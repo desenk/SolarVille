@@ -19,7 +19,11 @@ Experience how weather messes with energy. Normal day? Heat wave? Stormy skies? 
 - **Simulate**: Watch and manage as the sun rises and sets and storms roll in.
 
 ## 🛠️ Installation
-You can set this demo up with our easy-to-follow instructions - coming soon!
+You need to download a dataset to run the `dataAnalysis.py` file on. You can download it from [here.](https://uoe-my.sharepoint.com/:x:/g/personal/s2288094_ed_ac_uk/EXgZsSNw8MxHp46RTw_X_n0BuPif69lbyKBb_PfBL7Lr8g?e=lzOABi) Save this on your computer and replace the existing path of `block_0.csv` in line 159 of `dataAnalysis.py` with your own path to the `block_0.csv` file. E.g `file_path = "/your/path/to/file/block_0.csv"`
+
+You may have to install some python packages to run this file. These are 'pandas', 'numpy', 'matplotlib' and 'datetime' and you can use `pip install pandas numpy matplotlib datetime` to install them. It may be a good idea to set up a virtual python environment first so that there are no conflicts between packages.
+
+To run the script, go to a terminal and naviagate to where the `dataAnalysis.py` file is located. Then run `python dataAnalysis.py --start_date 2012-10-13 --timescale 'd'`. You can change the date to another day in the data set and also use the 'd', 'w', 'm' and 'y' flags to change the timescale that is plotted.
 
 ## 🔄 Usage
 Get your hands on the controls with our super user-friendly guide. Adjust the weather, watch energy flow, tweak setups – all in real-time!
