@@ -1,0 +1,5 @@
+# requirements-pi.txt
+# Add Raspberry Pi specific packages here
+Adafruit-CharLCD
+Adafruit-Blinka
+adafruit_character_lcd
