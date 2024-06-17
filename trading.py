@@ -7,6 +7,10 @@ def execute_trades(df, timestamp):
     total_supply = sellers['balance'].sum()
     total_demand = abs(buyers['balance'].sum())
     
+    if total_supply == 0 or total_demand == 0:
+        # If there's no supply or demand, skip trading
+        return df, 0.0
+    
     price = calculate_price(total_supply, total_demand)
     
     for buyer_index, buyer in buyers.iterrows():
@@ -29,7 +33,7 @@ def execute_trades(df, timestamp):
 
 def calculate_price(supply, demand):
     base_price = 0.10  # Base price per kWh in pounds
-    if demand > 0:
+    if demand > 0 and supply > 0:
         if demand > supply:
             price = base_price * (1 + (demand - supply) / supply)
         else:

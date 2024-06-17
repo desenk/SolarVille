@@ -46,7 +46,7 @@ def main(args):
                 print(f"Trading executed. Price: {price}")
             
             # Move to the next timestamp
-            timestamp += pd.Timedelta(hours=1)  # Adjust the increment based on your simulation needs
+            timestamp += pd.Timedelta(minutes=30)  # Adjust the increment to 30 minutes
             time.sleep(1)  # Simulate a time step
 
             # Check if plotting is done
