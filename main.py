@@ -1,10 +1,18 @@
+import argparse
 import time
 import pandas as pd
-import argparse
+from multiprocessing import Process, Queue
 from batteryControl import update_battery_charge, read_battery_charge
 from lcdControlTest import display_message
 from dataAnalysis import load_data, calculate_end_date, simulate_generation, update_plot_separate, update_plot_same
 from trading import execute_trades, calculate_price
+
+def plot_data(df, start_date, end_date, timescale, separate, queue):
+    if separate:
+        update_plot_separate(df, start_date, end_date, timescale)
+    else:
+        update_plot_same(df, start_date, end_date, timescale)
+    queue.put("done")
 
 def main(args):
     df = load_data(args.file_path, args.household, args.start_date, args.timescale)
@@ -13,33 +21,42 @@ def main(args):
     end_date = calculate_end_date(args.start_date, args.timescale)
     end_date_obj = pd.to_datetime(end_date)
     
-    if args.separate:
-        update_plot_separate(df, args.start_date, end_date, interval=args.timescale)
-    else:
-        update_plot_same(df, args.start_date, end_date, interval=args.timescale)
+    queue = Queue()
+    plot_process = Process(target=plot_data, args=(df, args.start_date, end_date, args.timescale, args.separate, queue))
+    plot_process.start()
     
     timestamp = pd.to_datetime(args.start_date)
 
     df['balance'] = df['generation'] - df['energy']  # Calculate the balance for each row
-    df['currency'] = 100  # Initialize the currency column to 100
+    df['currency'] = 100.0  # Initialize the currency column to 100
     df['battery_charge'] = 0.5  # Assume 50% initial charge
 
-    while timestamp <= end_date_obj:
-        current_data = df[df.index == timestamp]
-        
-        if not current_data.empty:
-            demand = current_data['energy'].sum()  # Calculate the total energy demand at the current timestamp
-            df.loc[df.index == timestamp, 'demand'] = demand  # Add the demand column to the DataFrame
-            df.loc[df.index == timestamp, 'battery_charge'] = update_battery_charge(current_data['generation'].sum(), demand)  # Update the battery charge based on the initial generation and demand
+    try:
+        while timestamp <= end_date_obj:
+            current_data = df[df.index == timestamp]
+            
+            if not current_data.empty:
+                demand = current_data['energy'].sum()  # Calculate the total energy demand at the current timestamp
+                df.loc[df.index == timestamp, 'demand'] = demand  # Add the demand column to the DataFrame
+                df.loc[df.index == timestamp, 'battery_charge'] = update_battery_charge(current_data['generation'].sum(), demand)  # Update the battery charge based on the initial generation and demand
 
-            display_message(f"Gen: {current_data['generation'].sum():.2f}W\nDem: {demand:.2f}W\nBat: {current_data['battery_charge'].mean() * 100:.2f}%")
+                display_message(f"Gen: {current_data['generation'].sum():.2f}W\nDem: {demand:.2f}W\nBat: {current_data['battery_charge'].mean() * 100:.2f}%")
 
-            df, price = execute_trades(df, timestamp)
-            print(f"Trading executed. Price: {price}")
-        
-        # Move to the next timestamp
-        timestamp += pd.Timedelta(hours=0.5)  # Adjust the increment based on your simulation needs
-        time.sleep(1)  # Simulate a time step
+                df, price = execute_trades(df, timestamp)
+                print(f"Trading executed. Price: {price}")
+            
+            # Move to the next timestamp
+            timestamp += pd.Timedelta(hours=1)  # Adjust the increment based on your simulation needs
+            time.sleep(1)  # Simulate a time step
+
+            # Check if plotting is done
+            if not queue.empty():
+                break
+
+    except KeyboardInterrupt:
+        print("Simulation interrupted.")
+    finally:
+        plot_process.join()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Smart Grid Simulation')

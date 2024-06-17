@@ -1,3 +1,5 @@
+import pandas as pd
+
 def execute_trades(df, timestamp):
     sellers = df[df['balance'] > 0].copy()
     buyers = df[df['balance'] < 0].copy()
@@ -17,8 +19,8 @@ def execute_trades(df, timestamp):
             # Update balances
             df.at[seller_index, 'balance'] -= trade_amount
             df.at[buyer_index, 'balance'] += trade_amount
-            df.at[seller_index, 'currency'] += trade_value
-            df.at[buyer_index, 'currency'] -= trade_value
+            df.at[seller_index, 'currency'] = float(df.at[seller_index, 'currency']) + trade_value
+            df.at[buyer_index, 'currency'] = float(df.at[buyer_index, 'currency']) - trade_value
             
             if df.at[buyer_index, 'balance'] == 0:
                 break
@@ -27,8 +29,11 @@ def execute_trades(df, timestamp):
 
 def calculate_price(supply, demand):
     base_price = 0.10  # Base price per kWh in pounds
-    if demand > supply:
-        price = base_price * (1 + (demand - supply) / supply)
+    if demand > 0:
+        if demand > supply:
+            price = base_price * (1 + (demand - supply) / supply)
+        else:
+            price = base_price * (1 - (supply - demand) / demand)
     else:
-        price = base_price * (1 - (supply - demand) / demand)
+        price = base_price
     return price

@@ -154,5 +154,5 @@ def update_plot_separate(df, start_date, end_date, interval=3): # Takes in the D
             for ax in axs:
                 ax.relim()
                 ax.autoscale_view()
-            plt.pause(0.8)  # Adjust the pause duration to control the speed of updates
+            plt.pause(0.1)  # Adjust the pause duration to control the speed of updates
     plt.show()
