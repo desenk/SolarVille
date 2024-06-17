@@ -103,7 +103,7 @@ def update_plot_same(df, start_date, end_date, interval=3): # Takes in the DataF
             net_line.set_data(df_day['datetime'][:i], df_day['generation'][:i] - df_day['energy'][:i]) # Update the net energy plot
             ax.relim() # Recalculate the limits of the axes
             ax.autoscale_view() # Autoscale the view
-            plt.pause(0.1)  # Adjust the pause duration to control the speed of updates
+            plt.pause(0.8)  # Adjust the pause duration to control the speed of updates
 
     plt.show() # Display the plot
 
@@ -154,5 +154,5 @@ def update_plot_separate(df, start_date, end_date, interval=3): # Takes in the D
             for ax in axs:
                 ax.relim()
                 ax.autoscale_view()
-            plt.pause(0.1)  # Adjust the pause duration to control the speed of updates
+            plt.pause(0.8)  # Adjust the pause duration to control the speed of updates
     plt.show()
