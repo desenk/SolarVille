@@ -1,13 +1,29 @@
 import time
-import board # type: ignore
-import busio # type: ignore
-from adafruit_ina219 import INA219 # type: ignore
+import board  # type: ignore
+import busio  # type: ignore
+from adafruit_ina219 import INA219  # type: ignore
 
-# Create the I2C bus
-i2c = busio.I2C(board.SCL, board.SDA)
+# Mock flag
+MOCK_ADC = True
 
-# Create the INA219 instance
-ina219 = INA219(i2c)
+if not MOCK_ADC:
+    # Create the I2C bus
+    i2c = busio.I2C(board.SCL, board.SDA)
+
+    # Create the INA219 instance
+    ina219 = INA219(i2c)
+else:
+    # Mock INA219 readings
+    class MockINA219:
+        @property
+        def bus_voltage(self):
+            return 12.0  # Mock voltage
+
+        @property
+        def current(self):
+            return 1.0  # Mock current in mA
+
+    ina219 = MockINA219()
 
 # Define thresholds and initial states
 battery_charge = 0.5  # Assume 50% initial charge
@@ -17,9 +33,14 @@ min_battery_charge = 0.0
 scaling_factor = 1000  # Example factor to scale up the generation data
 
 def read_battery_charge():
-    # calculate the battery status
+    # Calculate the battery status
     global battery_charge
-    return battery_charge
+    bus_voltage = ina219.bus_voltage  # Voltage on V- (load side)
+    current = ina219.current / 1000  # Current in A (from mA)
+    
+    # Calculate power
+    power = bus_voltage * current
+    return power
 
 def update_battery_charge(power_generated, power_demand):
     global battery_charge
@@ -58,4 +79,3 @@ if __name__ == "__main__":
         print(f"Battery Charge: {battery_charge * 100:.2f}%")
         
         time.sleep(1)  # Delay for 1 second
-    
