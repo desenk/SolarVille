@@ -3,13 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import datetime, timedelta
-import argparse
 import calendar
 
 # df is dataframe which is loaded from the csv file and is used to manipulate the data
 
 # Function to load and preprocess data
-def load_data(file_path, household): # Takes in the file path and the household ID
+def load_data(file_path, household, start_date, timescale): # Takes in the file path and the household ID
     alldata = pd.read_csv(file_path) # Load the data from the CSV file
     df = alldata[alldata["LCLid"] == household].copy() # Filter the data for the specific household
 
@@ -33,6 +32,12 @@ def load_data(file_path, household): # Takes in the file path and the household 
     # Calculate the cumulative energy use over time for each date
     df["cumulative_sum"] = df.groupby('date')["energy"].cumsum() # Calculate the cumulative sum of energy use for each date
     df.set_index("datetime", inplace=True) # Set the datetime column as the index for the DataFrame
+
+    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d") # Convert the start date to a datetime object for calculations
+    end_date_obj = calculate_end_date(start_date, timescale) # Calculate the end date based on the timescale flag
+    end_date_obj = datetime.strptime(end_date_obj, "%Y-%m-%d %H:%M:%S") # Convert the end date to a datetime object for calculations
+    df = df[(df.index >= start_date_obj) & (df.index < end_date_obj)] # Filter the DataFrame based on the start and end dates
+
     return df # Return the processed DataFrame
 
 # Function to calculate the end date based on the timescale flag
@@ -150,31 +155,4 @@ def update_plot_separate(df, start_date, end_date, interval=3): # Takes in the D
                 ax.relim()
                 ax.autoscale_view()
             plt.pause(0.8)  # Adjust the pause duration to control the speed of updates
-
     plt.show()
-
-# Main function to handle command-line arguments and run the script
-def main():
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot energy demand and generation data for a specific household and date range.')
-    # Add arguments for the file path, household ID, start date, timescale, and separate flag
-    parser.add_argument('--start_date', type=str, required=True, help='Start date (format: YYYY-MM-DD)')
-    parser.add_argument('--timescale', type=str, required=True, choices=['d', 'w', 'm', 'y'], help='Timescale: d for day, w for week, m for month, y for year')
-    parser.add_argument('--separate', action='store_true', help='Flag to plot data in separate subplots')
-
-    args = parser.parse_args() # Parse the arguments
-
-    file_path = "/home/raspberry/Documents/graphScripts/block_0.csv" # Path to the CSV file
-    household = "MAC000002" # Household ID for the data we are plotting (can be changed to any other household ID)
-    
-    df = load_data(file_path, household) # Load and preprocess the data
-    df = simulate_generation(df) # Simulate energy generation data
-    end_date = calculate_end_date(args.start_date, args.timescale) # Calculate the end date based on the timescale
-
-    if args.separate: # Check if the separate flag is set
-        update_plot_separate(df, args.start_date, end_date, interval=args.timescale) # Update the plot with separate subplots
-    else:
-        update_plot_same(df, args.start_date, end_date, interval=args.timescale) # Update the plot with a single plot
-
-if __name__ == "__main__": # Run the main function if the script is executed
-    main() # Call the main function
