@@ -18,7 +18,6 @@ def main(args):
     df = simulate_generation(df, mean=0.5, std=0.2)
     
     end_date = calculate_end_date(args.start_date, args.timescale)
-    end_date_obj = pd.to_datetime(end_date)
     
     queue = Queue()
     plot_process = Process(target=plot_data, args=(df, args.start_date, end_date, args.timescale, args.separate, queue))

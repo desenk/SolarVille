@@ -85,7 +85,7 @@ def update_plot_same(df, start_date, end_date, interval, queue):
     plt.tight_layout()
 
     for i in range(len(df_day)):
-        if i % 3 == 0:
+        if i % 1 == 0:
             demand_line.set_data(df_day['datetime'][:i], df_day['energy'][:i])
             generation_line.set_data(df_day['datetime'][:i], df_day['generation'][:i])
             net_line.set_data(df_day['datetime'][:i], df_day['generation'][:i] - df_day['energy'][:i])
@@ -137,7 +137,7 @@ def update_plot_separate(df, start_date, end_date, interval, queue):
     plt.tight_layout()
 
     for i in range(len(df_day)):
-        if i % 3 == 0:
+        if i % 1 == 0:
             demand_line.set_data(df_day['datetime'][:i], df_day['energy'][:i])
             generation_line.set_data(df_day['datetime'][:i], df_day['generation'][:i])
             net_line.set_data(df_day['datetime'][:i], df_day['generation'][:i] - df_day['energy'][:i])
