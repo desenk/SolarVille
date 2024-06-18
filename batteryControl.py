@@ -54,6 +54,7 @@ def update_battery_charge(power_generated, power_demand):
         battery_charge -= deficit_power / max_battery_charge
         if battery_charge < min_battery_charge:
             battery_charge = min_battery_charge
+    print(f"Updated battery charge: {battery_charge * 100:.2f}%")  # Debug print
     return battery_charge
 
 if __name__ == "__main__":
