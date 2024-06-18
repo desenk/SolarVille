@@ -39,14 +39,17 @@ def main(args):
             if not current_data.empty:
                 demand = current_data['energy'].sum()  # Calculate the total energy demand at the current timestamp
                 df.loc[df.index == timestamp, 'demand'] = demand  # Add the demand column to the DataFrame
-                df.loc[df.index == timestamp, 'battery_charge'] = update_battery_charge(current_data['generation'].sum(), demand)  # Update the battery charge based on the initial generation and demand
+                battery_charge = update_battery_charge(current_data['generation'].sum(), demand)  # Update the battery charge based on the initial generation and demand
+                df.loc[df.index == timestamp, 'battery_charge'] = battery_charge
 
                 print(f"Trading at {timestamp}")  # Debug print
-                print(f"Generation: {current_data['generation'].sum()}W, Demand: {demand}W, Battery: {current_data['battery_charge'].mean() * 100:.2f}%")
+                print(f"Generation: {current_data['generation'].sum():.2f}W, Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%")
+
+                display_message(f"Gen: {current_data['generation'].sum():.2f}W\nDem: {demand:.2f}W\nBat: {battery_charge * 100:.2f}%")
 
                 df, price = execute_trades(df, timestamp)
-                print(f"Trading executed. Price: {price}")
-                print(f"Updated Balance: {df['balance'].sum()}")  # Debug print
+                print(f"Trading executed. Price: {price:.2f}")
+                print(f"Updated Balance: {df['balance'].sum():.2f}")  # Debug print
 
     except KeyboardInterrupt:
         print("Simulation interrupted.")
@@ -62,4 +65,4 @@ if __name__ == "__main__":
     parser.add_argument('--separate', action='store_true', help='Flag to plot data in separate subplots')
     
     args = parser.parse_args()  # Parse the arguments
-    main(args) # Call the main function with the parsed arguments
+    main(args)  # Call the main function with the parsed arguments

@@ -1,5 +1,3 @@
-import pandas as pd
-
 def execute_trades(df, timestamp):
     sellers = df[df['balance'] > 0].copy()
     buyers = df[df['balance'] < 0].copy()
@@ -33,7 +31,7 @@ def execute_trades(df, timestamp):
 
 def calculate_price(supply, demand):
     base_price = 0.10  # Base price per kWh in pounds
-    print(f"Calculating price: supply = {supply}, demand = {demand}")  # Debug print
+    print(f"Calculating price: supply = {supply:.2f}, demand = {demand:.2f}")  # Debug print
     if demand > 0 and supply > 0:
         if demand > supply:
             price = base_price * (1 + (demand - supply) / supply)
@@ -41,5 +39,6 @@ def calculate_price(supply, demand):
             price = base_price * (1 - (supply - demand) / demand)
     else:
         price = base_price
-    print(f"Calculated price: {price}")  # Debug print
+    price = max(price, 0)  # Ensure the price is non-negative
+    print(f"Calculated price: {price:.2f}")  # Debug print
     return price
