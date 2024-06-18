@@ -45,11 +45,12 @@ def main(args):
                 print(f"Trading at {timestamp}")  # Debug print
                 print(f"Generation: {current_data['generation'].sum():.2f}W, Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%")
 
-                display_message(f"Gen: {current_data['generation'].sum():.2f}W\nDem: {demand:.2f}W\nBat: {battery_charge * 100:.2f}%")
-
                 df, price = execute_trades(df, timestamp)
                 print(f"Trading executed. Price: {price:.2f}")
                 print(f"Updated Balance: {df['balance'].sum():.2f}")  # Debug print
+
+                display_message(f"Gen: {current_data['generation'].sum():.2f}W\nDem: {demand:.2f}W\nBat: {battery_charge * 100:.2f}%")
+                print(f"LCD updated at {timestamp}")  # Debug print
 
     except KeyboardInterrupt:
         print("Simulation interrupted.")

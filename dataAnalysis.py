@@ -93,7 +93,7 @@ def update_plot_same(df, start_date, end_date, interval, queue):
             ax.autoscale_view()
             print(f"Plotting at {df_day['datetime'][i]}")  # Debug print
             queue.put(df_day['datetime'][i])
-            plt.pause(5)
+            plt.pause(6)  # Increase pause duration to 6 seconds
 
     plt.show()
     queue.put("done")
@@ -145,7 +145,7 @@ def update_plot_separate(df, start_date, end_date, interval, queue):
                 ax.relim()
                 ax.autoscale_view()
             queue.put(df_day['datetime'][i])
-            plt.pause(5)
+            plt.pause(6)
 
     plt.show()
     queue.put("done")
