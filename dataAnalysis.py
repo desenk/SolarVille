@@ -5,119 +5,108 @@ import matplotlib.dates as mdates
 from datetime import datetime, timedelta
 import calendar
 
-# df is dataframe which is loaded from the csv file and is used to manipulate the data
-
 # Function to load and preprocess data
-def load_data(file_path, household, start_date, timescale): # Takes in the file path and the household ID
-    alldata = pd.read_csv(file_path) # Load the data from the CSV file
-    df = alldata[alldata["LCLid"] == household].copy() # Filter the data for the specific household
+def load_data(file_path, household, start_date, timescale): 
+    alldata = pd.read_csv(file_path) 
+    df = alldata[alldata["LCLid"] == household].copy()
 
     # Process datetime info to pull out different components
-    df['datetime'] = pd.to_datetime(df['tstp'].str.replace('.0000000', '')) # Convert the timestamp to datetime format
-    df['date'] = df['datetime'].dt.date # Extract the date
-    df['month'] = df['datetime'].dt.strftime("%B") # Extract the month
-    df['day_of_month'] = df['datetime'].dt.strftime("%d") # Extract the day of the month
-    df['time'] = df['datetime'].dt.strftime('%X') # Extract the time
-    df['weekday'] = df['datetime'].dt.strftime('%A') # Extract the day of the week
-    df['day_seconds'] = (df['datetime'] - df['datetime'].dt.normalize()).dt.total_seconds() # Extract the time of day in seconds
+    df['datetime'] = pd.to_datetime(df['tstp'].str.replace('.0000000', ''))
+    df['date'] = df['datetime'].dt.date
+    df['month'] = df['datetime'].dt.strftime("%B")
+    df['day_of_month'] = df['datetime'].dt.strftime("%d")
+    df['time'] = df['datetime'].dt.strftime('%X')
+    df['weekday'] = df['datetime'].dt.strftime('%A')
+    df['day_seconds'] = (df['datetime'] - df['datetime'].dt.normalize()).dt.total_seconds()
 
-    # Order the weekdays and months correctly
     df['weekday'] = pd.Categorical(df['weekday'], categories=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], ordered=True)
-    df['month'] = pd.Categorical(df['month'], categories=calendar.month_name[1:], ordered=True) # Use calendar.month_name to get the full month names
+    df['month'] = pd.Categorical(df['month'], categories=calendar.month_name[1:], ordered=True)
 
-    # Set energy consumption data to numeric type
-    df = df[df["energy(kWh/hh)"] != "Null"] # Remove rows with missing energy data
-    df["energy"] = df["energy(kWh/hh)"].astype("float64") # Convert energy data to numeric type to allow for calculations
+    df = df[df["energy(kWh/hh)"] != "Null"]
+    df["energy"] = df["energy(kWh/hh)"].astype("float64")
 
-    # Calculate the cumulative energy use over time for each date
-    df["cumulative_sum"] = df.groupby('date')["energy"].cumsum() # Calculate the cumulative sum of energy use for each date
-    df.set_index("datetime", inplace=True) # Set the datetime column as the index for the DataFrame
+    df["cumulative_sum"] = df.groupby('date')["energy"].cumsum()
+    df.set_index("datetime", inplace=True)
 
-    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d") # Convert the start date to a datetime object for calculations
-    end_date_obj = calculate_end_date(start_date, timescale) # Calculate the end date based on the timescale flag
-    end_date_obj = datetime.strptime(end_date_obj, "%Y-%m-%d %H:%M:%S") # Convert the end date to a datetime object for calculations
-    df = df[(df.index >= start_date_obj) & (df.index < end_date_obj)] # Filter the DataFrame based on the start and end dates
+    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date_obj = calculate_end_date(start_date, timescale)
+    end_date_obj = datetime.strptime(end_date_obj, "%Y-%m-%d %H:%M:%S")
+    df = df[(df.index >= start_date_obj) & (df.index < end_date_obj)]
 
-    return df # Return the processed DataFrame
+    return df
 
-# Function to calculate the end date based on the timescale flag
-def calculate_end_date(start_date, timescale): # Takes in the start date and the timescale flag from command line
-    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d") # Convert the start date to a datetime object for calculations
-    # Calculate the end date based on the timescale flag
+def calculate_end_date(start_date, timescale):
+    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
     if timescale == 'd':
-        end_date_obj = start_date_obj + timedelta(days=1) # Add 1 day to the start date
+        end_date_obj = start_date_obj + timedelta(days=1)
     elif timescale == 'w': 
-        end_date_obj = start_date_obj + timedelta(weeks=1) # Add 1 week to the start date
+        end_date_obj = start_date_obj + timedelta(weeks=1)
     elif timescale == 'm':
-        end_date_obj = start_date_obj + timedelta(days=30) # Add 30 days to the start date
+        end_date_obj = start_date_obj + timedelta(days=30)
     elif timescale == 'y':
-        end_date_obj = start_date_obj + timedelta(days=365) # Add 365 days to the start date
+        end_date_obj = start_date_obj + timedelta(days=365)
     else:
-        # Raise an error if the timescale is invalid
         raise ValueError("Invalid timescale. Use 'd' for day, 'w' for week, 'm' for month, or 'y' for year.")
-    return end_date_obj.strftime("%Y-%m-%d %H:%M:%S") # Return the end date in the correct format
+    return end_date_obj.strftime("%Y-%m-%d %H:%M:%S")
 
-# Function to simulate energy generation data
-def simulate_generation(df, mean=0.5, std=0.2): # Takes in the DataFrame and the mean and standard deviation for the generation data
-    np.random.seed(42)  # Set seed for reproducibility
-    df['generation'] = np.random.normal(mean, std, df.shape[0]) # Generate random generation data
-    df['generation'] = df['generation'].clip(lower=0)  # Ensure no negative values
-    return df # Return the DataFrame with the generation data
+def simulate_generation(df, mean=0.5, std=0.2):
+    np.random.seed(42)
+    df['generation'] = np.random.normal(mean, std, df.shape[0])
+    df['generation'] = df['generation'].clip(lower=0)
+    return df
 
-# Function to update the plot in real-time for a single plot
-def update_plot_same(df, start_date, end_date, interval=3): # Takes in the DataFrame, start date, end date, and interval for updating the plot
-    df_day = df[start_date:end_date] # Filter the DataFrame for the specified date range
-    df_day = df_day.reset_index() # Reset the index for the filtered DataFrame
+def update_plot_same(df, start_date, end_date, interval, queue):
+    df_day = df[start_date:end_date]
+    df_day = df_day.reset_index()
 
-    fig, ax = plt.subplots(figsize=(15, 6)) # Create a single plot for the energy data
-    demand_line, = ax.plot([], [], label='Energy Demand (kWh)', color='red') # Plot for energy demand
-    generation_line, = ax.plot([], [], label='Energy Generation (kWh)', color='green') # Plot for energy generation
-    net_line, = ax.plot([], [], label='Net Energy (kWh)', color='blue', linestyle='--') # Plot for net energy
-    ax.legend() # Add a legend to the plot
-    ax.set_xlabel('Time') # Set the x-axis label
-    ax.set_ylabel('Energy (kWh)') # Set the y-axis label
-    ax.set_title(f'Real-Time Energy Demand and Generation for Household on {start_date[:10]}') # Set the title of the plot
+    fig, ax = plt.subplots(figsize=(15, 6))
+    demand_line, = ax.plot([], [], label='Energy Demand (kWh)', color='red')
+    generation_line, = ax.plot([], [], label='Energy Generation (kWh)', color='green')
+    net_line, = ax.plot([], [], label='Net Energy (kWh)', color='blue', linestyle='--')
+    ax.legend()
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Energy (kWh)')
+    ax.set_title(f'Real-Time Energy Demand and Generation for Household on {start_date[:10]}')
 
-# Set the x-axis format based on the interval
     if interval == 'd':
-        ax.xaxis.set_major_locator(mdates.HourLocator(interval=1)) # Set the major locator to hours
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M')) # Set the major formatter to hours and minutes
+        ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     elif interval == 'w':
-        ax.xaxis.set_major_locator(mdates.DayLocator(interval=1)) # Set the major locator to days
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d')) # Set the major formatter to year-month-day
+        ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     elif interval == 'm':
-        ax.xaxis.set_major_locator(mdates.WeekdayLocator(interval=1)) # Set the major locator to weekdays
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d')) # Set the major formatter to year-month-day
+        ax.xaxis.set_major_locator(mdates.WeekdayLocator(interval=1))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     elif interval == 'y':
-        ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1)) # Set the major locator to months
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m')) # Set the major formatter to year-month
+        ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
 
-    plt.xticks(rotation=45) # Rotate the x-axis labels for better visibility
-    plt.tight_layout() # Adjust the layout of the plot
+    plt.xticks(rotation=45)
+    plt.tight_layout()
 
-    # Update the plot in real-time
     for i in range(len(df_day)):
-        if i % 3 == 0:  # Update the plot every 3 data points to simulate real-time
-            demand_line.set_data(df_day['datetime'][:i], df_day['energy'][:i]) # Update the energy demand plot
-            generation_line.set_data(df_day['datetime'][:i], df_day['generation'][:i]) # Update the energy generation plot
-            net_line.set_data(df_day['datetime'][:i], df_day['generation'][:i] - df_day['energy'][:i]) # Update the net energy plot
-            ax.relim() # Recalculate the limits of the axes
-            ax.autoscale_view() # Autoscale the view
-            plt.pause(0.8)  # Adjust the pause duration to control the speed of updates
+        if i % 3 == 0:
+            demand_line.set_data(df_day['datetime'][:i], df_day['energy'][:i])
+            generation_line.set_data(df_day['datetime'][:i], df_day['generation'][:i])
+            net_line.set_data(df_day['datetime'][:i], df_day['generation'][:i] - df_day['energy'][:i])
+            ax.relim()
+            ax.autoscale_view()
+            queue.put(df_day['datetime'][i])
+            plt.pause(0.8)
 
-    plt.show() # Display the plot
+    plt.show()
+    queue.put("done")
 
-# Function to update the plot in real-time for separate subplots
-def update_plot_separate(df, start_date, end_date, interval=3): # Takes in the DataFrame, start date, end date, and interval for updating the plot
-    df_day = df[start_date:end_date] # Filter the DataFrame for the specified date range
-    df_day = df_day.reset_index() # Reset the index for the filtered DataFrame
+def update_plot_separate(df, start_date, end_date, interval, queue):
+    df_day = df[start_date:end_date]
+    df_day = df_day.reset_index()
 
-    fig, axs = plt.subplots(3, 1, figsize=(15, 18), sharex=True) # Create separate subplots for the energy data
-    
-    demand_line, = axs[0].plot([], [], label='Energy Demand (kWh)', color='red') # Plot for energy demand
-    generation_line, = axs[1].plot([], [], label='Energy Generation (kWh)', color='green') # Plot for energy generation
-    net_line, = axs[2].plot([], [], label='Net Energy (kWh)', color='blue', linestyle='--') # Plot for net energy 
-    
+    fig, axs = plt.subplots(3, 1, figsize=(15, 18), sharex=True)
+
+    demand_line, = axs[0].plot([], [], label='Energy Demand (kWh)', color='red')
+    generation_line, = axs[1].plot([], [], label='Energy Generation (kWh)', color='green')
+    net_line, = axs[2].plot([], [], label='Net Energy (kWh)', color='blue', linestyle='--')
+
     axs[0].set_ylabel('Energy (kWh)')
     axs[0].set_title(f'Energy Demand for Household on {start_date[:10]}')
     axs[0].legend()
@@ -147,12 +136,15 @@ def update_plot_separate(df, start_date, end_date, interval=3): # Takes in the D
     plt.tight_layout()
 
     for i in range(len(df_day)):
-        if i % 3 == 0:  # Update the plot every 3 data points to simulate real-time
+        if i % 3 == 0:
             demand_line.set_data(df_day['datetime'][:i], df_day['energy'][:i])
             generation_line.set_data(df_day['datetime'][:i], df_day['generation'][:i])
             net_line.set_data(df_day['datetime'][:i], df_day['generation'][:i] - df_day['energy'][:i])
             for ax in axs:
                 ax.relim()
                 ax.autoscale_view()
-            plt.pause(0.8)  # Adjust the pause duration to control the speed of updates
+            queue.put(df_day['datetime'][i])
+            plt.pause(0.8)
+
     plt.show()
+    queue.put("done")
