@@ -2,7 +2,6 @@ import argparse
 import time
 import pandas as pd
 from multiprocessing import Process, Queue
-from threading import Thread
 from batteryControl import update_battery_charge, read_battery_charge
 from lcdControlTest import display_message
 from dataAnalysis import load_data, calculate_end_date, simulate_generation, update_plot_separate, update_plot_same
@@ -22,8 +21,8 @@ def main(args):
     end_date = calculate_end_date(args.start_date, args.timescale)
     
     queue = Queue()
-    plot_thread = Thread(target=plot_data, args=(df, args.start_date, end_date, args.timescale, args.separate, queue))
-    plot_thread.start()
+    plot_process = Process(target=plot_data, args=(df, args.start_date, end_date, args.timescale, args.separate, queue))
+    plot_process.start()
     
     df['balance'] = df['generation'] - df['energy']  # Calculate the balance for each row
     df['currency'] = 100.0  # Initialize the currency column to 100
@@ -59,7 +58,7 @@ def main(args):
     except KeyboardInterrupt:
         print("Simulation interrupted.")
     finally:
-        plot_thread.join()
+        plot_process.join()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Smart Grid Simulation')
