@@ -12,6 +12,7 @@ def plot_data(df, start_date, end_date, timescale, separate, queue):
         update_plot_separate(df, start_date, end_date, timescale, queue)
     else:
         update_plot_same(df, start_date, end_date, timescale, queue)
+    queue.put("plot_initialized")  # Signal that the plot is initialized
 
 def main(args):
     print("Loading data, please wait...")
@@ -24,13 +25,15 @@ def main(args):
     plot_process = Process(target=plot_data, args=(df, args.start_date, end_date, args.timescale, args.separate, queue))
     plot_process.start()
     
+    # Wait for the plotting process to signal that it is initialized
+    plot_initialized = queue.get()
+    if plot_initialized == "plot_initialized":
+        print("Plot initialized, starting simulation...")
+
     df['balance'] = df['generation'] - df['energy']  # Calculate the balance for each row
     df['currency'] = 100.0  # Initialize the currency column to 100
     df['battery_charge'] = 0.5  # Assume 50% initial charge
 
-    print("Starting simulation...")
-    time.sleep(2)  # Give time for the plot to initialize
-    
     try:
         while True:
             timestamp = queue.get()
