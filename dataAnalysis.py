@@ -101,7 +101,7 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
     plt.pause(0.1)
 
     for i in range(len(df_day)):
-        if i % 1 == 0:
+        if i % 3 == 0:
             demand_line.set_data(df_day['datetime'][:i], df_day['energy'][:i])
             generation_line.set_data(df_day['datetime'][:i], df_day['generation'][:i])
             net_line.set_data(df_day['datetime'][:i], df_day['generation'][:i] - df_day['energy'][:i])
