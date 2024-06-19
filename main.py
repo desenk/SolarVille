@@ -9,23 +9,21 @@ from trading import execute_trades, calculate_price
 
 def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event):
     if separate:
-        update_plot_separate(df, start_date, end_date, timescale, queue)
+        update_plot_separate(df, start_date, end_date, timescale, queue, ready_event)
     else:
-        update_plot_same(df, start_date, end_date, timescale, queue)
-    ready_event.set()  # Signal that the plot is initialized
+        update_plot_same(df, start_date, end_date, timescale, queue, ready_event)
 
 def main(args):
     print("Loading data, please wait...")
     df = load_data(args.file_path, args.household, args.start_date, args.timescale)
     df = simulate_generation(df, mean=0.5, std=0.2)
-    
     end_date = calculate_end_date(args.start_date, args.timescale)
-    
+
     queue = Queue()
     ready_event = Event()
     plot_process = Process(target=plot_data, args=(df, args.start_date, end_date, args.timescale, args.separate, queue, ready_event))
     plot_process.start()
-    
+
     # Wait for the plotting process to signal that it is ready
     ready_event.wait()
     print("Plot initialized, starting simulation...")
@@ -70,6 +68,6 @@ if __name__ == "__main__":
     parser.add_argument('--start_date', type=str, required=True, help='Start date for the simulation')
     parser.add_argument('--timescale', type=str, required=True, choices=['d', 'w', 'm', 'y'], help='Timescale: d for day, w for week, m for month, y for year')
     parser.add_argument('--separate', action='store_true', help='Flag to plot data in separate subplots')
-    
+
     args = parser.parse_args()  # Parse the arguments
     main(args)  # Call the main function with the parsed arguments
