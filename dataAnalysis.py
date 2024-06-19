@@ -80,6 +80,7 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
     ax.set_ylabel('Energy (kWh)')
     ax.set_title(f'Real-Time Energy Demand and Generation for Household on {start_date[:10]}')
 
+    logging.info("Configuring x-axis")
     if interval == 'd':
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
@@ -92,6 +93,7 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
     elif interval == 'y':
         ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+    logging.info("x-axis configured")
 
     plt.xticks(rotation=45)
     plt.tight_layout()
@@ -145,18 +147,20 @@ def update_plot_separate(df, start_date, end_date, interval, queue, ready_event)
     axs[2].set_title(f'Net Energy for Household on {start_date[:10]}')
     axs[2].legend()
 
+    logging.info("Configuring x-axis")
     if interval == 'd':
         axs[2].xaxis.set_major_locator(mdates.HourLocator(interval=1))
         axs[2].xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     elif interval == 'w':
-        axs[2].xaxis.set_major_locator(mdates.DayLocator(interval=1))
-        axs[2].xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+        axs[2].xaxis.set.major_locator(mdates.DayLocator(interval=1))
+        axs[2].xaxis.set.major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     elif interval == 'm':
         axs[2].xaxis.set.major_locator(mdates.WeekdayLocator(interval=1))
         axs[2].xaxis.set.major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     elif interval == 'y':
         axs[2].xaxis.set.major_locator(mdates.MonthLocator(interval=1))
         axs[2].xaxis.set.major_formatter(mdates.DateFormatter('%Y-%m'))
+    logging.info("x-axis configured")
 
     plt.xticks(rotation=45)
     plt.tight_layout()
