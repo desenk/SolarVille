@@ -2,10 +2,14 @@ import argparse
 import time
 import pandas as pd
 from multiprocessing import Process, Queue, Event
+import logging
 from batteryControl import update_battery_charge, read_battery_charge
 from lcdControlTest import display_message
 from dataAnalysis import load_data, calculate_end_date, simulate_generation, update_plot_separate, update_plot_same
 from trading import execute_trades, calculate_price
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event):
     if separate:
@@ -14,11 +18,12 @@ def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event)
         update_plot_same(df, start_date, end_date, timescale, queue, ready_event)
 
 def main(args):
-    print("Loading data, please wait...")
+    logging.info("Loading data, please wait...")
+    start_time = time.time()
     df = load_data(args.file_path, args.household, args.start_date, args.timescale)
     df = simulate_generation(df, mean=0.5, std=0.2)
-    
     end_date = calculate_end_date(args.start_date, args.timescale)
+    logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
     
     queue = Queue()
     ready_event = Event()
@@ -27,7 +32,7 @@ def main(args):
     
     # Wait for the plotting process to signal that it is ready
     ready_event.wait()
-    print("Plot initialized, starting simulation...")
+    logging.info("Plot initialized, starting simulation...")
 
     df['balance'] = df['generation'] - df['energy']  # Calculate the balance for each row
     df['currency'] = 100.0  # Initialize the currency column to 100
@@ -47,18 +52,18 @@ def main(args):
                 battery_charge = update_battery_charge(current_data['generation'].sum(), demand)  # Update the battery charge based on the initial generation and demand
                 df.loc[df.index == timestamp, 'battery_charge'] = battery_charge
 
-                print(f"Trading at {timestamp}")  # Debug print
-                print(f"Generation: {current_data['generation'].sum():.2f}W, Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%")
+                logging.info(f"Trading at {timestamp}")
+                logging.info(f"Generation: {current_data['generation'].sum():.2f}W, Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%")
 
                 df, price = execute_trades(df, timestamp)
-                print(f"Trading executed. Price: {price:.2f}")
-                print(f"Updated Balance: {df['balance'].sum():.2f}")  # Debug print
+                logging.info(f"Trading executed. Price: {price:.2f}")
+                logging.info(f"Updated Balance: {df['balance'].sum():.2f}")
 
                 display_message(f"Gen: {current_data['generation'].sum():.2f}W\nDem: {demand:.2f}W\nBat: {battery_charge * 100:.2f}%")
-                print(f"LCD updated at {timestamp}")  # Debug print
+                logging.info(f"LCD updated at {timestamp}")
 
     except KeyboardInterrupt:
-        print("Simulation interrupted.")
+        logging.info("Simulation interrupted.")
     finally:
         plot_process.join()
 

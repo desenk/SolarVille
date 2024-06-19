@@ -4,9 +4,16 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import datetime, timedelta
 import calendar
+import logging
+import time
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Function to load and preprocess data
 def load_data(file_path, household, start_date, timescale, chunk_size=10000):
+    logging.info("Start loading data")
+    start_time = time.time()
     start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
     end_date_obj = calculate_end_date(start_date, timescale)
     
@@ -35,6 +42,7 @@ def load_data(file_path, household, start_date, timescale, chunk_size=10000):
     
     df = pd.concat(filtered_chunks)
     df.set_index("datetime", inplace=True)
+    logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
     return df
 
 def calculate_end_date(start_date, timescale):
@@ -52,6 +60,7 @@ def calculate_end_date(start_date, timescale):
     return end_date_obj.strftime("%Y-%m-%d %H:%M:%S")
 
 def simulate_generation(df, mean=0.5, std=0.2):
+    logging.info("Simulating generation")
     np.random.seed(42)
     df['generation'] = np.random.normal(mean, std, df.shape[0])
     df['generation'] = df['generation'].clip(lower=0)
@@ -75,6 +84,7 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     elif interval == 'w':
         ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
+        ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     elif interval == 'm':
         ax.xaxis.set_major_locator(mdates.WeekdayLocator(interval=1))
@@ -94,7 +104,7 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
             net_line.set_data(df_day['datetime'][:i], df_day['generation'][:i] - df_day['energy'][:i])
             ax.relim()
             ax.autoscale_view()
-            print(f"Plotting at {df_day['datetime'][i]}")  # Debug print
+            logging.info(f"Plotting at {df_day['datetime'][i]}")
             queue.put(df_day['datetime'][i])
             plt.pause(6)  # Increase pause duration to 6 seconds
 
