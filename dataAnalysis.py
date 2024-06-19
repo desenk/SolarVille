@@ -115,7 +115,7 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
             demand_line.set_data(df_day['datetime'][:i], df_day['energy'][:i])
             generation_line.set_data(df_day['datetime'][:i], df_day['generation'][:i])
             net_line.set_data(df_day['datetime'][:i], df_day['generation'][:i] - df_day['energy'][:i])
-            #ax.relim()
+            ax.relim()
             #ax.autoscale_view()
             logging.info(f"Plotting at {df_day['datetime'][i]}")
             queue.put(df_day['datetime'][i])
