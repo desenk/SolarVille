@@ -109,7 +109,7 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
             ax.autoscale_view()
             logging.info(f"Plotting at {df_day['datetime'][i]}")
             queue.put(df_day['datetime'][i])
-            plt.pause(6)  # Increase pause duration to 6 seconds
+            plt.pause(3)  # Increase pause duration to 6 seconds
 
     plt.show()
     queue.put("done")
