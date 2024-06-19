@@ -84,7 +84,6 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     elif interval == 'w':
         ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
-        ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     elif interval == 'm':
         ax.xaxis.set_major_locator(mdates.WeekdayLocator(interval=1))
@@ -96,6 +95,9 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
     plt.xticks(rotation=45)
     plt.tight_layout()
     ready_event.set()  # Signal that the plot is initialized
+
+    # Force an initial plot update
+    plt.pause(0.1)
 
     for i in range(len(df_day)):
         if i % 1 == 0:
@@ -145,10 +147,13 @@ def update_plot_separate(df, start_date, end_date, interval, queue, ready_event)
     elif interval == 'y':
         axs[2].xaxis.set_major_locator(mdates.MonthLocator(interval=1))
         axs[2].xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
-
-    plt.xticks(rotation=45)
+        plt.xticks(rotation=45)
+    
     plt.tight_layout()
     ready_event.set()  # Signal that the plot is initialized
+
+    # Force an initial plot update
+    plt.pause(0.1)
 
     for I in range(len(df_day)):
         if I % 1 == 0:
