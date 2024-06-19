@@ -25,7 +25,7 @@ def main(args):
     plot_process.start()
     
     # Wait for the plotting process to start
-    time.sleep(10)  # Adjust the time as necessary to ensure the plot is initialized
+    time.sleep(12)  # Adjust the time as necessary to ensure the plot is initialized
     print("Plot initialized, starting simulation...")
 
     df['balance'] = df['generation'] - df['energy']  # Calculate the balance for each row
