@@ -37,7 +37,7 @@ def main(args):
     df['balance'] = df['generation'] - df['energy']  # Calculate the balance for each row
     df['currency'] = 100.0  # Initialize the currency column to 100
     df['battery_charge'] = 0.5  # Assume 50% initial charge
-    logging.info("Dataframe for balence, currency and battery charge is created.")
+    logging.info("Dataframe for balance, currency and battery charge is created.")
 
     try:
         while True:
@@ -46,8 +46,9 @@ def main(args):
                 break
 
             current_data = df[df.index == timestamp]
-
+            
             if not current_data.empty:
+                start_update_time = time.time()
                 demand = current_data['energy'].sum()  # Calculate the total energy demand at the current timestamp
                 df.loc[df.index == timestamp, 'demand'] = demand  # Add the demand column to the DataFrame
                 battery_charge = update_battery_charge(current_data['generation'].sum(), demand)  # Update the battery charge based on the initial generation and demand
@@ -62,6 +63,7 @@ def main(args):
 
                 display_message(f"Gen: {current_data['generation'].sum():.2f}W\nDem: {demand:.2f}W\nBat: {battery_charge * 100:.2f}%")
                 logging.info(f"LCD updated at {timestamp}")
+                logging.info(f"Update completed in {time.time() - start_update_time:.2f} seconds")
 
     except KeyboardInterrupt:
         logging.info("Simulation interrupted.")

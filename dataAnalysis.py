@@ -103,6 +103,10 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
     plt.pause(0.1)
     logging.info("Initial plot update forced")
 
+    # Show the plot immediately without blocking
+    plt.show(block=False)
+    logging.info("Plot shown without blocking")
+
     for i in range(len(df_day)):
         if i % 1 == 0:
             logging.info(f"Updating plot at index {i}")
@@ -148,11 +152,11 @@ def update_plot_separate(df, start_date, end_date, interval, queue, ready_event)
         axs[2].xaxis.set_major_locator(mdates.DayLocator(interval=1))
         axs[2].xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     elif interval == 'm':
-        axs[2].xaxis.set_major_locator(mdates.WeekdayLocator(interval=1))
-        axs[2].xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+        axs[2].xaxis.set.major_locator(mdates.WeekdayLocator(interval=1))
+        axs[2].xaxis.set.major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     elif interval == 'y':
-        axs[2].xaxis.set_major_locator(mdates.MonthLocator(interval=1))
-        axs[2].xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+        axs[2].xaxis.set.major_locator(mdates.MonthLocator(interval=1))
+        axs[2].xaxis.set.major_formatter(mdates.DateFormatter('%Y-%m'))
 
     plt.xticks(rotation=45)
     plt.tight_layout()
@@ -163,6 +167,10 @@ def update_plot_separate(df, start_date, end_date, interval, queue, ready_event)
     plt.draw()
     plt.pause(0.1)
     logging.info("Initial plot update forced")
+
+    # Show the plot immediately without blocking
+    plt.show(block=False)
+    logging.info("Plot shown without blocking")
 
     for I in range(len(df_day)):
         if I % 1 == 0:
