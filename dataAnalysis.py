@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import calendar
 
 # Function to load and preprocess data
-def load_data(file_path, household, start_date, timescale, chunk_size=5000):
+def load_data(file_path, household, start_date, timescale, chunk_size=100):
     start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
     end_date_obj = calculate_end_date(start_date, timescale)
     
