@@ -67,6 +67,7 @@ def simulate_generation(df, mean=0.5, std=0.2):
     return df
 
 def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
+    logging.info("Initializing plot")
     df_day = df[start_date:end_date]
     df_day = df_day.reset_index()
 
@@ -95,13 +96,16 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
     plt.xticks(rotation=45)
     plt.tight_layout()
     ready_event.set()  # Signal that the plot is initialized
+    logging.info("Plot initialized")
 
     # Force an initial plot update
     plt.draw()
     plt.pause(0.1)
+    logging.info("Initial plot update forced")
 
     for i in range(len(df_day)):
-        if i % 3 == 0:
+        if i % 1 == 0:
+            logging.info(f"Updating plot at index {i}")
             demand_line.set_data(df_day['datetime'][:i], df_day['energy'][:i])
             generation_line.set_data(df_day['datetime'][:i], df_day['generation'][:i])
             net_line.set_data(df_day['datetime'][:i], df_day['generation'][:i] - df_day['energy'][:i])
@@ -109,12 +113,13 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
             ax.autoscale_view()
             logging.info(f"Plotting at {df_day['datetime'][i]}")
             queue.put(df_day['datetime'][i])
-            plt.pause(3)  # Increase pause duration to 6 seconds
+            plt.pause(6)  # Increase pause duration to 6 seconds
 
     plt.show()
     queue.put("done")
 
 def update_plot_separate(df, start_date, end_date, interval, queue, ready_event):
+    logging.info("Initializing plot")
     df_day = df[start_date:end_date]
     df_day = df_day.reset_index()
 
@@ -152,19 +157,23 @@ def update_plot_separate(df, start_date, end_date, interval, queue, ready_event)
     plt.xticks(rotation=45)
     plt.tight_layout()
     ready_event.set()  # Signal that the plot is initialized
+    logging.info("Plot initialized")
 
     # Force an initial plot update
     plt.draw()
     plt.pause(0.1)
+    logging.info("Initial plot update forced")
 
     for I in range(len(df_day)):
         if I % 1 == 0:
+            logging.info(f"Updating plot at index {I}")
             demand_line.set_data(df_day['datetime'][:I], df_day['energy'][:I])
             generation_line.set_data(df_day['datetime'][:I], df_day['generation'][:I])
             net_line.set_data(df_day['datetime'][:I], df_day['generation'][:I] - df_day['energy'][:I])
             for ax in axs:
                 ax.relim()
                 ax.autoscale_view()
+            logging.info(f"Plotting at {df_day['datetime'][I]}")
             queue.put(df_day['datetime'][I])
             plt.pause(6)
 

@@ -37,6 +37,7 @@ def main(args):
     df['balance'] = df['generation'] - df['energy']  # Calculate the balance for each row
     df['currency'] = 100.0  # Initialize the currency column to 100
     df['battery_charge'] = 0.5  # Assume 50% initial charge
+    logging.info("Dataframe for balence, currency and battery charge is created.")
 
     try:
         while True:
@@ -45,7 +46,7 @@ def main(args):
                 break
 
             current_data = df[df.index == timestamp]
-            
+
             if not current_data.empty:
                 demand = current_data['energy'].sum()  # Calculate the total energy demand at the current timestamp
                 df.loc[df.index == timestamp, 'demand'] = demand  # Add the demand column to the DataFrame
