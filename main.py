@@ -2,6 +2,7 @@ import argparse
 import time
 import pandas as pd
 from multiprocessing import Process, Queue, Event
+import threading
 import logging
 from batteryControl import update_battery_charge, read_battery_charge
 from lcdControlTest import display_message
@@ -16,6 +17,23 @@ def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event)
         update_plot_separate(df, start_date, end_date, timescale, queue, ready_event)
     else:
         update_plot_same(df, start_date, end_date, timescale, queue, ready_event)
+
+def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
+    demand = current_data['energy'].sum()
+    df.loc[df.index == timestamp, 'demand'] = demand
+    battery_charge = update_battery_charge(current_data['generation'].sum(), demand)
+    df.loc[df.index == timestamp, 'battery_charge'] = battery_charge
+
+    logging.info(f"Trading at {timestamp}")
+    logging.info(f"Generation: {current_data['generation'].sum():.2f}W, Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%")
+
+    df, price = execute_trades(df, timestamp)
+    logging.info(f"Trading executed. Price: {price:.2f}")
+    logging.info(f"Updated Balance: {df['balance'].sum():.2f}")
+
+    display_message(f"Gen: {current_data['generation'].sum():.2f}W\nDem: {demand:.2f}W\nBat: {battery_charge * 100:.2f}%")
+    logging.info(f"LCD updated at {timestamp}")
+    return df, battery_charge
 
 def main(args):
     logging.info("Loading data, please wait...")
@@ -57,12 +75,10 @@ def main(args):
                 logging.info(f"Trading at {timestamp}")
                 logging.info(f"Generation: {current_data['generation'].sum():.2f}W, Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%")
 
-                df, price = execute_trades(df, timestamp)
-                logging.info(f"Trading executed. Price: {price:.2f}")
-                logging.info(f"Updated Balance: {df['balance'].sum():.2f}")
+                trading_thread = threading.Thread(target=process_trading_and_lcd, args=(df, timestamp, current_data, battery_charge))
+                trading_thread.start()
+                trading_thread.join()
 
-                display_message(f"Gen: {current_data['generation'].sum():.2f}W\nDem: {demand:.2f}W\nBat: {battery_charge * 100:.2f}%")
-                logging.info(f"LCD updated at {timestamp}")
                 logging.info(f"Update completed in {time.time() - start_update_time:.2f} seconds")
 
     except KeyboardInterrupt:
