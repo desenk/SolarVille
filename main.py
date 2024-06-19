@@ -1,17 +1,17 @@
 import argparse
 import time
 import pandas as pd
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Event
 from batteryControl import update_battery_charge, read_battery_charge
 from lcdControlTest import display_message
 from dataAnalysis import load_data, calculate_end_date, simulate_generation, update_plot_separate, update_plot_same
 from trading import execute_trades, calculate_price
 
-def plot_data(df, start_date, end_date, timescale, separate, queue):
+def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event):
     if separate:
-        update_plot_separate(df, start_date, end_date, timescale, queue)
+        update_plot_separate(df, start_date, end_date, timescale, queue, ready_event)
     else:
-        update_plot_same(df, start_date, end_date, timescale, queue)
+        update_plot_same(df, start_date, end_date, timescale, queue, ready_event)
 
 def main(args):
     print("Loading data, please wait...")
@@ -21,11 +21,12 @@ def main(args):
     end_date = calculate_end_date(args.start_date, args.timescale)
     
     queue = Queue()
-    plot_process = Process(target=plot_data, args=(df, args.start_date, end_date, args.timescale, args.separate, queue))
+    ready_event = Event()
+    plot_process = Process(target=plot_data, args=(df, args.start_date, end_date, args.timescale, args.separate, queue, ready_event))
     plot_process.start()
     
-    # Wait for the plotting process to start
-    time.sleep(12)  # Adjust the time as necessary to ensure the plot is initialized
+    # Wait for the plotting process to signal that it is ready
+    ready_event.wait()
     print("Plot initialized, starting simulation...")
 
     df['balance'] = df['generation'] - df['energy']  # Calculate the balance for each row

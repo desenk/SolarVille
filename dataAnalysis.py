@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import calendar
 
 # Function to load and preprocess data
-def load_data(file_path, household, start_date, timescale, chunk_size=100):
+def load_data(file_path, household, start_date, timescale, chunk_size=10000):
     start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
     end_date_obj = calculate_end_date(start_date, timescale)
     
@@ -57,7 +57,7 @@ def simulate_generation(df, mean=0.5, std=0.2):
     df['generation'] = df['generation'].clip(lower=0)
     return df
 
-def update_plot_same(df, start_date, end_date, interval, queue):
+def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
     df_day = df[start_date:end_date]
     df_day = df_day.reset_index()
 
@@ -84,7 +84,8 @@ def update_plot_same(df, start_date, end_date, interval, queue):
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
 
     plt.xticks(rotation=45)
-    plt.tight_layout()  # Signal that the plot is initialized
+    plt.tight_layout()
+    ready_event.set()  # Signal that the plot is initialized
 
     for i in range(len(df_day)):
         if i % 1 == 0:
@@ -100,7 +101,7 @@ def update_plot_same(df, start_date, end_date, interval, queue):
     plt.show()
     queue.put("done")
 
-def update_plot_separate(df, start_date, end_date, interval, queue):
+def update_plot_separate(df, start_date, end_date, interval, queue, ready_event):
     df_day = df[start_date:end_date]
     df_day = df_day.reset_index()
 
@@ -137,6 +138,7 @@ def update_plot_separate(df, start_date, end_date, interval, queue):
 
     plt.xticks(rotation=45)
     plt.tight_layout()
+    ready_event.set()  # Signal that the plot is initialized
 
     for I in range(len(df_day)):
         if I % 1 == 0:
