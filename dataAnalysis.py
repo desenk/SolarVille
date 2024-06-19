@@ -6,33 +6,35 @@ from datetime import datetime, timedelta
 import calendar
 
 # Function to load and preprocess data
-def load_data(file_path, household, start_date, timescale): 
-    alldata = pd.read_csv(file_path) 
-    df = alldata[alldata["LCLid"] == household].copy()
-
-    # Process datetime info to pull out different components
-    df['datetime'] = pd.to_datetime(df['tstp'].str.replace('.0000000', ''))
-    df['date'] = df['datetime'].dt.date
-    df['month'] = df['datetime'].dt.strftime("%B")
-    df['day_of_month'] = df['datetime'].dt.strftime("%d")
-    df['time'] = df['datetime'].dt.strftime('%X')
-    df['weekday'] = df['datetime'].dt.strftime('%A')
-    df['day_seconds'] = (df['datetime'] - df['datetime'].dt.normalize()).dt.total_seconds()
-
-    df['weekday'] = pd.Categorical(df['weekday'], categories=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], ordered=True)
-    df['month'] = pd.Categorical(df['month'], categories=calendar.month_name[1:], ordered=True)
-
-    df = df[df["energy(kWh/hh)"] != "Null"]
-    df["energy"] = df["energy(kWh/hh)"].astype("float64")
-
-    df["cumulative_sum"] = df.groupby('date')["energy"].cumsum()
-    df.set_index("datetime", inplace=True)
-
+def load_data(file_path, household, start_date, timescale, chunk_size=5000):
     start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
     end_date_obj = calculate_end_date(start_date, timescale)
-    end_date_obj = datetime.strptime(end_date_obj, "%Y-%m-%d %H:%M:%S")
-    df = df[(df.index >= start_date_obj) & (df.index < end_date_obj)]
+    
+    filtered_chunks = []
+    for chunk in pd.read_csv(file_path, chunksize=chunk_size):
+        chunk = chunk[chunk["LCLid"] == household]
+        chunk['datetime'] = pd.to_datetime(chunk['tstp'].str.replace('.0000000', ''))
+        chunk = chunk[(chunk['datetime'] >= start_date_obj) & (chunk['datetime'] < end_date_obj)]
+        
+        if not chunk.empty:
+            chunk['date'] = chunk['datetime'].dt.date
+            chunk['month'] = chunk['datetime'].dt.strftime("%B")
+            chunk['day_of_month'] = chunk['datetime'].dt.strftime("%d")
+            chunk['time'] = chunk['datetime'].dt.strftime('%X')
+            chunk['weekday'] = chunk['datetime'].dt.strftime('%A')
+            chunk['day_seconds'] = (chunk['datetime'] - chunk['datetime'].dt.normalize()).dt.total_seconds()
 
+            chunk['weekday'] = pd.Categorical(chunk['weekday'], categories=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], ordered=True)
+            chunk['month'] = pd.Categorical(chunk['month'], categories=calendar.month_name[1:], ordered=True)
+
+            chunk = chunk[chunk["energy(kWh/hh)"] != "Null"]
+            chunk["energy"] = chunk["energy(kWh/hh)"].astype("float64")
+            chunk["cumulative_sum"] = chunk.groupby('date')["energy"].cumsum()
+            
+            filtered_chunks.append(chunk)
+    
+    df = pd.concat(filtered_chunks)
+    df.set_index("datetime", inplace=True)
     return df
 
 def calculate_end_date(start_date, timescale):
