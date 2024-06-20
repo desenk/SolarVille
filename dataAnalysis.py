@@ -116,7 +116,7 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
             generation_line.set_data(df_day['datetime'][:i], df_day['generation'][:i])
             net_line.set_data(df_day['datetime'][:i], df_day['generation'][:i] - df_day['energy'][:i])
             ax.relim()
-            #ax.autoscale_view()
+            ax.autoscale_view()
             logging.info(f"Plotting at {df_day['datetime'][i]}")
             queue.put(df_day['datetime'][i])
             plt.pause(6)  # Increase pause duration to 6 seconds
@@ -182,9 +182,9 @@ def update_plot_separate(df, start_date, end_date, interval, queue, ready_event)
             demand_line.set_data(df_day['datetime'][:I], df_day['energy'][:I])
             generation_line.set_data(df_day['datetime'][:I], df_day['generation'][:I])
             net_line.set_data(df_day['datetime'][:I], df_day['generation'][:I] - df_day['energy'][:I])
-            #for ax in axs:
-                #ax.relim()
-                #ax.autoscale_view()
+            for ax in axs:
+                ax.relim()
+                ax.autoscale_view()
             logging.info(f"Plotting at {df_day['datetime'][I]}")
             queue.put(df_day['datetime'][I])
             plt.pause(6)

@@ -4,8 +4,16 @@ import pandas as pd
 from multiprocessing import Process, Queue, Event
 import threading
 import logging
-from batteryControl import update_battery_charge, read_battery_charge
-from lcdControlTest import display_message
+import platform
+
+# Conditionally import the correct modules based on the platform
+if platform.system() == 'Darwin':  # MacOS
+    from mock_batteryControl import update_battery_charge, read_battery_charge
+    from mock_lcdControlTest import display_message
+else:  # Raspberry Pi
+    from batteryControl import update_battery_charge, read_battery_charge
+    from lcdControlTest import display_message
+
 from dataAnalysis import load_data, calculate_end_date, simulate_generation, update_plot_separate, update_plot_same
 from trading import execute_trades, calculate_price
 
