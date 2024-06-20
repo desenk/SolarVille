@@ -7,12 +7,8 @@ import calendar
 import logging
 import time
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
 # Function to load and preprocess data
 def load_data(file_path, household, start_date, timescale, chunk_size=10000):
-    logging.info("Start loading data")
     start_time = time.time()
     start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
     end_date_obj = calculate_end_date(start_date, timescale)
@@ -42,7 +38,6 @@ def load_data(file_path, household, start_date, timescale, chunk_size=10000):
     
     df = pd.concat(filtered_chunks)
     df.set_index("datetime", inplace=True)
-    logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
     return df
 
 def calculate_end_date(start_date, timescale):
@@ -60,14 +55,12 @@ def calculate_end_date(start_date, timescale):
     return end_date_obj.strftime("%Y-%m-%d %H:%M:%S")
 
 def simulate_generation(df, mean=0.5, std=0.2):
-    logging.info("Simulating generation")
     np.random.seed(42)
     df['generation'] = np.random.normal(mean, std, df.shape[0])
     df['generation'] = df['generation'].clip(lower=0)
     return df
 
 def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
-    logging.info("Initializing plot")
     df_day = df[start_date:end_date]
     df_day = df_day.reset_index()
 
@@ -80,7 +73,6 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
     ax.set_ylabel('Energy (kWh)')
     ax.set_title(f'Real-Time Energy Demand and Generation for Household on {start_date[:10]}')
 
-    logging.info("Configuring x-axis")
     if interval == 'd':
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
@@ -93,12 +85,10 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
     elif interval == 'y':
         ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
-    logging.info("x-axis configured")
 
     plt.xticks(rotation=45)
     plt.tight_layout()
     ready_event.set()  # Signal that the plot is initialized
-    logging.info("Plot initialized")
 
     # Force an initial plot update
     plt.draw()
@@ -107,26 +97,21 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
 
     # Show the plot immediately without blocking
     plt.show(block=False)
-    logging.info("Plot shown without blocking")
 
     for i in range(len(df_day)):
-        logging.info(f"Updating plot at index {i}")
         start_plot_time = time.time()
         demand_line.set_data(df_day['datetime'][:i+1], df_day['energy'][:i+1])
         generation_line.set_data(df_day['datetime'][:i+1], df_day['generation'][:i+1])
         net_line.set_data(df_day['datetime'][:i+1], df_day['generation'][:i+1] - df_day['energy'][:i+1])
         ax.relim()
         ax.autoscale_view()
-        logging.info(f"Plotting at {df_day['datetime'][i]}")
         queue.put(df_day['datetime'][i])
         plt.pause(6)  # Increase pause duration to 6 seconds
-        logging.info(f"Plot update completed in {time.time() - start_plot_time:.2f} seconds")
 
     plt.show()
     queue.put("done")
 
 def update_plot_separate(df, start_date, end_date, interval, queue, ready_event):
-    logging.info("Initializing plot")
     df_day = df[start_date:end_date]
     df_day = df_day.reset_index()
 
@@ -148,7 +133,6 @@ def update_plot_separate(df, start_date, end_date, interval, queue, ready_event)
     axs[2].set_title(f'Net Energy for Household on {start_date[:10]}')
     axs[2].legend()
 
-    logging.info("Configuring x-axis")
     if interval == 'd':
         axs[2].xaxis.set_major_locator(mdates.HourLocator(interval=1))
         axs[2].xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
@@ -161,35 +145,28 @@ def update_plot_separate(df, start_date, end_date, interval, queue, ready_event)
     elif interval == 'y':
         axs[2].xaxis.set_major_locator(mdates.MonthLocator(interval=1))
         axs[2].xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
-    logging.info("x-axis configured")
 
     plt.xticks(rotation=45)
     plt.tight_layout()
     ready_event.set()  # Signal that the plot is initialized
-    logging.info("Plot initialized")
 
     # Force an initial plot update
     plt.draw()
     plt.pause(0.1)
-    logging.info("Initial plot update forced")
 
     # Show the plot immediately without blocking
     plt.show(block=False)
-    logging.info("Plot shown without blocking")
 
     for I in range(len(df_day)):
         if I % 1 == 0:
-            logging.info(f"Updating plot at index {I}")
             start_plot_time = time.time()
             demand_line.set_data(df_day['datetime'][:I], df_day['energy'][:I])
             generation_line.set_data(df_day['datetime'][:I], df_day['generation'][:I])
             net_line.set_data(df_day['datetime'][:I], df_day['generation'][:I] - df_day['energy'][:I])
             axs[0].relim()
             axs[0].autoscale_view()
-            logging.info(f"Plotting at {df_day['datetime'][I]}")
             queue.put(df_day['datetime'][I])
             plt.pause(6)
-            logging.info(f"Plot update completed in {time.time() - start_plot_time:.2f} seconds")
 
     plt.show()
     queue.put("done")
