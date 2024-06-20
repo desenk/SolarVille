@@ -72,9 +72,9 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
     df_day = df_day.reset_index()
 
     fig, ax = plt.subplots(figsize=(15, 6))
-    demand_line, = ax.plot([], [], label='Energy Demand (kWh)', color='red')
-    generation_line, = ax.plot([], [], label='Energy Generation (kWh)', color='green')
-    net_line, = ax.plot([], [], label='Net Energy (kWh)', color='blue', linestyle='--')
+    demand_line, = ax.plot([], [], label='Energy Demand (kWh)', color='red', marker='o', linestyle='-')
+    generation_line, = ax.plot([], [], label='Energy Generation (kWh)', color='green', marker='o', linestyle='-')
+    net_line, = ax.plot([], [], label='Net Energy (kWh)', color='blue', linestyle='--', marker='o')
     ax.legend()
     ax.set_xlabel('Time')
     ax.set_ylabel('Energy (kWh)')
@@ -110,16 +110,17 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
     logging.info("Plot shown without blocking")
 
     for i in range(len(df_day)):
-        if i % 1 == 0:
-            logging.info(f"Updating plot at index {i}")
-            demand_line.set_data(df_day['datetime'][:i], df_day['energy'][:i])
-            generation_line.set_data(df_day['datetime'][:i], df_day['generation'][:i])
-            net_line.set_data(df_day['datetime'][:i], df_day['generation'][:i] - df_day['energy'][:i])
-            ax.relim()
-            ax.autoscale_view()
-            logging.info(f"Plotting at {df_day['datetime'][i]}")
-            queue.put(df_day['datetime'][i])
-            plt.pause(6)  # Increase pause duration to 6 seconds
+        logging.info(f"Updating plot at index {i}")
+        start_plot_time = time.time()
+        demand_line.set_data(df_day['datetime'][:i+1], df_day['energy'][:i+1])
+        generation_line.set_data(df_day['datetime'][:i+1], df_day['generation'][:i+1])
+        net_line.set_data(df_day['datetime'][:i+1], df_day['generation'][:i+1] - df_day['energy'][:i+1])
+        ax.relim()
+        ax.autoscale_view()
+        logging.info(f"Plotting at {df_day['datetime'][i]}")
+        queue.put(df_day['datetime'][i])
+        plt.pause(6)  # Increase pause duration to 6 seconds
+        logging.info(f"Plot update completed in {time.time() - start_plot_time:.2f} seconds")
 
     plt.show()
     queue.put("done")
@@ -152,14 +153,14 @@ def update_plot_separate(df, start_date, end_date, interval, queue, ready_event)
         axs[2].xaxis.set_major_locator(mdates.HourLocator(interval=1))
         axs[2].xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     elif interval == 'w':
-        axs[2].xaxis.set.major_locator(mdates.DayLocator(interval=1))
-        axs[2].xaxis.set.major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+        axs[2].xaxis.set_major_locator(mdates.DayLocator(interval=1))
+        axs[2].xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     elif interval == 'm':
-        axs[2].xaxis.set.major_locator(mdates.WeekdayLocator(interval=1))
-        axs[2].xaxis.set.major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+        axs[2].xaxis.set_major_locator(mdates.WeekdayLocator(interval=1))
+        axs[2].xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     elif interval == 'y':
-        axs[2].xaxis.set.major_locator(mdates.MonthLocator(interval=1))
-        axs[2].xaxis.set.major_formatter(mdates.DateFormatter('%Y-%m'))
+        axs[2].xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+        axs[2].xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
     logging.info("x-axis configured")
 
     plt.xticks(rotation=45)
@@ -179,15 +180,16 @@ def update_plot_separate(df, start_date, end_date, interval, queue, ready_event)
     for I in range(len(df_day)):
         if I % 1 == 0:
             logging.info(f"Updating plot at index {I}")
+            start_plot_time = time.time()
             demand_line.set_data(df_day['datetime'][:I], df_day['energy'][:I])
             generation_line.set_data(df_day['datetime'][:I], df_day['generation'][:I])
             net_line.set_data(df_day['datetime'][:I], df_day['generation'][:I] - df_day['energy'][:I])
-            for ax in axs:
-                ax.relim()
-                ax.autoscale_view()
+            axs[0].relim()
+            axs[0].autoscale_view()
             logging.info(f"Plotting at {df_day['datetime'][I]}")
             queue.put(df_day['datetime'][I])
             plt.pause(6)
+            logging.info(f"Plot update completed in {time.time() - start_plot_time:.2f} seconds")
 
     plt.show()
     queue.put("done")
