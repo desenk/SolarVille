@@ -32,15 +32,16 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
     battery_charge = update_battery_charge(current_data['generation'].sum(), demand)
     df.loc[df.index == timestamp, 'battery_charge'] = battery_charge
 
-    logging.info(f"Trading at {timestamp}")
-    logging.info(f"Generation: {current_data['generation'].sum():.2f}W, Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%")
-
     df, price = execute_trades(df, timestamp)
-    logging.info(f"Trading executed. Price: {price:.2f}")
-    logging.info(f"Updated Balance: {df['balance'].sum():.2f}")
-
     display_message(f"Gen: {current_data['generation'].sum():.2f}W\nDem: {demand:.2f}W\nBat: {battery_charge * 100:.2f}%")
-    logging.info(f"LCD updated at {timestamp}")
+    
+    logging.info(
+        f"At {timestamp} - Generation: {current_data['generation'].sum():.2f}W, "
+        f"Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%, "
+        f"Price: {price:.2f}, Updated Balance: {df['balance'].sum():.2f}, "
+        f"LCD updated"
+    )
+    
     return df, battery_charge
 
 def main(args):
@@ -75,15 +76,7 @@ def main(args):
             
             if not current_data.empty:
                 start_update_time = time.time()
-                demand = current_data['energy'].sum()  # Calculate the total energy demand at the current timestamp
-                df.loc[df.index == timestamp, 'demand'] = demand  # Add the demand column to the DataFrame
-                battery_charge = update_battery_charge(current_data['generation'].sum(), demand)  # Update the battery charge based on the initial generation and demand
-                df.loc[df.index == timestamp, 'battery_charge'] = battery_charge
-
-                logging.info(f"Trading at {timestamp}")
-                logging.info(f"Generation: {current_data['generation'].sum():.2f}W, Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%")
-
-                trading_thread = threading.Thread(target=process_trading_and_lcd, args=(df, timestamp, current_data, battery_charge))
+                trading_thread = threading.Thread(target=process_trading_and_lcd, args=(df, timestamp, current_data, current_data['battery_charge'].iloc[0]))
                 trading_thread.start()
                 trading_thread.join()
 
