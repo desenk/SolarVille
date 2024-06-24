@@ -71,7 +71,7 @@ def main(args):
     df['battery_charge'] = 0.5  # Assume 50% initial charge
     logging.info("Dataframe for balance, currency and battery charge is created.")
 
-    peer_ip = '10.126.43.115'  # Example IP, replace with actual peer IP
+    peer_ip = '10.126.48.172'  # Example IP, replace with actual peer IP
 
     try:
         while True:
