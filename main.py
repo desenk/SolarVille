@@ -5,6 +5,7 @@ from multiprocessing import Process, Queue, Event
 import threading
 import logging
 import platform
+import requests
 
 # Conditionally import the correct modules based on the platform
 if platform.system() == 'Darwin':  # MacOS
@@ -26,7 +27,7 @@ def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event)
     else:
         update_plot_same(df, start_date, end_date, timescale, queue, ready_event)
 
-def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
+def process_trading_and_lcd(df, timestamp, current_data, battery_charge, peer_ip):
     demand = current_data['energy'].sum()
     df.loc[df.index == timestamp, 'demand'] = demand
     battery_charge = update_battery_charge(current_data['generation'].sum(), demand)
@@ -41,7 +42,11 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
         f"Price: {price:.2f}, Updated Balance: {df['balance'].sum():.2f}, "
         f"LCD updated"
     )
-    
+
+    # Send updates to Flask server
+    requests.post(f'http://{peer_ip}:5000/update_demand', json={'demand': demand})
+    requests.post(f'http://{peer_ip}:5000/update_generation', json={'generation': current_data['generation'].sum()})
+
     return df, battery_charge
 
 def main(args):
@@ -65,6 +70,8 @@ def main(args):
     df['currency'] = 100.0  # Initialize the currency column to 100
     df['battery_charge'] = 0.5  # Assume 50% initial charge
     logging.info("Dataframe for balance, currency and battery charge is created.")
+
+    peer_ip = '192.168.1.2'  # Example IP, replace with actual peer IP
 
     try:
         while True:

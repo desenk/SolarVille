@@ -10,37 +10,37 @@ import time
 # Function to load and preprocess data
 def load_data(file_path, household, start_date, timescale, chunk_size=10000):
     start_time = time.time()
-    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
-    end_date_obj = calculate_end_date(start_date, timescale)
+    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d") # Convert start_date to datetime object
+    end_date_obj = calculate_end_date(start_date, timescale) # Calculate end_date
     
-    filtered_chunks = []
-    for chunk in pd.read_csv(file_path, chunksize=chunk_size):
-        chunk = chunk[chunk["LCLid"] == household]
-        chunk['datetime'] = pd.to_datetime(chunk['tstp'].str.replace('.0000000', ''))
-        chunk = chunk[(chunk['datetime'] >= start_date_obj) & (chunk['datetime'] < end_date_obj)]
+    filtered_chunks = [] # List to store filtered chunks
+    for chunk in pd.read_csv(file_path, chunksize=chunk_size): # Read data in chunks
+        chunk = chunk[chunk["LCLid"] == household] # Filter data for the specified household
+        chunk['datetime'] = pd.to_datetime(chunk['tstp'].str.replace('.0000000', '')) # Convert 'tstp' to datetime object
+        chunk = chunk[(chunk['datetime'] >= start_date_obj) & (chunk['datetime'] < end_date_obj)] # Filter data for the specified date range
         
-        if not chunk.empty:
-            chunk['date'] = chunk['datetime'].dt.date
-            chunk['month'] = chunk['datetime'].dt.strftime("%B")
-            chunk['day_of_month'] = chunk['datetime'].dt.strftime("%d")
-            chunk['time'] = chunk['datetime'].dt.strftime('%X')
-            chunk['weekday'] = chunk['datetime'].dt.strftime('%A')
-            chunk['day_seconds'] = (chunk['datetime'] - chunk['datetime'].dt.normalize()).dt.total_seconds()
+        if not chunk.empty: # Check if the chunk is not empty
+            chunk['date'] = chunk['datetime'].dt.date # Extract date from datetime
+            chunk['month'] = chunk['datetime'].dt.strftime("%B") # Extract month from datetime
+            chunk['day_of_month'] = chunk['datetime'].dt.strftime("%d") # Extract day of month from datetime
+            chunk['time'] = chunk['datetime'].dt.strftime('%X') # Extract time from datetime
+            chunk['weekday'] = chunk['datetime'].dt.strftime('%A') # Extract weekday from datetime
+            chunk['day_seconds'] = (chunk['datetime'] - chunk['datetime'].dt.normalize()).dt.total_seconds() # Extract seconds from midnight
 
-            chunk['weekday'] = pd.Categorical(chunk['weekday'], categories=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], ordered=True)
-            chunk['month'] = pd.Categorical(chunk['month'], categories=calendar.month_name[1:], ordered=True)
+            chunk['weekday'] = pd.Categorical(chunk['weekday'], categories=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], ordered=True) # Set weekday categories
+            chunk['month'] = pd.Categorical(chunk['month'], categories=calendar.month_name[1:], ordered=True) # Set month categories
 
-            chunk = chunk[chunk["energy(kWh/hh)"] != "Null"]
-            chunk["energy"] = chunk["energy(kWh/hh)"].astype("float64")
-            chunk["cumulative_sum"] = chunk.groupby('date')["energy"].cumsum()
+            chunk = chunk[chunk["energy(kWh/hh)"] != "Null"] # Remove rows with Null values
+            chunk["energy"] = chunk["energy(kWh/hh)"].astype("float64") # Convert energy to float
+            chunk["cumulative_sum"] = chunk.groupby('date')["energy"].cumsum() # Calculate cumulative sum for each date
             
-            filtered_chunks.append(chunk)
+            filtered_chunks.append(chunk) # Append filtered chunk to the list
     
-    df = pd.concat(filtered_chunks)
-    df.set_index("datetime", inplace=True)
-    return df
+    df = pd.concat(filtered_chunks) # Concatenate filtered chunks
+    df.set_index("datetime", inplace=True) # Set datetime as index
+    return df # Return the dataframe
 
-def calculate_end_date(start_date, timescale):
+def calculate_end_date(start_date, timescale): # Function to calculate end date based on timescale
     start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
     if timescale == 'd':
         end_date_obj = start_date_obj + timedelta(days=1)
@@ -54,24 +54,24 @@ def calculate_end_date(start_date, timescale):
         raise ValueError("Invalid timescale. Use 'd' for day, 'w' for week, 'm' for month, or 'y' for year.")
     return end_date_obj.strftime("%Y-%m-%d %H:%M:%S")
 
-def simulate_generation(df, mean=0.5, std=0.2):
+def simulate_generation(df, mean=0.5, std=0.2): # Function to simulate energy generation
     np.random.seed(42)
     df['generation'] = np.random.normal(mean, std, df.shape[0])
     df['generation'] = df['generation'].clip(lower=0)
     return df
 
-def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
-    df_day = df[start_date:end_date]
-    df_day = df_day.reset_index()
+def update_plot_same(df, start_date, end_date, interval, queue, ready_event): # Function to update plot with same y-axis
+    df_day = df[start_date:end_date] # Filter data for the specified date range
+    df_day = df_day.reset_index() # Reset index
 
-    fig, ax = plt.subplots(figsize=(15, 6))
-    demand_line, = ax.plot([], [], label='Energy Demand (kWh)', color='red', marker='o', linestyle='-')
-    generation_line, = ax.plot([], [], label='Energy Generation (kWh)', color='green', marker='o', linestyle='-')
-    net_line, = ax.plot([], [], label='Net Energy (kWh)', color='blue', linestyle='--', marker='o')
-    ax.legend()
-    ax.set_xlabel('Time')
-    ax.set_ylabel('Energy (kWh)')
-    ax.set_title(f'Real-Time Energy Demand and Generation for Household on {start_date[:10]}')
+    fig, ax = plt.subplots(figsize=(15, 6)) # Create a figure and axis
+    demand_line, = ax.plot([], [], label='Energy Demand (kWh)', color='red', marker='o', linestyle='-') # Plot for energy demand
+    generation_line, = ax.plot([], [], label='Energy Generation (kWh)', color='green', marker='o', linestyle='-') # Plot for energy generation
+    net_line, = ax.plot([], [], label='Net Energy (kWh)', color='blue', linestyle='--', marker='o') # Plot for net energy
+    ax.legend() # Add legend to the plot
+    ax.set_xlabel('Time') # Set x-axis label
+    ax.set_ylabel('Energy (kWh)') # Set y-axis label
+    ax.set_title(f'Real-Time Energy Demand and Generation for Household on {start_date[:10]}') # Set title for the plot
 
     if interval == 'd':
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
@@ -91,25 +91,25 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
     ready_event.set()  # Signal that the plot is initialized
 
     # Force an initial plot update
-    plt.draw()
-    plt.pause(0.1)
+    plt.draw() # Draw the plot
+    plt.pause(0.1) # Pause for 0.1 seconds
     logging.info("Initial plot update forced")
 
     # Show the plot immediately without blocking
     plt.show(block=False)
 
-    for i in range(len(df_day)):
-        start_plot_time = time.time()
-        demand_line.set_data(df_day['datetime'][:i+1], df_day['energy'][:i+1])
-        generation_line.set_data(df_day['datetime'][:i+1], df_day['generation'][:i+1])
-        net_line.set_data(df_day['datetime'][:i+1], df_day['generation'][:i+1] - df_day['energy'][:i+1])
-        ax.relim()
-        ax.autoscale_view()
-        queue.put(df_day['datetime'][i])
+    for i in range(len(df_day)): # Loop through the length of the dataframe
+        start_plot_time = time.time() # Start time for plotting
+        demand_line.set_data(df_day['datetime'][:i+1], df_day['energy'][:i+1]) # Set data for energy demand
+        generation_line.set_data(df_day['datetime'][:i+1], df_day['generation'][:i+1]) # Set data for energy generation
+        net_line.set_data(df_day['datetime'][:i+1], df_day['generation'][:i+1] - df_day['energy'][:i+1]) # Set data for net energy
+        ax.relim() # Recalculate limits
+        ax.autoscale_view() # Autoscale the view
+        queue.put(df_day['datetime'][i]) # Put datetime value in the queue
         plt.pause(6)  # Increase pause duration to 6 seconds
 
-    plt.show()
-    queue.put("done")
+    plt.show() # Show the plot
+    queue.put("done") # Put "done" in the queue
 
 def update_plot_separate(df, start_date, end_date, interval, queue, ready_event):
     df_day = df[start_date:end_date]
