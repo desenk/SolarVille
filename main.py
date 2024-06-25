@@ -71,7 +71,7 @@ def main(args):
     df['battery_charge'] = 0.5  # Assume 50% initial charge
     logging.info("Dataframe for balance, currency and battery charge is created.")
 
-    peer_ip = '10.126.48.172'  # Example IP, replace with actual peer IP
+    peer_ip = '10.126.48.172'  # IP address of Pi #1
 
     try:
         while True:
@@ -83,7 +83,7 @@ def main(args):
             
             if not current_data.empty:
                 start_update_time = time.time()
-                trading_thread = threading.Thread(target=process_trading_and_lcd, args=(df, timestamp, current_data, current_data['battery_charge'].iloc[0]))
+                trading_thread = threading.Thread(target=process_trading_and_lcd, args=(df, timestamp, current_data, current_data['battery_charge'].iloc[0], peer_ip))
                 trading_thread.start()
                 trading_thread.join()
 
