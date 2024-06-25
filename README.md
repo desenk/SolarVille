@@ -18,12 +18,59 @@ Experience how weather messes with energy. Normal day? Heat wave? Stormy skies? 
 - **Demonstrate**: See real weather impacts on solar power.
 - **Simulate**: Watch and manage as the sun rises and sets and storms roll in.
 
-## 🛠️ Installation
-You need to download a dataset to run the `dataAnalysis.py` file on. You can download it from [here.](https://www.dropbox.com/scl/fi/q0bnffnh7ri5hrr19lzln/block_0.csv?rlkey=q57lpbt8csgphdeqta0m2n2yl&st=6187recp&dl=0) Save this on your computer as a .csv file and replace the existing path of `block_0.csv` in line 159 of `dataAnalysis.py` with your own path to the `block_0.csv` file. E.g `file_path = "/your/path/to/file/block_0.csv"`
+## Prerequisites
+- Python 3.11
+- Required Python packages (see `requirements.txt` and `requirements-pi.txt`)
+- Raspberry Pi 4
 
-You may have to install some python packages to run this file. These are 'pandas', 'numpy', 'matplotlib' and 'datetime' and you can use `pip install pandas numpy matplotlib datetime` to install them. It may be a good idea to set up a virtual python environment first so that there are no conflicts between packages.
+## Setup Instructions
 
-To run the script, go to a terminal and naviagate to where the `dataAnalysis.py` file is located. Then run `python dataAnalysis.py --start_date 2012-10-13 --timescale 'd'`. You can change the date to another day in the data set and also use the 'd', 'w', 'm' and 'y' flags to change the timescale that is plotted.
+### Step 1: Clone the Repository
+```sh
+git clone https://github.com/your-repo/SolarVille.git
+cd SolarVille
+```
+### Step 2: Set up the Virtual Environment
+```sh
+python3 -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+```
+
+### Step 3: Install Dependencies
+**For Mac/Linux:**
+```sh
+pip install -r requirements.txt
+```
+**For Raspberry Pi:**
+```sh
+pip install -r requirements-pi.txt
+```
+
+## Running the Simulation
+
+### Step 1: Prepare the Data
+
+Ensure you have the CSV file containing energy data. The CSV file should be structured correctly and located in the project directory. You can download the sample data from [here](https://www.dropbox.com/scl/fi/q0bnffnh7ri5hrr19lzln/block_0.csv?rlkey=q57lpbt8csgphdeqta0m2n2yl&st=o1uxz728&dl=0).
+
+### Step 2: Run the Simulation
+```sh
+python main.py --file_path <path_to_csv> --household <household_id> --start_date <start_date> --timescale <timescale>
+```
+- <path_to_csv>: Path to your energy data CSV file
+- <household_id>: Household ID to filter data
+- <start_date>: Start date for the simulation (format: YYYY-MM-DD)
+- <timescale>: Timescale for the simulation (‘d’ for day, ‘w’ for week, ‘m’ for month, ‘y’ for year)
+
+**Example:**
+```sh
+python main.py --file_path data/block_0.csv --household MAC000002 --start_date 2012-10-13 --timescale 'd'
+```
+
+## Additional Information
+
+**Raspberry Pi Specific Setup**
+
+For Raspberry Pi, ensure the correct hardware connections, making sure to adjust the GPIO pins in the code to your requirements. Install additional libraries specified in requirements-pi.txt.
 
 ## 🔄 Usage
 Get your hands on the controls with our super user-friendly guide. Adjust the weather, watch energy flow, tweak setups – all in real-time!
