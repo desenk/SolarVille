@@ -71,7 +71,11 @@ def main(args):
     df['battery_charge'] = 0.5  # Assume 50% initial charge
     logging.info("Dataframe for balance, currency and battery charge is created.")
 
+<<<<<<< HEAD
     peer_ip = '10.126.48.172'  # IP address of the Rasperry Pi #2
+=======
+    peer_ip = '10.126.48.172'  # IP address of Pi #1
+>>>>>>> e2529e8500f8301c792716013410e8b668e98256
 
     try:
         while True:
