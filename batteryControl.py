@@ -80,3 +80,5 @@ if __name__ == "__main__":
         print(f"Battery Charge: {battery_charge * 100:.2f}%")
         
         time.sleep(1)  # Delay for 1 second
+
+        #commit
