@@ -34,7 +34,7 @@ def calculate_price(supply, demand):
     print(f"Calculating price: supply = {supply:.2f}, demand = {demand:.2f}")  # Debug print
     if demand > 0 and supply > 0:
         if demand > supply:
-            price = base_price * (1 + (demand - supply) / supply)
+            price = base_price * (1 + (demand - supply) / supply) 
         else:
             price = base_price * (1 - (supply - demand) / demand)
     else:
