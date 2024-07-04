@@ -6,6 +6,7 @@ import threading
 import logging
 import platform
 import requests
+from flask import Flask, request, jsonify
 
 # Conditionally import the correct modules based on the platform
 if platform.system() == 'Darwin':  # MacOS
@@ -20,6 +21,13 @@ from trading import execute_trades, calculate_price
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+app = Flask(__name__)
+
+@app.route('/start', methods=['POST'])
+def start():
+    start_simulation()
+    return jsonify({"status": "Simulation started"})
 
 def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event):
     if separate:
@@ -46,10 +54,20 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge, peer_ip
     # Send updates to Flask server
     requests.post(f'http://{peer_ip}:5000/update_demand', json={'demand': demand})
     requests.post(f'http://{peer_ip}:5000/update_generation', json={'generation': current_data['generation'].sum()})
+    requests.post(f'http://{peer_ip}:5000/update_balance', json={'amount': df['balance'].sum()})
 
     return df, battery_charge
 
-def main(args):
+def sync_state(df, peer_ip):
+    state = {
+        'balance': df['balance'].sum(),
+        'currency': df['currency'].sum(),
+        'demand': df['demand'].sum(),
+        'generation': df['generation'].sum()
+    }
+    requests.post(f'http://{peer_ip}:5000/sync', json=state)
+
+def start_simulation():
     logging.info("Loading data, please wait...")
     start_time = time.time()
     df = load_data(args.file_path, args.household, args.start_date, args.timescale)
@@ -71,7 +89,7 @@ def main(args):
     df['battery_charge'] = 0.5  # Assume 50% initial charge
     logging.info("Dataframe for balance, currency and battery charge is created.")
 
-    peer_ip = '10.126.43.115'  # IP address of the Rasperry Pi #2
+    peer_ip = '192.168.222.62'  # IP address of the Raspberry Pi #2
 
     try:
         while True:
@@ -88,6 +106,10 @@ def main(args):
                 trading_thread.join()
 
                 logging.info(f"Update completed in {time.time() - start_update_time:.2f} seconds")
+                
+                # Periodically sync state
+                if timestamp.minute % 5 == 0:  # Example: sync every 5 minutes
+                    sync_state(df, peer_ip)
 
     except KeyboardInterrupt:
         logging.info("Simulation interrupted.")
@@ -103,4 +125,4 @@ if __name__ == "__main__":
     parser.add_argument('--separate', action='store_true', help='Flag to plot data in separate subplots')
 
     args = parser.parse_args()  # Parse the arguments
-    main(args)  # Call the main function with the parsed arguments
+    app.run(host='0.0.0.0', port=5000)  # Start the Flask server

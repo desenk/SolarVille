@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import requests
 
 app = Flask(__name__)
 
@@ -34,6 +35,20 @@ def update_generation():
 @app.route('/get_data', methods=['GET'])
 def get_data():
     global energy_data
+    return jsonify(energy_data)
+
+@app.route('/start_simulation', methods=['POST'])
+def start_simulation():
+    peers = request.json.get('peers', [])
+    for peer in peers:
+        requests.post(f'http://{peer}:5000/start')
+    return jsonify({"status": "Simulation started on all peers"})
+
+@app.route('/sync', methods=['POST'])
+def sync():
+    global energy_data
+    data = request.json
+    energy_data.update(data)
     return jsonify(energy_data)
 
 if __name__ == '__main__':
