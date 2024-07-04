@@ -30,8 +30,8 @@ def execute_trades(df, timestamp):
     return df, price
 
 def calculate_price(supply, demand):
-    p_min = 0.10
-    p_max = 1.0
+    p_min = 0.10    # Minimum electricity trading price for prosumers
+    p_max = 1.0    # Maximum electricty trading price for consumers
     base_price = (p_min + p_max)/2   # Base price per kWh in pounds
     sdr = supply/demand
     print(f"Calculating price: supply = {supply:.2f}, demand = {demand:.2f}, SDR = {sdr:.2f}")  # Debug print
