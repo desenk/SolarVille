@@ -42,6 +42,13 @@ def get_data():
     global energy_data
     return jsonify(energy_data)
 
+@app.route('/start_simulation', methods=['POST'])
+def start_simulation():
+    peers = request.json.get('peers', [])
+    for peer in peers:
+        requests.post(f'http://{peer}:5000/start')
+    return jsonify({"status": "Simulation started on all peers"})
+
 def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event):
     if separate:
         update_plot_separate(df, start_date, end_date, timescale, queue, ready_event)
