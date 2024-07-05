@@ -94,6 +94,9 @@ def start_simulation():
     logging.info("Loading data, please wait...")
     start_time = time.time()
     df = load_data(args.file_path, args.household, args.start_date, args.timescale)
+    if df.empty:
+        logging.error("No data loaded. Exiting simulation.")
+        return
     df = simulate_generation(df, mean=0.5, std=0.2)
     end_date = calculate_end_date(args.start_date, args.timescale)
     logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
