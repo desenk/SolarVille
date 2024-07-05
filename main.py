@@ -45,6 +45,9 @@ def get_data():
 @app.route('/start_simulation', methods=['POST'])
 def start_simulation():
     peers = request.json.get('peers', [])
+    # Start simulation on self
+    start()
+    # Start simulation on peers
     for peer in peers:
         requests.post(f'http://{peer}:5000/start')
     return jsonify({"status": "Simulation started on all peers"})
