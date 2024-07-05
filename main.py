@@ -24,10 +24,23 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 app = Flask(__name__)
 
+# Shared data for the example
+energy_data = {
+    "balance": 0,
+    "currency": 100.0,
+    "demand": 0,
+    "generation": 0
+}
+
 @app.route('/start', methods=['POST'])
 def start():
     start_simulation()
     return jsonify({"status": "Simulation started"})
+
+@app.route('/get_data', methods=['GET'])
+def get_data():
+    global energy_data
+    return jsonify(energy_data)
 
 def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event):
     if separate:
@@ -89,7 +102,7 @@ def start_simulation():
     df['battery_charge'] = 0.5  # Assume 50% initial charge
     logging.info("Dataframe for balance, currency and battery charge is created.")
 
-    peer_ip = '192.168.222.63'  # IP address of the Raspberry Pi #2
+    peer_ip = '10.126.108.106'  # IP address of Pi #1
 
     try:
         while True:
