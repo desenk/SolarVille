@@ -46,51 +46,13 @@ def get_data():
 def start_simulation():
     peers = request.json.get('peers', [])
     # Start simulation on self
-    start()
+    start_simulation_local()
     # Start simulation on peers
     for peer in peers:
         requests.post(f'http://{peer}:5000/start')
     return jsonify({"status": "Simulation started on all peers"})
 
-def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event):
-    if separate:
-        update_plot_separate(df, start_date, end_date, timescale, queue, ready_event)
-    else:
-        update_plot_same(df, start_date, end_date, timescale, queue, ready_event)
-
-def process_trading_and_lcd(df, timestamp, current_data, battery_charge, peer_ip):
-    demand = current_data['energy'].sum()
-    df.loc[df.index == timestamp, 'demand'] = demand
-    battery_charge = update_battery_charge(current_data['generation'].sum(), demand)
-    df.loc[df.index == timestamp, 'battery_charge'] = battery_charge
-
-    df, price = execute_trades(df, timestamp)
-    display_message(f"Gen: {current_data['generation'].sum():.2f}W\nDem: {demand:.2f}W\nBat: {battery_charge * 100:.2f}%")
-    
-    logging.info(
-        f"At {timestamp} - Generation: {current_data['generation'].sum():.2f}W, "
-        f"Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%, "
-        f"Price: {price:.2f}, Updated Balance: {df['balance'].sum():.2f}, "
-        f"LCD updated"
-    )
-
-    # Send updates to Flask server
-    requests.post(f'http://{peer_ip}:5000/update_demand', json={'demand': demand})
-    requests.post(f'http://{peer_ip}:5000/update_generation', json={'generation': current_data['generation'].sum()})
-    requests.post(f'http://{peer_ip}:5000/update_balance', json={'amount': df['balance'].sum()})
-
-    return df, battery_charge
-
-def sync_state(df, peer_ip):
-    state = {
-        'balance': df['balance'].sum(),
-        'currency': df['currency'].sum(),
-        'demand': df['demand'].sum(),
-        'generation': df['generation'].sum()
-    }
-    requests.post(f'http://{peer_ip}:5000/sync', json=state)
-
-def start_simulation():
+def start_simulation_local():
     logging.info("Loading data, please wait...")
     start_time = time.time()
     df = load_data(args.file_path, args.household, args.start_date, args.timescale)
@@ -141,6 +103,65 @@ def start_simulation():
         logging.info("Simulation interrupted.")
     finally:
         plot_process.join()
+
+def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event):
+    if separate:
+        update_plot_separate(df, start_date, end_date, timescale, queue, ready_event)
+    else:
+        update_plot_same(df, start_date, end_date, timescale, queue, ready_event)
+
+def process_trading_and_lcd(df, timestamp, current_data, battery_charge, peer_ip):
+    demand = current_data['energy'].sum()
+    df.loc[df.index == timestamp, 'demand'] = demand
+    battery_charge = update_battery_charge(current_data['generation'].sum(), demand)
+    df.loc[df.index == timestamp, 'battery_charge'] = battery_charge
+
+    df, price = execute_trades(df, timestamp)
+    display_message(f"Gen: {current_data['generation'].sum():.2f}W\nDem: {demand:.2f}W\nBat: {battery_charge * 100:.2f}%")
+    
+    logging.info(
+        f"At {timestamp} - Generation: {current_data['generation'].sum():.2f}W, "
+        f"Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%, "
+        f"Price: {price:.2f}, Updated Balance: {df['balance'].sum():.2f}, "
+        f"LCD updated"
+    )
+
+    # Send updates to Flask server
+    requests.post(f'http://{peer_ip}:5000/update_demand', json={'demand': demand})
+    requests.post(f'http://{peer_ip}:5000/update_generation', json={'generation': current_data['generation'].sum()})
+    requests.post(f'http://{peer_ip}:5000/update_balance', json={'amount': df['balance'].sum()})
+
+    return df, battery_charge
+
+def sync_state(df, peer_ip):
+    state = {
+        'balance': df['balance'].sum(),
+        'currency': df['currency'].sum(),
+        'demand': df['demand'].sum(),
+        'generation': df['generation'].sum()
+    }
+    requests.post(f'http://{peer_ip}:5000/sync', json=state)
+
+@app.route('/update_balance', methods=['POST'])
+def update_balance():
+    global energy_data
+    data = request.json
+    energy_data['balance'] += data.get('amount', 0)
+    return jsonify(energy_data)
+
+@app.route('/update_demand', methods=['POST'])
+def update_demand():
+    global energy_data
+    data = request.json
+    energy_data['demand'] = data.get('demand', 0)
+    return jsonify(energy_data)
+
+@app.route('/update_generation', methods=['POST'])
+def update_generation():
+    global energy_data
+    data = request.json
+    energy_data['generation'] = data.get('generation', 0)
+    return jsonify(energy_data)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Smart Grid Simulation')
