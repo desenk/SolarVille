@@ -34,7 +34,7 @@ energy_data = {
 
 @app.route('/start', methods=['POST'])
 def start():
-    start_simulation()
+    start_simulation_local()
     return jsonify({"status": "Simulation started"})
 
 @app.route('/get_data', methods=['GET'])
