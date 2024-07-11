@@ -34,7 +34,7 @@ energy_data = {
 
 @app.route('/start', methods=['POST'])
 def start():
-    start_simulation_local()
+    threading.Thread(target=start_simulation_local).start()
     return jsonify({"status": "Simulation started"})
 
 @app.route('/get_data', methods=['GET'])
@@ -78,7 +78,7 @@ def start_simulation_local():
     df['currency'] = 100.0  # Initialize the currency column to 100
     df['battery_charge'] = 0.5  # Assume 50% initial charge
     logging.info("Dataframe for balance, currency and battery charge is created.")
-
+    
     peer_ip = '192.168.170.63'  # IP address of the Raspberry Pi #2
 
     try:
@@ -143,27 +143,6 @@ def sync_state(df, peer_ip):
         'generation': df['generation'].sum()
     }
     requests.post(f'http://{peer_ip}:5000/sync', json=state)
-
-@app.route('/update_balance', methods=['POST'])
-def update_balance():
-    global energy_data
-    data = request.json
-    energy_data['balance'] += data.get('amount', 0)
-    return jsonify(energy_data)
-
-@app.route('/update_demand', methods=['POST'])
-def update_demand():
-    global energy_data
-    data = request.json
-    energy_data['demand'] = data.get('demand', 0)
-    return jsonify(energy_data)
-
-@app.route('/update_generation', methods=['POST'])
-def update_generation():
-    global energy_data
-    data = request.json
-    energy_data['generation'] = data.get('generation', 0)
-    return jsonify(energy_data)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Smart Grid Simulation')
