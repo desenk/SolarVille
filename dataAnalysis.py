@@ -35,9 +35,16 @@ def load_data(file_path, household, start_date, timescale, chunk_size=10000):
             chunk["cumulative_sum"] = chunk.groupby('date')["energy"].cumsum() # Calculate cumulative sum for each date
             
             filtered_chunks.append(chunk) # Append filtered chunk to the list
-    
+        else:
+            logging.info(f"No data found in chunk for household {household} and date range {start_date} to {end_date_obj}")
+
+    if not filtered_chunks:
+        logging.error(f"No data loaded for household {household} and date range {start_date} to {end_date_obj}")
+        return pd.DataFrame() # Return an empty DataFrame if no data is loaded
+
     df = pd.concat(filtered_chunks) # Concatenate filtered chunks
     df.set_index("datetime", inplace=True) # Set datetime as index
+    logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
     return df # Return the dataframe
 
 def calculate_end_date(start_date, timescale): # Function to calculate end date based on timescale
