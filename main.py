@@ -45,8 +45,8 @@ def get_data():
 @app.route('/start_simulation', methods=['POST'])
 def start_simulation():
     peers = request.json.get('peers', [])
-    # Start simulation on self
-    start_simulation_local()
+    # Start simulation on self in a separate thread
+    threading.Thread(target=start_simulation_local).start()
     # Start simulation on peers
     for peer in peers:
         response = requests.post(f'http://{peer}:5000/start')
