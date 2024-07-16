@@ -79,7 +79,7 @@ def start_simulation_local():
     df['battery_charge'] = 0.5  # Assume 50% initial charge
     logging.info("Dataframe for balance, currency and battery charge is created.")
 
-    peer_ip = '192.168.170.63'  # IP address of the Raspberry Pi #2
+    peer_ip = '192.168.121.63'  # IP address of the Raspberry Pi #2
 
     try:
         while True:
