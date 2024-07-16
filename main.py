@@ -97,9 +97,11 @@ def start_simulation_local():
 
                 logging.info(f"Update completed in {time.time() - start_update_time:.2f} seconds")
                 
-                # Periodically sync state
-                if timestamp.minute % 5 == 0:  # Example: sync every 5 minutes
+                # Periodically sync state every 6 seconds
+                if timestamp.second % 6 == 0:  # Example: sync every 6 seconds
+                    logging.info(f"Syncing state with peer {peer_ip}")
                     sync_state(df, peer_ip)
+                    logging.info(f"State synced with peer {peer_ip}")
 
     except KeyboardInterrupt:
         logging.info("Simulation interrupted.")
@@ -129,9 +131,9 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge, peer_ip
     )
 
     # Send updates to Flask server
-    requests.post(f'http://{peer_ip}:5000/update_demand', json={'demand': demand})
-    requests.post(f'http://{peer_ip}:5000/update_generation', json={'generation': current_data['generation'].sum()})
-    requests.post(f'http://{peer_ip}:5000/update_balance', json={'amount': df['balance'].sum()})
+    make_api_call(f'http://{peer_ip}:5000/update_demand', {'demand': demand})
+    make_api_call(f'http://{peer_ip}:5000/update_generation', {'generation': current_data['generation'].sum()})
+    make_api_call(f'http://{peer_ip}:5000/update_balance', {'amount': df['balance'].sum()})
 
     return df, battery_charge
 
@@ -142,7 +144,7 @@ def sync_state(df, peer_ip):
         'demand': df['demand'].sum(),
         'generation': df['generation'].sum()
     }
-    requests.post(f'http://{peer_ip}:5000/sync', json=state)
+    make_api_call(f'http://{peer_ip}:5000/sync', state)
 
 @app.route('/update_balance', methods=['POST'])
 def update_balance():
@@ -164,6 +166,20 @@ def update_generation():
     data = request.json
     energy_data['generation'] = data.get('generation', 0)
     return jsonify(energy_data)
+
+@app.route('/sync', methods=['POST'])
+def sync():
+    global energy_data
+    data = request.json
+    energy_data.update(data)
+    return jsonify(energy_data)
+
+def make_api_call(url, data):
+    try:
+        response = requests.post(url, json=data, timeout=5)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        logging.error(f"API call failed: {e}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Smart Grid Simulation')

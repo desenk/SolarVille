@@ -41,7 +41,9 @@ def get_data():
 def start_simulation():
     peers = request.json.get('peers', [])
     for peer in peers:
-        requests.post(f'http://{peer}:5000/start')
+        response = requests.post(f'http://{peer}:5000/start')
+        if response.status_code != 200:
+            logging.error(f"Failed to start simulation on peer {peer}")
     return jsonify({"status": "Simulation started on all peers"})
 
 @app.route('/sync', methods=['POST'])

@@ -49,7 +49,7 @@ def update_battery_charge(power_generated, power_demand):
         battery_charge += surplus_power / max_battery_charge
         if battery_charge > max_battery_charge:
             battery_charge = max_battery_charge
-            #  Add code to send excess power to the grid at half price
+            # Add code to send excess power to the grid at half price
     elif power_generated < power_demand:
         deficit_power = power_demand - power_generated
         battery_charge -= deficit_power / max_battery_charge
