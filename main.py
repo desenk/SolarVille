@@ -6,7 +6,7 @@ import threading
 import logging
 import platform
 import requests
-from flask import Flask, request, jsonify
+from flask import request
 
 # Conditionally import the correct modules based on the platform
 if platform.system() == 'Darwin':  # MacOS
@@ -21,42 +21,6 @@ from trading import execute_trades, calculate_price
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-app = Flask(__name__)
-
-# Shared data for the example
-energy_data = {
-    "balance": 0,
-    "currency": 100.0,
-    "demand": 0,
-    "generation": 0
-}
-
-@app.route('/start', methods=['POST'])
-def start():
-    threading.Thread(target=start_simulation_local).start()
-    return jsonify({"status": "Simulation started"})
-
-@app.route('/get_data', methods=['GET'])
-def get_data():
-    global energy_data
-    return jsonify(energy_data)
-
-@app.route('/start_simulation', methods=['POST'])
-def start_simulation():
-    try:
-        peers = request.json.get('peers', [])
-        # Start simulation on self in a separate thread
-        threading.Thread(target=start_simulation_local).start()
-        # Start simulation on peers
-        for peer in peers:
-            response = requests.post(f'http://{peer}:5000/start')
-            if response.status_code != 200:
-                logging.error(f"Failed to start simulation on peer {peer}")
-        return jsonify({"status": "Simulation started on all peers"})
-    except Exception as e:
-        logging.error(f"Error starting simulation: {e}")
-        return jsonify({"error": str(e)}), 400
 
 def start_simulation_local():
     logging.info("Loading data, please wait...")
@@ -82,9 +46,9 @@ def start_simulation_local():
     df['currency'] = 100.0  # Initialize the currency column to 100
     df['battery_charge'] = 0.5  # Assume 50% initial charge
     logging.info("Dataframe for balance, currency and battery charge is created.")
-
-    peer_ip = '192.168.121.63'  # IP address of the Raspberry Pi #2
-
+    
+    peer_ip = '192.168.121.63' # IP address of Pi #1
+    
     try:
         while True:
             timestamp = queue.get()
@@ -101,8 +65,8 @@ def start_simulation_local():
 
                 logging.info(f"Update completed in {time.time() - start_update_time:.2f} seconds")
                 
-                # Periodically sync state every 6 seconds
-                if timestamp.second % 6 == 0:  # Example: sync every 6 seconds
+                # Periodically sync state
+                if timestamp.second % 6 == 0:  # Example: sync every 5 minutes
                     logging.info(f"Syncing state with peer {peer_ip}")
                     sync_state(df, peer_ip)
                     logging.info(f"State synced with peer {peer_ip}")
@@ -155,34 +119,6 @@ def sync_state(df, peer_ip):
     if response is None:
         logging.error(f"Failed to sync state with peer {peer_ip}")
 
-@app.route('/update_balance', methods=['POST'])
-def update_balance():
-    global energy_data
-    data = request.json
-    energy_data['balance'] += data.get('amount', 0)
-    return jsonify(energy_data)
-
-@app.route('/update_demand', methods=['POST'])
-def update_demand():
-    global energy_data
-    data = request.json
-    energy_data['demand'] = data.get('demand', 0)
-    return jsonify(energy_data)
-
-@app.route('/update_generation', methods=['POST'])
-def update_generation():
-    global energy_data
-    data = request.json
-    energy_data['generation'] = data.get('generation', 0)
-    return jsonify(energy_data)
-
-@app.route('/sync', methods=['POST'])
-def sync():
-    global energy_data
-    data = request.json
-    energy_data.update(data)
-    return jsonify(energy_data)
-
 def make_api_call(url, data, max_retries=3):
     for attempt in range(max_retries):
         try:
@@ -195,6 +131,18 @@ def make_api_call(url, data, max_retries=3):
                 logging.error(f"Max retries reached for {url}")
     return None
 
+def initialize_simulation():
+    global df, end_date
+    logging.info("Loading data, please wait...")
+    start_time = time.time()
+    df = load_data(args.file_path, args.household, args.start_date, args.timescale)
+    if df.empty:
+        logging.error("No data loaded. Exiting simulation.")
+        return
+    df = simulate_generation(df, mean=0.5, std=0.2)
+    end_date = calculate_end_date(args.start_date, args.timescale)
+    logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Smart Grid Simulation')
     parser.add_argument('--file_path', type=str, required=True, help='Path to the CSV file')
@@ -204,4 +152,8 @@ if __name__ == "__main__":
     parser.add_argument('--separate', action='store_true', help='Flag to plot data in separate subplots')
 
     args = parser.parse_args()  # Parse the arguments
-    app.run(host='0.0.0.0', port=5000)  # Start the Flask server
+    initialize_simulation()
+
+    from server import app
+    threading.Thread(target=start_simulation_local).start()
+    app.run(host='0.0.0.0', port=5000)
