@@ -44,15 +44,19 @@ def get_data():
 
 @app.route('/start_simulation', methods=['POST'])
 def start_simulation():
-    peers = request.json.get('peers', [])
-    # Start simulation on self in a separate thread
-    threading.Thread(target=start_simulation_local).start()
-    # Start simulation on peers
-    for peer in peers:
-        response = requests.post(f'http://{peer}:5000/start')
-        if response.status_code != 200:
-            logging.error(f"Failed to start simulation on peer {peer}")
-    return jsonify({"status": "Simulation started on all peers"})
+    try:
+        peers = request.json.get('peers', [])
+        # Start simulation on self in a separate thread
+        threading.Thread(target=start_simulation_local).start()
+        # Start simulation on peers
+        for peer in peers:
+            response = requests.post(f'http://{peer}:5000/start')
+            if response.status_code != 200:
+                logging.error(f"Failed to start simulation on peer {peer}")
+        return jsonify({"status": "Simulation started on all peers"})
+    except Exception as e:
+        logging.error(f"Error starting simulation: {e}")
+        return jsonify({"error": str(e)}), 400
 
 def start_simulation_local():
     logging.info("Loading data, please wait...")
