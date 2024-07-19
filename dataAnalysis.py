@@ -10,42 +10,48 @@ import time
 # Function to load and preprocess data
 def load_data(file_path, household, start_date, timescale, chunk_size=10000):
     start_time = time.time()
-    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d") # Convert start_date to datetime object
-    end_date_obj = calculate_end_date(start_date, timescale) # Calculate end_date
+    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date_obj = calculate_end_date(start_date, timescale)
     
-    filtered_chunks = [] # List to store filtered chunks
-    for chunk in pd.read_csv(file_path, chunksize=chunk_size): # Read data in chunks
-        chunk = chunk[chunk["LCLid"] == household] # Filter data for the specified household
-        chunk['datetime'] = pd.to_datetime(chunk['tstp'].str.replace('.0000000', '')) # Convert 'tstp' to datetime object
-        chunk = chunk[(chunk['datetime'] >= start_date_obj) & (chunk['datetime'] < end_date_obj)] # Filter data for the specified date range
+    filtered_chunks = []
+    chunks_with_data = 0
+    total_chunks = 0
+    
+    for chunk in pd.read_csv(file_path, chunksize=chunk_size):
+        total_chunks += 1
+        chunk = chunk[chunk["LCLid"] == household]
+        chunk['datetime'] = pd.to_datetime(chunk['tstp'].str.replace('.0000000', ''))
+        chunk = chunk[(chunk['datetime'] >= start_date_obj) & (chunk['datetime'] < end_date_obj)]
         
-        if not chunk.empty: # Check if the chunk is not empty
-            chunk['date'] = chunk['datetime'].dt.date # Extract date from datetime
-            chunk['month'] = chunk['datetime'].dt.strftime("%B") # Extract month from datetime
-            chunk['day_of_month'] = chunk['datetime'].dt.strftime("%d") # Extract day of month from datetime
-            chunk['time'] = chunk['datetime'].dt.strftime('%X') # Extract time from datetime
-            chunk['weekday'] = chunk['datetime'].dt.strftime('%A') # Extract weekday from datetime
-            chunk['day_seconds'] = (chunk['datetime'] - chunk['datetime'].dt.normalize()).dt.total_seconds() # Extract seconds from midnight
+        if not chunk.empty:
+            chunks_with_data += 1
+            chunk['date'] = chunk['datetime'].dt.date
+            chunk['month'] = chunk['datetime'].dt.strftime("%B")
+            chunk['day_of_month'] = chunk['datetime'].dt.strftime("%d")
+            chunk['time'] = chunk['datetime'].dt.strftime('%X')
+            chunk['weekday'] = chunk['datetime'].dt.strftime('%A')
+            chunk['day_seconds'] = (chunk['datetime'] - chunk['datetime'].dt.normalize()).dt.total_seconds()
 
-            chunk['weekday'] = pd.Categorical(chunk['weekday'], categories=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], ordered=True) # Set weekday categories
-            chunk['month'] = pd.Categorical(chunk['month'], categories=calendar.month_name[1:], ordered=True) # Set month categories
+            chunk['weekday'] = pd.Categorical(chunk['weekday'], categories=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], ordered=True)
+            chunk['month'] = pd.Categorical(chunk['month'], categories=calendar.month_name[1:], ordered=True)
 
-            chunk = chunk[chunk["energy(kWh/hh)"] != "Null"] # Remove rows with Null values
-            chunk["energy"] = chunk["energy(kWh/hh)"].astype("float64") # Convert energy to float
-            chunk["cumulative_sum"] = chunk.groupby('date')["energy"].cumsum() # Calculate cumulative sum for each date
+            chunk = chunk[chunk["energy(kWh/hh)"] != "Null"]
+            chunk["energy"] = chunk["energy(kWh/hh)"].astype("float64")
+            chunk["cumulative_sum"] = chunk.groupby('date')["energy"].cumsum()
             
-            filtered_chunks.append(chunk) # Append filtered chunk to the list
+            filtered_chunks.append(chunk)
         else:
-            logging.info(f"No data found in chunk for household {household} and date range {start_date} to {end_date_obj}")
+            logging.debug(f"No data found in chunk {total_chunks} for household {household} and date range {start_date} to {end_date_obj}")
 
-    if not filtered_chunks:
+    if chunks_with_data > 0:
+        logging.info(f"Data found in {chunks_with_data} out of {total_chunks} chunks for household {household}")
+        df = pd.concat(filtered_chunks)
+        df.set_index("datetime", inplace=True)
+        logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds. Total rows: {len(df)}")
+        return df
+    else:
         logging.error(f"No data loaded for household {household} and date range {start_date} to {end_date_obj}")
-        return pd.DataFrame() # Return an empty DataFrame if no data is loaded
-
-    df = pd.concat(filtered_chunks) # Concatenate filtered chunks
-    df.set_index("datetime", inplace=True) # Set datetime as index
-    logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
-    return df # Return the dataframe
+        return pd.DataFrame()
 
 def calculate_end_date(start_date, timescale): # Function to calculate end date based on timescale
     start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
