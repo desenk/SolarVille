@@ -131,9 +131,12 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge, peer_ip
     )
 
     # Send updates to Flask server
-    make_api_call(f'http://{peer_ip}:5000/update_demand', {'demand': demand})
-    make_api_call(f'http://{peer_ip}:5000/update_generation', {'generation': current_data['generation'].sum()})
-    make_api_call(f'http://{peer_ip}:5000/update_balance', {'amount': df['balance'].sum()})
+    update_demand = make_api_call(f'http://{peer_ip}:5000/update_demand', {'demand': demand})
+    update_generation = make_api_call(f'http://{peer_ip}:5000/update_generation', {'generation': current_data['generation'].sum()})
+    update_balance = make_api_call(f'http://{peer_ip}:5000/update_balance', {'amount': df['balance'].sum()})
+
+    if update_demand is None or update_generation is None or update_balance is None:
+        logging.error(f"Failed to update peer {peer_ip} with latest data")
 
     return df, battery_charge
 
@@ -144,7 +147,9 @@ def sync_state(df, peer_ip):
         'demand': df['demand'].sum(),
         'generation': df['generation'].sum()
     }
-    make_api_call(f'http://{peer_ip}:5000/sync', state)
+    response = make_api_call(f'http://{peer_ip}:5000/sync', state)
+    if response is None:
+        logging.error(f"Failed to sync state with peer {peer_ip}")
 
 @app.route('/update_balance', methods=['POST'])
 def update_balance():
@@ -174,12 +179,17 @@ def sync():
     energy_data.update(data)
     return jsonify(energy_data)
 
-def make_api_call(url, data):
-    try:
-        response = requests.post(url, json=data, timeout=5)
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        logging.error(f"API call failed: {e}")
+def make_api_call(url, data, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(url, json=data, timeout=5)
+            response.raise_for_status()
+            return response
+        except requests.exceptions.RequestException as e:
+            logging.error(f"API call failed (attempt {attempt + 1}/{max_retries}): {e}")
+            if attempt == max_retries - 1:
+                logging.error(f"Max retries reached for {url}")
+    return None
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Smart Grid Simulation')
