@@ -1,9 +1,8 @@
 from flask import Flask, request, jsonify
-import requests
 import logging
+import time
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
 
 app = Flask(__name__)
 
@@ -14,6 +13,34 @@ energy_data = {
     "demand": 0,
     "generation": 0
 }
+
+simulation_start_time = None
+
+@app.route('/sync_start', methods=['POST'])
+def sync_start():
+    global simulation_start_time
+    data = request.json
+    if 'start_time' in data:
+        simulation_start_time = data['start_time']
+        return jsonify({"status": "success", "start_time": simulation_start_time})
+    else:
+        return jsonify({"status": "error", "message": "No start time provided"}), 400
+
+@app.route('/get_start_time', methods=['GET'])
+def get_start_time():
+    global simulation_start_time
+    if simulation_start_time:
+        return jsonify({"start_time": simulation_start_time})
+    else:
+        return jsonify({"status": "error", "message": "Start time not set"}), 404
+
+@app.route('/start', methods=['POST'])
+def start():
+    return jsonify({"status": "Simulation already running"})
+
+@app.route('/start_simulation', methods=['POST'])
+def start_simulation():
+    return jsonify({"status": "Simulation already running"})
 
 @app.route('/update_balance', methods=['POST'])
 def update_balance():
@@ -60,19 +87,6 @@ def get_data():
         logging.error(f"Error getting data: {e}")
         return jsonify({"error": str(e)}), 400
 
-@app.route('/start_simulation', methods=['POST'])
-def start_simulation():
-    try:
-        peers = request.json.get('peers', [])
-        for peer in peers:
-            response = requests.post(f'http://{peer}:5000/start')
-            if response.status_code != 200:
-                logging.error(f"Failed to start simulation on peer {peer}")
-        return jsonify({"status": "Simulation started on all peers"})
-    except Exception as e:
-        logging.error(f"Error starting simulation: {e}")
-        return jsonify({"error": str(e)}), 400
-
 @app.route('/sync', methods=['POST'])
 def sync():
     global energy_data
@@ -85,5 +99,5 @@ def sync():
         logging.error(f"Error syncing data: {e}")
         return jsonify({"error": str(e)}), 400
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)

@@ -19,10 +19,31 @@ else:  # Raspberry Pi
 from dataAnalysis import load_data, calculate_end_date, simulate_generation, update_plot_separate, update_plot_same
 from trading import execute_trades, calculate_price
 
+peer_ip = '192.168.233.24' # IP address of Pi #2
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+def synchronize_start(peer_ip):
+    current_time = time.time()
+    start_time = current_time + 10  # Start 10 seconds from now
+    
+    # Set start time on this Pi
+    response = requests.post(f'http://localhost:5000/sync_start', json={"start_time": start_time})
+    
+    # Set start time on peer Pi
+    peer_response = requests.post(f'http://{peer_ip}:5000/sync_start', json={"start_time": start_time})
+    
+    if response.status_code == 200 and peer_response.status_code == 200:
+        logging.info(f"Simulation will start at {time.ctime(start_time)}")
+        wait_time = start_time - time.time()
+        if wait_time > 0:
+            time.sleep(wait_time)
+    else:
+        logging.error("Failed to synchronize start times")
+
 def start_simulation_local():
+    synchronize_start(peer_ip)
     logging.info("Loading data, please wait...")
     start_time = time.time()
     df = load_data(args.file_path, args.household, args.start_date, args.timescale)
@@ -46,8 +67,6 @@ def start_simulation_local():
     df['currency'] = 100.0  # Initialize the currency column to 100
     df['battery_charge'] = 0.5  # Assume 50% initial charge
     logging.info("Dataframe for balance, currency and battery charge is created.")
-    
-    peer_ip = '192.168.233.24' # IP address of Pi #2
     
     try:
         while True:
@@ -155,5 +174,13 @@ if __name__ == "__main__":
     initialize_simulation()
 
     from server import app
-    threading.Thread(target=start_simulation_local).start()
-    app.run(host='0.0.0.0', port=5000)
+    server_thread = threading.Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 5000})
+    server_thread.start()
+    
+    time.sleep(2)  # Give the server a moment to start
+    
+    simulation_thread = threading.Thread(target=start_simulation_local)
+    simulation_thread.start()
+    
+    simulation_thread.join()
+    server_thread.join()
