@@ -43,6 +43,7 @@ def synchronize_start(peer_ip):
         logging.error("Failed to synchronize start times")
 
 def start_simulation_local():
+    peer_ip = '192.168.233.200' if platform.node() == 'raspberrypi' else '192.168.233.24'
     synchronize_start(peer_ip)
     logging.info("Loading data, please wait...")
     start_time = time.time()
@@ -171,6 +172,9 @@ if __name__ == "__main__":
     parser.add_argument('--separate', action='store_true', help='Flag to plot data in separate subplots')
 
     args = parser.parse_args()  # Parse the arguments
+    initialize_simulation()
+
+    args = parser.parse_args()
     initialize_simulation()
 
     from server import app
