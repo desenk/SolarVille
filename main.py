@@ -43,7 +43,7 @@ def synchronize_start(peer_ip):
         logging.error("Failed to synchronize start times")
 
 def start_simulation_local():
-    peer_ip = '192.168.233.200' if platform.node() == 'raspberrypi' else '192.168.233.24'
+    peer_ip = '192.168.233.63' if platform.node() == 'raspberrypi' else '192.168.233.200'
     synchronize_start(peer_ip)
     logging.info("Loading data, please wait...")
     start_time = time.time()
