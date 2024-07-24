@@ -30,6 +30,12 @@ def start_simulation_local():
         logging.error('Failed to start simulation')
         return
         
+    # Wait for the simulation to start
+    response = requests.get('http://localhost:5000/wait_for_start')
+    if response.status_code != 200:
+        logging.error('Failed to start simulation')
+        return
+    
     start_time = time.time()
 
     df = load_data(args.file_path, args.household, args.start_date, args.timescale)
@@ -99,21 +105,21 @@ def synchronize_start(peer_ip):
             logging.info(f"Waiting for {wait_time:.2f} seconds before starting simulation")
             time.sleep(wait_time)
         
-        # Send start signal to both Pis
-        start_response = requests.post(f'http://{peer_ip}:5000/start', json={'peers': [peer_ip]})
-        local_start_response = requests.post('http://localhost:5000/start', json={'peers': [peer_ip]})
+        # Send ready signal to both Pis
+        ready_response = requests.post(f'http://{peer_ip}:5000/ready')
+        local_ready_response = requests.post('http://localhost:5000/ready')
         
-        logging.info(f"Start responses - Peer: {start_response.json()}, Local: {local_start_response.json()}")
-        
-        if start_response.json()['status'] == 'Simulation started' and local_start_response.json()['status'] == 'Simulation started':
-            logging.info("Starting simulation now")
-            return True
-        else:
-            logging.error("Failed to start simulation")
-            return False
-    else:
-        logging.error("Failed to synchronize start times")
-        return False
+        if ready_response.status_code == 200 and local_ready_response.status_code == 200:
+            # Send start signal to both Pis
+            start_response = requests.post(f'http://{peer_ip}:5000/start', json={'peers': [peer_ip]})
+            local_start_response = requests.post('http://localhost:5000/start', json={'peers': [peer_ip]})
+            
+            if start_response.json()['status'] == 'Simulation started' and local_start_response.json()['status'] == 'Simulation started':
+                logging.info("Starting simulation now")
+                return True
+    
+    logging.error("Failed to start simulation")
+    return False
 
 def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event):
     if separate:

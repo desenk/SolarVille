@@ -32,7 +32,10 @@ def start():
     data = request.json
     peers = data.get('peers', [])
 
+    timeout = time.time() + 30  # 30 second timeout
     while not all(peer_ready.get(peer, False) for peer in peers):
+        if time.time() > timeout:
+            return jsonify({"status": "Timeout waiting for peers"}), 408
         time.sleep(0.1)
     simulation_started.set()
     return jsonify({"status": "Simulation started"})
@@ -74,6 +77,13 @@ def update_peer_data():
 @app.route('/get_peer_data', methods=['GET'])
 def get_peer_data():
     return jsonify(peer_data)
+
+@app.route('/wait_for_start', methods=['GET'])
+def wait_for_start():
+    if simulation_started.wait(timeout=30):  # Wait up to 30 seconds
+        return jsonify({"status": "Simulation started"})
+    else:
+        return jsonify({"status": "Timeout waiting for simulation to start"}), 408
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
