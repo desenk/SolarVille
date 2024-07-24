@@ -90,33 +90,45 @@ def synchronize_start(peer_ip):
     current_time = time.time()
     start_time = current_time + 10  # Start 10 seconds from now
     
-    # Set start time on this Pi
-    response = requests.post('http://localhost:5000/sync_start', json={"start_time": start_time})
-    
-    # Set start time on peer Pi
-    peer_response = requests.post(f'http://{peer_ip}:5000/sync_start', json={"start_time": start_time})
-    
-    if response.status_code == 200 and peer_response.status_code == 200:
-        logging.info(f"Simulation will start at {time.ctime(start_time)}")
+    try:
+        # Set start time on this Pi
+        response = requests.post('http://localhost:5000/sync_start', json={"start_time": start_time})
         
-        # Wait until it's time to start
-        wait_time = start_time - time.time()
-        if wait_time > 0:
-            logging.info(f"Waiting for {wait_time:.2f} seconds before starting simulation")
-            time.sleep(wait_time)
+        # Set start time on peer Pi
+        peer_response = requests.post(f'http://{peer_ip}:5000/sync_start', json={"start_time": start_time})
         
-        # Send ready signal to both Pis
-        ready_response = requests.post(f'http://{peer_ip}:5000/ready')
-        local_ready_response = requests.post('http://localhost:5000/ready')
-        
-        if ready_response.status_code == 200 and local_ready_response.status_code == 200:
-            # Send start signal to both Pis
-            start_response = requests.post(f'http://{peer_ip}:5000/start', json={'peers': [peer_ip]})
-            local_start_response = requests.post('http://localhost:5000/start', json={'peers': [peer_ip]})
+        if response.status_code == 200 and peer_response.status_code == 200:
+            logging.info(f"Simulation will start at {time.ctime(start_time)}")
             
-            if start_response.json()['status'] == 'Simulation started' and local_start_response.json()['status'] == 'Simulation started':
-                logging.info("Starting simulation now")
-                return True
+            # Wait until it's time to start
+            wait_time = start_time - time.time()
+            if wait_time > 0:
+                logging.info(f"Waiting for {wait_time:.2f} seconds before starting simulation")
+                time.sleep(wait_time)
+            
+            # Send ready signal to both Pis
+            ready_response = requests.post(f'http://{peer_ip}:5000/ready')
+            local_ready_response = requests.post('http://localhost:5000/ready')
+            
+            if ready_response.status_code == 200 and local_ready_response.status_code == 200:
+                # Send start signal to both Pis
+                start_response = requests.post(f'http://{peer_ip}:5000/start', json={'peers': [peer_ip]})
+                local_start_response = requests.post('http://localhost:5000/start', json={'peers': [peer_ip]})
+                
+                if start_response.status_code == 200 and local_start_response.status_code == 200:
+                    if start_response.json()['status'] == 'Simulation started' and local_start_response.json()['status'] == 'Simulation started':
+                        logging.info("Starting simulation now")
+                        return True
+                    else:
+                        logging.error(f"Unexpected response: Peer - {start_response.json()}, Local - {local_start_response.json()}")
+                else:
+                    logging.error(f"Start request failed: Peer status - {start_response.status_code}, Local status - {local_start_response.status_code}")
+            else:
+                logging.error(f"Ready request failed: Peer status - {ready_response.status_code}, Local status - {local_ready_response.status_code}")
+        else:
+            logging.error(f"Sync start request failed: Peer status - {peer_response.status_code}, Local status - {response.status_code}")
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Network error during synchronization: {e}")
     
     logging.error("Failed to start simulation")
     return False

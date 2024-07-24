@@ -2,6 +2,7 @@ import time
 import board
 import busio 
 from adafruit_ina219 import INA219
+import logging
 
 # Mock flag
 MOCK_ADC = True

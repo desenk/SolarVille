@@ -32,7 +32,7 @@ def start():
     data = request.json
     peers = data.get('peers', [])
 
-    timeout = time.time() + 30  # 30 second timeout
+    timeout = time.time() + 60  # 30 second timeout
     while not all(peer_ready.get(peer, False) for peer in peers):
         if time.time() > timeout:
             return jsonify({"status": "Timeout waiting for peers"}), 408
