@@ -7,6 +7,11 @@ import logging
 import platform
 import requests
 from flask import request
+from trading import calculate_price
+from dataAnalysis import load_data, calculate_end_date, simulate_generation, update_plot_separate, update_plot_same
+
+max_battery_charge = 1.0
+min_battery_charge = 0.0
 
 # Conditionally import the correct modules based on the platform
 if platform.system() == 'Darwin':  # MacOS
@@ -16,37 +21,17 @@ else:  # Raspberry Pi
     from batteryControl import update_battery_charge, read_battery_charge
     from lcdControlTest import display_message
 
-from dataAnalysis import load_data, calculate_end_date, simulate_generation, update_plot_separate, update_plot_same
-from trading import execute_trades, calculate_price
-
-peer_ip = '192.168.233.24' # IP address of Pi #2
-
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def synchronize_start(peer_ip):
-    current_time = time.time()
-    start_time = current_time + 10  # Start 10 seconds from now
-    
-    # Set start time on this Pi
-    response = requests.post(f'http://localhost:5000/sync_start', json={"start_time": start_time})
-    
-    # Set start time on peer Pi
-    peer_response = requests.post(f'http://{peer_ip}:5000/sync_start', json={"start_time": start_time})
-    
-    if response.status_code == 200 and peer_response.status_code == 200:
-        logging.info(f"Simulation will start at {time.ctime(start_time)}")
-        wait_time = start_time - time.time()
-        if wait_time > 0:
-            time.sleep(wait_time)
-    else:
-        logging.error("Failed to synchronize start times")
-
 def start_simulation_local():
-    peer_ip = '192.168.233.63' if platform.node() == 'raspberrypi' else '192.168.233.200'
-    synchronize_start(peer_ip)
-    logging.info("Loading data, please wait...")
+    peer_ip = '192.168.233.24'  # IP address of Pi #2
+    if not synchronize_start(peer_ip):
+        logging.error('Failed to start simulation')
+        return
+
     start_time = time.time()
+
     df = load_data(args.file_path, args.household, args.start_date, args.timescale)
     if df.empty:
         logging.error("No data loaded. Exiting simulation.")
@@ -70,31 +55,60 @@ def start_simulation_local():
     logging.info("Dataframe for balance, currency and battery charge is created.")
     
     try:
-        while True:
-            timestamp = queue.get()
-            if timestamp == "done":
-                break
-
-            current_data = df[df.index == timestamp]
+        for timestamp in df.index:
+            current_time = time.time()
+            elapsed_time = current_time - start_time
+            
+            # Calculate the expected elapsed time based on the simulation speed
+            expected_elapsed_time = (timestamp - df.index[0]).total_seconds() * (6 / 3600)  # 6 seconds per hour
+            
+            # If we're ahead of schedule, wait
+            if elapsed_time < expected_elapsed_time:
+                time.sleep(expected_elapsed_time - elapsed_time)
+            
+            current_data = df.loc[timestamp]
             
             if not current_data.empty:
-                start_update_time = time.time()
-                trading_thread = threading.Thread(target=process_trading_and_lcd, args=(df, timestamp, current_data, current_data['battery_charge'].iloc[0], peer_ip))
-                trading_thread.start()
-                trading_thread.join()
-
-                logging.info(f"Update completed in {time.time() - start_update_time:.2f} seconds")
+                df = process_trading_and_lcd(df, timestamp, current_data, current_data['battery_charge'], peer_ip)
                 
-                # Periodically sync state
-                if timestamp.second % 6 == 0:  # Example: sync every 5 minutes
-                    logging.info(f"Syncing state with peer {peer_ip}")
-                    sync_state(df, peer_ip)
-                    logging.info(f"State synced with peer {peer_ip}")
+                # Update the plot
+                queue.put(timestamp)
 
     except KeyboardInterrupt:
         logging.info("Simulation interrupted.")
     finally:
+        queue.put("done")
         plot_process.join()
+
+def synchronize_start(peer_ip):
+    current_time = time.time()
+    start_time = current_time + 10  # Start 10 seconds from now
+    
+    # Set start time on this Pi
+    response = requests.post('http://localhost:5000/sync_start', json={"start_time": start_time})
+    
+    # Set start time on peer Pi
+    peer_response = requests.post(f'http://{peer_ip}:5000/sync_start', json={"start_time": start_time})
+    
+    if response.status_code == 200 and peer_response.status_code == 200:
+        logging.info(f"Simulation will start at {time.ctime(start_time)}")
+        
+        # Send start signal to both Pis
+        start_response = requests.post(f'http://{peer_ip}:5000/start', json={'peers': [peer_ip]})
+        local_start_response = requests.post('http://localhost:5000/start', json={'peers': [peer_ip]})
+        
+        if start_response.json()['status'] == 'Simulation started' and local_start_response.json()['status'] == 'Simulation started':
+            wait_time = start_time - time.time()
+            if wait_time > 0:
+                time.sleep(wait_time)
+        else:
+            logging.error("Failed to start simulation")
+            return False
+    else:
+        logging.error("Failed to synchronize start times")
+        return False
+    
+    return True
 
 def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event):
     if separate:
@@ -103,41 +117,63 @@ def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event)
         update_plot_same(df, start_date, end_date, timescale, queue, ready_event)
 
 def process_trading_and_lcd(df, timestamp, current_data, battery_charge, peer_ip):
-    demand = current_data['energy'].sum()
-    df.loc[df.index == timestamp, 'demand'] = demand
-    battery_charge = update_battery_charge(current_data['generation'].sum(), demand)
-    df.loc[df.index == timestamp, 'battery_charge'] = battery_charge
+    demand = current_data['energy']
+    generation = current_data['generation']
+    balance = generation - demand
+    df.loc[timestamp, 'demand'] = demand
+    df.loc[timestamp, 'generation'] = generation
+    df.loc[timestamp, 'balance'] = balance
+    
+    battery_charge = update_battery_charge(generation, demand)
+    df.loc[timestamp, 'battery_charge'] = battery_charge
 
-    df, price = execute_trades(df, timestamp)
-    display_message(f"Gen: {current_data['generation'].sum():.2f}W\nDem: {demand:.2f}W\nBat: {battery_charge * 100:.2f}%")
+    # Send updates to Flask server
+    update_data = {
+        'demand': demand,
+        'generation': generation,
+        'balance': balance,
+        'battery_charge': battery_charge
+    }
+    make_api_call(f'http://{peer_ip}:5000/update_peer_data', update_data)
+
+    # Get peer data for trading
+    peer_data_response = requests.get(f'http://{peer_ip}:5000/get_peer_data')
+    if peer_data_response.status_code == 200:
+        peer_data = peer_data_response.json()
+        
+        # Get peer balance
+        peer_balance = peer_data[peer_ip]['balance']
+        
+        # Perform trading
+        if balance > 0 and peer_balance < 0:
+            # This household has excess energy to sell
+            trade_amount = min(balance, abs(peer_balance))
+            price = calculate_price(balance, abs(peer_balance))
+            df.loc[timestamp, 'balance'] -= trade_amount
+            df.loc[timestamp, 'currency'] += trade_amount * price
+            logging.info(f"Sold {trade_amount:.2f} kWh at {price:.2f} $/kWh")
+        elif balance < 0 and peer_balance > 0:
+            # This household needs to buy energy
+            trade_amount = min(abs(balance), peer_balance)
+            price = calculate_price(peer_balance, abs(balance))
+            df.loc[timestamp, 'balance'] += trade_amount
+            df.loc[timestamp, 'currency'] -= trade_amount * price
+            logging.info(f"Bought {trade_amount:.2f} kWh at {price:.2f} $/kWh")
+    else:
+        logging.error("Failed to get peer data for trading")
+
+    # Update LCD display
+    display_message(f"Gen: {generation:.2f}W\nDem: {demand:.2f}W\nBat: {battery_charge * 100:.2f}%")
     
     logging.info(
-        f"At {timestamp} - Generation: {current_data['generation'].sum():.2f}W, "
+        f"At {timestamp} - Generation: {generation:.2f}W, "
         f"Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%, "
-        f"Price: {price:.2f}, Updated Balance: {df['balance'].sum():.2f}, "
+        f"Balance: {df.loc[timestamp, 'balance']:.2f}, "
+        f"Currency: {df.loc[timestamp, 'currency']:.2f}, "
         f"LCD updated"
     )
 
-    # Send updates to Flask server
-    update_demand = make_api_call(f'http://{peer_ip}:5000/update_demand', {'demand': demand})
-    update_generation = make_api_call(f'http://{peer_ip}:5000/update_generation', {'generation': current_data['generation'].sum()})
-    update_balance = make_api_call(f'http://{peer_ip}:5000/update_balance', {'amount': df['balance'].sum()})
-
-    if update_demand is None or update_generation is None or update_balance is None:
-        logging.error(f"Failed to update peer {peer_ip} with latest data")
-
-    return df, battery_charge
-
-def sync_state(df, peer_ip):
-    state = {
-        'balance': df['balance'].sum(),
-        'currency': df['currency'].sum(),
-        'demand': df['demand'].sum(),
-        'generation': df['generation'].sum()
-    }
-    response = make_api_call(f'http://{peer_ip}:5000/sync', state)
-    if response is None:
-        logging.error(f"Failed to sync state with peer {peer_ip}")
+    return df
 
 def make_api_call(url, data, max_retries=3):
     for attempt in range(max_retries):

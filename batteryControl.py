@@ -1,7 +1,7 @@
 import time
-import board  # type: ignore
-import busio  # type: ignore
-from adafruit_ina219 import INA219  # type: ignore
+import board
+import busio 
+from adafruit_ina219 import INA219
 
 # Mock flag
 MOCK_ADC = True
@@ -42,20 +42,22 @@ def read_battery_charge():
     power = bus_voltage * current
     return power
 
-def update_battery_charge(power_generated, power_demand):
-    global battery_charge
-    if power_generated > power_demand:
-        surplus_power = power_generated - power_demand
+def update_battery_charge(generation, demand):
+    global battery_charge, max_battery_charge, min_battery_charge
+    
+    if generation > demand:
+        surplus_power = generation - demand
         battery_charge += surplus_power / max_battery_charge
         if battery_charge > max_battery_charge:
             battery_charge = max_battery_charge
-            # Add code to send excess power to the grid at half price
-    elif power_generated < power_demand:
-        deficit_power = power_demand - power_generated
+            # Note: Excess power handling should be done in the trading function
+    elif generation < demand:
+        deficit_power = demand - generation
         battery_charge -= deficit_power / max_battery_charge
         if battery_charge < min_battery_charge:
             battery_charge = min_battery_charge
-    print(f"Updated battery charge: {battery_charge * 100:.2f}%")  # Debug print
+    
+    logging.info(f"Updated battery charge: {battery_charge * 100:.2f}%")
     return battery_charge
 
 if __name__ == "__main__":
