@@ -164,24 +164,26 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge, peer_ip
     if peer_data_response.status_code == 200:
         peer_data = peer_data_response.json()
         
-        # Get peer balance
-        peer_balance = peer_data[peer_ip]['balance']
-        
-        # Perform trading
-        if balance > 0 and peer_balance < 0:
-            # This household has excess energy to sell
-            trade_amount = min(balance, abs(peer_balance))
-            price = calculate_price(balance, abs(peer_balance))
-            df.loc[timestamp, 'balance'] -= trade_amount
-            df.loc[timestamp, 'currency'] += trade_amount * price
-            logging.info(f"Sold {trade_amount:.2f} kWh at {price:.2f} $/kWh")
-        elif balance < 0 and peer_balance > 0:
-            # This household needs to buy energy
-            trade_amount = min(abs(balance), peer_balance)
-            price = calculate_price(peer_balance, abs(balance))
-            df.loc[timestamp, 'balance'] += trade_amount
-            df.loc[timestamp, 'currency'] -= trade_amount * price
-            logging.info(f"Bought {trade_amount:.2f} kWh at {price:.2f} $/kWh")
+        # Get peer balance with error checking
+        peer_balance = peer_data.get(peer_ip, {}).get('balance')
+        if peer_balance is None:
+            logging.warning(f"No balance data available for peer {peer_ip}")
+        else:
+            # Perform trading
+            if balance > 0 and peer_balance < 0:
+                # This household has excess energy to sell
+                trade_amount = min(balance, abs(peer_balance))
+                price = calculate_price(balance, abs(peer_balance))
+                df.loc[timestamp, 'balance'] -= trade_amount
+                df.loc[timestamp, 'currency'] += trade_amount * price
+                logging.info(f"Sold {trade_amount:.2f} kWh at {price:.2f} $/kWh")
+            elif balance < 0 and peer_balance > 0:
+                # This household needs to buy energy
+                trade_amount = min(abs(balance), peer_balance)
+                price = calculate_price(peer_balance, abs(balance))
+                df.loc[timestamp, 'balance'] += trade_amount
+                df.loc[timestamp, 'currency'] -= trade_amount * price
+                logging.info(f"Bought {trade_amount:.2f} kWh at {price:.2f} $/kWh")
     else:
         logging.error("Failed to get peer data for trading")
 

@@ -23,16 +23,24 @@ energy_data = {
 @app.route('/ready', methods=['POST'])
 def ready():
     peer_ip = request.remote_addr
-    peer_ready[peer_ip] = True
-    return jsonify({"status": "ready"})
+    if peer_ip in peers:
+        peer_ready[peer_ip] = True
+        return jsonify({"status": "ready"})
+    else:
+        return jsonify({"status": "peer not recognized"}), 400
 
 @app.route('/start', methods=['POST'])
 def start():
-    global peers
+    global peers, peer_ready
     data = request.json
     peers = data.get('peers', [])
+    
+    # Initialize peer_ready dictionary
+    for peer in peers:
+        if peer not in peer_ready:
+            peer_ready[peer] = False
 
-    timeout = time.time() + 60  # 30 second timeout
+    timeout = time.time() + 30  # 30 second timeout
     while not all(peer_ready.get(peer, False) for peer in peers):
         if time.time() > timeout:
             return jsonify({"status": "Timeout waiting for peers"}), 408
