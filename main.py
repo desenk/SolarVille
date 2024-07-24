@@ -30,6 +30,8 @@ def start_simulation_local():
         logging.error('Failed to start simulation')
         return
 
+    requests.get('http://localhost:5000/wait_for_start')
+        
     start_time = time.time()
 
     df = load_data(args.file_path, args.household, args.start_date, args.timescale)
@@ -97,18 +99,21 @@ def synchronize_start(peer_ip):
         start_response = requests.post(f'http://{peer_ip}:5000/start', json={'peers': [peer_ip]})
         local_start_response = requests.post('http://localhost:5000/start', json={'peers': [peer_ip]})
         
+        logging.info(f"Start responses - Peer: {start_response.json()}, Local: {local_start_response.json()}")
+        
         if start_response.json()['status'] == 'Simulation started' and local_start_response.json()['status'] == 'Simulation started':
             wait_time = start_time - time.time()
             if wait_time > 0:
+                logging.info(f"Waiting for {wait_time:.2f} seconds before starting simulation")
                 time.sleep(wait_time)
+            logging.info("Starting simulation now")
+            return True
         else:
             logging.error("Failed to start simulation")
             return False
     else:
         logging.error("Failed to synchronize start times")
         return False
-    
-    return True
 
 def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event):
     if separate:
@@ -208,9 +213,6 @@ if __name__ == "__main__":
     parser.add_argument('--separate', action='store_true', help='Flag to plot data in separate subplots')
 
     args = parser.parse_args()  # Parse the arguments
-    initialize_simulation()
-
-    args = parser.parse_args()
     initialize_simulation()
 
     from server import app
