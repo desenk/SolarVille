@@ -91,11 +91,14 @@ def synchronize_start(peer_ip):
     start_time = current_time + 10  # Start 10 seconds from now
     
     try:
+        local_ip = requests.get('https://api.ipify.org').text  # Get local IP
+        peers = [local_ip, peer_ip]  # List of both IPs
+        
         # Set start time on this Pi
-        response = requests.post('http://localhost:5000/sync_start', json={"start_time": start_time})
+        response = requests.post('http://localhost:5000/sync_start', json={"start_time": start_time, "peers": peers})
         
         # Set start time on peer Pi
-        peer_response = requests.post(f'http://{peer_ip}:5000/sync_start', json={"start_time": start_time})
+        peer_response = requests.post(f'http://{peer_ip}:5000/sync_start', json={"start_time": start_time, "peers": peers})
         
         if response.status_code == 200 and peer_response.status_code == 200:
             logging.info(f"Simulation will start at {time.ctime(start_time)}")
@@ -112,8 +115,8 @@ def synchronize_start(peer_ip):
             
             if ready_response.status_code == 200 and local_ready_response.status_code == 200:
                 # Send start signal to both Pis
-                start_response = requests.post(f'http://{peer_ip}:5000/start', json={'peers': [peer_ip]})
-                local_start_response = requests.post('http://localhost:5000/start', json={'peers': [peer_ip]})
+                start_response = requests.post(f'http://{peer_ip}:5000/start', json={'peers': peers})
+                local_start_response = requests.post('http://localhost:5000/start', json={'peers': peers})
                 
                 if start_response.status_code == 200 and local_start_response.status_code == 200:
                     if start_response.json()['status'] == 'Simulation started' and local_start_response.json()['status'] == 'Simulation started':

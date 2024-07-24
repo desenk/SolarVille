@@ -33,14 +33,14 @@ def ready():
 def start():
     global peers, peer_ready
     data = request.json
-    peers = data.get('peers', [])
+    peers = data.get('peers', peers)  # Use existing peers if not provided
     
     # Initialize peer_ready dictionary
     for peer in peers:
         if peer not in peer_ready:
             peer_ready[peer] = False
 
-    timeout = time.time() + 30  # 30 second timeout
+    timeout = time.time() + 60  # 60 second timeout
     while not all(peer_ready.get(peer, False) for peer in peers):
         if time.time() > timeout:
             return jsonify({"status": "Timeout waiting for peers"}), 408
@@ -52,13 +52,14 @@ start_time = None
 
 @app.route('/sync_start', methods=['POST'])
 def sync_start():
-    global start_time
+    global start_time, peers
     data = request.json
     start_time = data.get('start_time')
-    if start_time:
-        return jsonify({"status": "start time set", "start_time": start_time})
+    peers = data.get('peers', [])
+    if start_time and peers:
+        return jsonify({"status": "start time and peers set", "start_time": start_time, "peers": peers})
     else:
-        return jsonify({"error": "Invalid start time"}), 400
+        return jsonify({"error": "Invalid start time or peers"}), 400
 
 @app.route('/start_simulation', methods=['POST'])
 def start_simulation():
