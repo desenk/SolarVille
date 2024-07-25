@@ -9,10 +9,14 @@ import digitalio
 i2c = busio.I2C(board.SCL, board.SDA)
 ina219 = adafruit_ina219.INA219(i2c)
 
-# Adjust for very low power measurements
-ina219.set_calibration_16V_400mA()
+# Adjust for higher voltage and current range
+ina219.set_calibration_32V_1A()
 
-# LCD setup
+# Increase ADC resolution for more accurate readings
+ina219.bus_adc_resolution = adafruit_ina219.ADCResolution.ADCRES_12BIT_32S
+ina219.shunt_adc_resolution = adafruit_ina219.ADCResolution.ADCRES_12BIT_32S
+
+# LCD setup (unchanged)
 lcd_columns = 16
 lcd_rows = 2
 
@@ -28,37 +32,32 @@ lcd = characterlcd.Character_LCD_Mono(
 )
 
 def read_solar_panel():
-    bus_voltage = ina219.bus_voltage  # voltage on V- (load side)
-    shunt_voltage = ina219.shunt_voltage  # voltage between V+ and V- across the shunt
-    current = ina219.current  # current in mA
+    bus_voltage = ina219.bus_voltage
+    shunt_voltage = ina219.shunt_voltage
+    current = ina219.current
+    power = ina219.power
     
-    # Calculate power manually
-    power = bus_voltage * (current / 1000)  # V * A = W
-    power_mw = power * 1000  # Convert W to mW
-    
-    return bus_voltage, shunt_voltage, current, power_mw
+    return bus_voltage, shunt_voltage, current, power
 
-def display_readings(bus_voltage, current, power_mw):
+def display_readings(bus_voltage, current, power):
     lcd.clear()
-    # First row: Voltage and Current
     lcd.message = f"V:{bus_voltage:.2f}V I:{current:.2f}mA\n"
-    # Second row: Power in mW
-    lcd.message += f"P:{power_mw:.3f}mW"
+    lcd.message += f"P:{power:.3f}mW"
 
-def print_readings(bus_voltage, shunt_voltage, current, power_mw):
+def print_readings(bus_voltage, shunt_voltage, current, power):
     print(f"Bus Voltage:    {bus_voltage:.3f} V")
     print(f"Shunt Voltage:  {shunt_voltage:.6f} V")
-    print(f"Load Voltage:   {bus_voltage + shunt_voltage:.3f} V")
+    print(f"Total Voltage:  {bus_voltage + shunt_voltage:.3f} V")
     print(f"Current:        {current:.3f} mA")
-    print(f"Power:          {power_mw:.3f} mW")
+    print(f"Power:          {power:.3f} mW")
     print("------------------------")
 
 try:
     print("Press CTRL+C to exit")
     while True:
-        bus_voltage, shunt_voltage, current, power_mw = read_solar_panel()
-        display_readings(bus_voltage, current, power_mw)
-        print_readings(bus_voltage, shunt_voltage, current, power_mw)
+        bus_voltage, shunt_voltage, current, power = read_solar_panel()
+        display_readings(bus_voltage, current, power)
+        print_readings(bus_voltage, shunt_voltage, current, power)
         time.sleep(2)
 
 except KeyboardInterrupt:
