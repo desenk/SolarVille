@@ -1,9 +1,9 @@
 import time
-import board
-import busio
-import adafruit_ina219
-import adafruit_character_lcd.character_lcd as characterlcd
-import digitalio
+import board # type: ignore
+import busio # type: ignore
+import adafruit_ina219 # type: ignore
+import adafruit_character_lcd.character_lcd as characterlcd # type: ignore
+import digitalio # type: ignore
 
 # I2C setup
 i2c = busio.I2C(board.SCL, board.SDA)
