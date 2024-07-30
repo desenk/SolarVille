@@ -22,14 +22,11 @@ energy_data = {
 
 @app.route('/ready', methods=['POST'])
 def ready():
-    data = request.json
-    peer_ip = data.get('peer_ip')
+    peer_ip = request.remote_addr
     if peer_ip in peers:
         peer_ready[peer_ip] = True
-        logging.info(f"Peer {peer_ip} is ready")
         return jsonify({"status": "ready"})
     else:
-        logging.warning(f"Peer {peer_ip} not recognized")
         return jsonify({"status": "peer not recognized"}), 400
 
 @app.route('/start', methods=['POST'])
@@ -60,10 +57,8 @@ def sync_start():
     start_time = data.get('start_time')
     peers = data.get('peers', [])
     if start_time and peers:
-        logging.info(f"Sync start received. Start time: {start_time}, Peers: {peers}")
         return jsonify({"status": "start time and peers set", "start_time": start_time, "peers": peers})
     else:
-        logging.warning("Invalid start time or peers in sync_start request")
         return jsonify({"error": "Invalid start time or peers"}), 400
 
 @app.route('/start_simulation', methods=['POST'])
