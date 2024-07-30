@@ -91,7 +91,7 @@ def synchronize_start(peer_ip):
     start_time = current_time + 10  # Start 10 seconds from now
     
     try:
-        local_ip = requests.get('https://api.ipify.org').text  # Get local IP
+        local_ip = '192.168.245.200'  # Get local IP
         peers = [local_ip, peer_ip]  # List of both IPs
         
         # Set start time on this Pi
