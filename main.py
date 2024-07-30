@@ -25,7 +25,7 @@ else:  # Raspberry Pi
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def start_simulation_local():
-    peer_ip = '192.168.233.24'  # IP address of Pi #2
+    peer_ip = '192.168.245.64'  # IP address of Pi #2
     if not synchronize_start(peer_ip):
         logging.error('Failed to start simulation')
         return
