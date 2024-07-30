@@ -1,6 +1,6 @@
 import argparse
 import time
-import pandas as pd
+import pandas as pd # type: ignore
 from multiprocessing import Process, Queue, Event
 import threading
 import logging
