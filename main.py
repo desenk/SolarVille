@@ -91,7 +91,7 @@ def synchronize_start(peer_ip):
     start_time = current_time + 10  # Start 10 seconds from now
     
     try:
-        local_ip = '192.168.245.200'  # Get local IP
+        local_ip = '192.168.245.200'  # IP address of this Pi
         peers = [local_ip, peer_ip]  # List of both IPs
         
         # Set start time on this Pi
@@ -110,8 +110,8 @@ def synchronize_start(peer_ip):
                 time.sleep(wait_time)
             
             # Send ready signal to both Pis
-            ready_response = requests.post(f'http://{peer_ip}:5000/ready')
-            local_ready_response = requests.post('http://localhost:5000/ready')
+            ready_response = requests.post(f'http://{peer_ip}:5000/ready', json={"peer_ip": local_ip})
+            local_ready_response = requests.post('http://localhost:5000/ready', json={"peer_ip": local_ip})
             
             if ready_response.status_code == 200 and local_ready_response.status_code == 200:
                 # Send start signal to both Pis
