@@ -1,4 +1,5 @@
 import argparse
+import queue
 import time
 import pandas as pd # type: ignore
 from multiprocessing import Process, Queue, Event
@@ -10,9 +11,15 @@ from flask import request
 from trading import calculate_price
 from dataAnalysis import load_data, calculate_end_date, simulate_generation, update_plot_separate, update_plot_same
 from config import LOCAL_IP, PEER_IP
+import random
+import numpy as np
 
 max_battery_charge = 1.0
 min_battery_charge = 0.0
+
+CHECKPOINT_INTERVAL = 5  # Check every 10 simulated time steps
+BASE_TIMESTEP = 6  # 6 seconds per simulated hour
+current_timestep = BASE_TIMESTEP
 
 # Conditionally import the correct modules based on the platform
 if platform.system() == 'Darwin':  # MacOS
@@ -36,58 +43,41 @@ def start_simulation_local():
         logging.error('Failed to start simulation')
         return
     
+    run_simulation()
+
+def run_simulation():
+    global current_timestep, df
     start_time = time.time()
 
-    df = load_data(args.file_path, args.household, args.start_date, args.timescale)
-    if df.empty:
-        logging.error("No data loaded. Exiting simulation.")
-        return
-    df = simulate_generation(df, mean=0.5, std=0.2)
-    end_date = calculate_end_date(args.start_date, args.timescale)
-    logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
-    
-    queue = Queue()
-    ready_event = Event()
-    plot_process = Process(target=plot_data, args=(df, args.start_date, end_date, args.timescale, args.separate, queue, ready_event))
-    plot_process.start()
-    
-    # Wait for the plotting process to signal that it is ready
-    ready_event.wait()
-    logging.info("Plot initialized, starting simulation...")
-
-    df['balance'] = df['generation'] - df['energy']  # Calculate the balance for each row
-    df['currency'] = 100.0  # Initialize the currency column to 100
-    df['battery_charge'] = 0.5  # Assume 50% initial charge
-    logging.info("Dataframe for balance, currency and battery charge is created.")
-    
-    try:
-        for timestamp in df.index:
-            current_time = time.time()
-            elapsed_time = current_time - start_time
+    for i, timestamp in enumerate(df.index):
+        iteration_start_time = time.time()
+        
+        current_data = df.loc[timestamp]
+        
+        if not current_data.empty:
+            df = process_trading_and_lcd(df, timestamp, current_data, current_data['battery_charge'])
             
-            # Calculate the expected elapsed time based on the simulation speed
-            expected_elapsed_time = (timestamp - df.index[0]).total_seconds() * (6 / 3600)  # 6 seconds per hour
-            
-            # If we're ahead of schedule, wait
-            if elapsed_time < expected_elapsed_time:
-                time.sleep(expected_elapsed_time - elapsed_time)
-            
-            current_data = df.loc[timestamp]
-            
-            if not current_data.empty:
-                df = process_trading_and_lcd(df, timestamp, current_data, current_data['battery_charge'])
-                
-                # Update the plot
-                queue.put(timestamp)
-
-    except KeyboardInterrupt:
-        logging.info("Simulation interrupted.")
-    finally:
-        queue.put("done")
-        plot_process.join()
-
-import random
-import numpy as np
+            # Update the plot
+            queue.put(timestamp)
+        
+        # Checkpoint every CHECKPOINT_INTERVAL steps
+        if i % CHECKPOINT_INTERVAL == 0:
+            checkpoint(PEER_IP)
+        
+        # Adaptive time step
+        elapsed_time = time.time() - iteration_start_time
+        if elapsed_time > current_timestep:
+            current_timestep *= 1.1  # Increase timestep by 10%
+        elif elapsed_time < current_timestep * 0.8:
+            current_timestep = max(BASE_TIMESTEP, current_timestep * 0.9)  # Decrease timestep, but not below BASE_TIMESTEP
+        
+        # Calculate the expected elapsed time based on the simulation speed
+        expected_elapsed_time = (timestamp - df.index[0]).total_seconds() * (current_timestep / 3600)
+        
+        # If we're ahead of schedule, wait
+        actual_elapsed_time = time.time() - start_time
+        if actual_elapsed_time < expected_elapsed_time:
+            time.sleep(expected_elapsed_time - actual_elapsed_time)
 
 def synchronize_start():
     current_time = time.time()
@@ -192,6 +182,29 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
     )
 
     return df
+
+def checkpoint(peer_ip):
+    local_state = get_local_state()
+    response = requests.post(f'http://{peer_ip}:5000/checkpoint', json=local_state)
+    peer_state = response.json()
+    if local_state != peer_state:
+        resynchronize(peer_state)
+
+def get_local_state():
+    return {
+        'timestamp': df.index[-1].strftime('%Y-%m-%d %H:%M:%S'),
+        'balance': float(df.loc[df.index[-1], 'balance']),
+        'battery_charge': float(df.loc[df.index[-1], 'battery_charge']),
+        'currency': float(df.loc[df.index[-1], 'currency'])
+    }
+
+def resynchronize(peer_state):
+    global df
+    current_index = df.index.get_loc(pd.to_datetime(peer_state['timestamp']))
+    df.loc[df.index[current_index], 'balance'] = peer_state['balance']
+    df.loc[df.index[current_index], 'battery_charge'] = peer_state['battery_charge']
+    df.loc[df.index[current_index], 'currency'] = peer_state['currency']
+    logging.info(f"Resynchronized at {peer_state['timestamp']}")
 
 def make_api_call(url, data, max_retries=3):
     for attempt in range(max_retries):
