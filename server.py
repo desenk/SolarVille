@@ -99,15 +99,6 @@ def get_data():
         logging.error(f"Error getting data: {e}")
         return jsonify({"error": str(e)}), 400
 
-@app.route('/update_peer_data', methods=['POST'])
-def update_peer_data():
-    data = request.json
-    PEER_IP = request.remote_addr
-    if PEER_IP not in peer_data:
-        peer_data[PEER_IP] = {}
-    peer_data[PEER_IP].update(data)
-    return jsonify({"status": "updated"})
-
 @app.route('/get_peer_data', methods=['GET'])
 def get_peer_data():
     return jsonify(peer_data)
