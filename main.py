@@ -75,7 +75,7 @@ def start_simulation_local():
             current_data = df.loc[timestamp]
             
             if not current_data.empty:
-                df = process_trading_and_lcd(df, timestamp, current_data, current_data['battery_charge'], PEER_IP)
+                df = process_trading_and_lcd(df, timestamp, current_data, current_data['battery_charge'])
                 
                 # Update the plot
                 queue.put(timestamp)
@@ -91,7 +91,7 @@ import numpy as np
 
 def synchronize_start():
     current_time = time.time()
-    start_time = current_time + 20  # Start 20 seconds from now
+    start_time = current_time + 10  # Start 20 seconds from now
     
     try:
         peers = [LOCAL_IP, PEER_IP]  # List of both IPs
