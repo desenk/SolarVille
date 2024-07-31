@@ -29,7 +29,7 @@ def start_simulation_local():
     if not synchronize_start(peer_ip):
         logging.error('Failed to start simulation')
         return
-        
+    
     # Wait for the simulation to start
     response = requests.get('http://localhost:5000/wait_for_start')
     if response.status_code != 200:
@@ -86,22 +86,27 @@ def start_simulation_local():
         queue.put("done")
         plot_process.join()
 
+import random
+import numpy as np
+
 def synchronize_start(peer_ip):
     current_time = time.time()
-    start_time = current_time + 10  # Start 10 seconds from now
+    start_time = current_time + 20  # Start 20 seconds from now
     
     try:
-        local_ip = '192.168.245.200'  # IP address of this Pi
+        local_ip = '192.168.233.200'  # IP address of Pi #1
         peers = [local_ip, peer_ip]  # List of both IPs
         
-        # Set start time on this Pi
+        # Set start time on both Pis
         response = requests.post('http://localhost:5000/sync_start', json={"start_time": start_time, "peers": peers})
-        
-        # Set start time on peer Pi
         peer_response = requests.post(f'http://{peer_ip}:5000/sync_start', json={"start_time": start_time, "peers": peers})
         
         if response.status_code == 200 and peer_response.status_code == 200:
             logging.info(f"Simulation will start at {time.ctime(start_time)}")
+            
+            # Set a fixed seed for random number generation
+            random.seed(42)
+            np.random.seed(42)
             
             # Wait until it's time to start
             wait_time = start_time - time.time()
@@ -109,27 +114,13 @@ def synchronize_start(peer_ip):
                 logging.info(f"Waiting for {wait_time:.2f} seconds before starting simulation")
                 time.sleep(wait_time)
             
-            # Send ready signal to both Pis
-            ready_response = requests.post(f'http://{peer_ip}:5000/ready', json={"peer_ip": local_ip})
-            local_ready_response = requests.post('http://localhost:5000/ready', json={"peer_ip": local_ip})
+            # Start the simulation
+            simulation_start_time = time.time()
+            requests.post('http://localhost:5000/start_simulation', json={'start_time': simulation_start_time})
+            requests.post(f'http://{peer_ip}:5000/start_simulation', json={'start_time': simulation_start_time})
             
-            if ready_response.status_code == 200 and local_ready_response.status_code == 200:
-                # Send start signal to both Pis
-                start_response = requests.post(f'http://{peer_ip}:5000/start', json={'peers': peers})
-                local_start_response = requests.post('http://localhost:5000/start', json={'peers': peers})
-                
-                if start_response.status_code == 200 and local_start_response.status_code == 200:
-                    if start_response.json()['status'] == 'Simulation started' and local_start_response.json()['status'] == 'Simulation started':
-                        logging.info("Starting simulation now")
-                        return True
-                    else:
-                        logging.error(f"Unexpected response: Peer - {start_response.json()}, Local - {local_start_response.json()}")
-                else:
-                    logging.error(f"Start request failed: Peer status - {start_response.status_code}, Local status - {local_start_response.status_code}")
-            else:
-                logging.error(f"Ready request failed: Peer status - {ready_response.status_code}, Local status - {local_ready_response.status_code}")
-        else:
-            logging.error(f"Sync start request failed: Peer status - {peer_response.status_code}, Local status - {response.status_code}")
+            logging.info("Starting simulation now")
+            return True
     except requests.exceptions.RequestException as e:
         logging.error(f"Network error during synchronization: {e}")
     

@@ -66,9 +66,18 @@ def sync_start():
         logging.warning("Invalid start time or peers in sync_start request")
         return jsonify({"error": "Invalid start time or peers"}), 400
 
+simulation_start_time = None
+
 @app.route('/start_simulation', methods=['POST'])
 def start_simulation():
-    return jsonify({"status": "Simulation already running"})
+    global simulation_start_time
+    data = request.json
+    simulation_start_time = data.get('start_time')
+    if simulation_start_time:
+        simulation_started.set()
+        return jsonify({"status": "Simulation started"})
+    else:
+        return jsonify({"error": "Invalid start time"}), 400
 
 @app.route('/get_data', methods=['GET'])
 def get_data():
