@@ -9,6 +9,7 @@ import requests
 from flask import request
 from trading import calculate_price
 from dataAnalysis import load_data, calculate_end_date, simulate_generation, update_plot_separate, update_plot_same
+from config import LOCAL_IP, PEER_IP
 
 max_battery_charge = 1.0
 min_battery_charge = 0.0
@@ -25,8 +26,7 @@ else:  # Raspberry Pi
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def start_simulation_local():
-    peer_ip = '192.168.245.64'  # IP address of Pi #2
-    if not synchronize_start(peer_ip):
+    if not synchronize_start():
         logging.error('Failed to start simulation')
         return
     
@@ -75,7 +75,7 @@ def start_simulation_local():
             current_data = df.loc[timestamp]
             
             if not current_data.empty:
-                df = process_trading_and_lcd(df, timestamp, current_data, current_data['battery_charge'], peer_ip)
+                df = process_trading_and_lcd(df, timestamp, current_data, current_data['battery_charge'], PEER_IP)
                 
                 # Update the plot
                 queue.put(timestamp)
@@ -89,17 +89,16 @@ def start_simulation_local():
 import random
 import numpy as np
 
-def synchronize_start(peer_ip):
+def synchronize_start():
     current_time = time.time()
     start_time = current_time + 20  # Start 20 seconds from now
     
     try:
-        local_ip = '192.168.233.200'  # IP address of Pi #1
-        peers = [local_ip, peer_ip]  # List of both IPs
+        peers = [LOCAL_IP, PEER_IP]  # List of both IPs
         
         # Set start time on both Pis
         response = requests.post('http://localhost:5000/sync_start', json={"start_time": start_time, "peers": peers})
-        peer_response = requests.post(f'http://{peer_ip}:5000/sync_start', json={"start_time": start_time, "peers": peers})
+        peer_response = requests.post(f'http://{PEER_IP}:5000/sync_start', json={"start_time": start_time, "peers": peers})
         
         if response.status_code == 200 and peer_response.status_code == 200:
             logging.info(f"Simulation will start at {time.ctime(start_time)}")
@@ -117,7 +116,7 @@ def synchronize_start(peer_ip):
             # Start the simulation
             simulation_start_time = time.time()
             requests.post('http://localhost:5000/start_simulation', json={'start_time': simulation_start_time})
-            requests.post(f'http://{peer_ip}:5000/start_simulation', json={'start_time': simulation_start_time})
+            requests.post(f'http://{PEER_IP}:5000/start_simulation', json={'start_time': simulation_start_time})
             
             logging.info("Starting simulation now")
             return True
@@ -133,7 +132,7 @@ def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event)
     else:
         update_plot_same(df, start_date, end_date, timescale, queue, ready_event)
 
-def process_trading_and_lcd(df, timestamp, current_data, battery_charge, peer_ip):
+def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
     demand = current_data['energy']
     generation = current_data['generation']
     balance = generation - demand
@@ -151,17 +150,17 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge, peer_ip
         'balance': balance,
         'battery_charge': battery_charge
     }
-    make_api_call(f'http://{peer_ip}:5000/update_peer_data', update_data)
+    make_api_call(f'http://{PEER_IP}:5000/update_peer_data', update_data)
 
     # Get peer data for trading
-    peer_data_response = requests.get(f'http://{peer_ip}:5000/get_peer_data')
+    peer_data_response = requests.get(f'http://{PEER_IP}:5000/get_peer_data')
     if peer_data_response.status_code == 200:
         peer_data = peer_data_response.json()
         
         # Get peer balance with error checking
-        peer_balance = peer_data.get(peer_ip, {}).get('balance')
+        peer_balance = peer_data.get(PEER_IP, {}).get('balance')
         if peer_balance is None:
-            logging.warning(f"No balance data available for peer {peer_ip}")
+            logging.warning(f"No balance data available for peer {PEER_IP}")
         else:
             # Perform trading
             if balance > 0 and peer_balance < 0:

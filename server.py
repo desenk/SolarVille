@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import logging
 import time
 import threading
+from config import PEER_IP, LOCAL_IP
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -23,7 +24,7 @@ energy_data = {
 @app.route('/ready', methods=['POST'])
 def ready():
     data = request.json
-    peer_ip = data.get('peer_ip')
+    peer_ip = request.remote_addr
     if peer_ip in peers:
         peer_ready[peer_ip] = True
         logging.info(f"Peer {peer_ip} is ready")
@@ -31,6 +32,16 @@ def ready():
     else:
         logging.warning(f"Peer {peer_ip} not recognized")
         return jsonify({"status": "peer not recognized"}), 400
+
+@app.route('/update_peer_data', methods=['POST'])
+def update_peer_data():
+    data = request.json
+    peer_ip = request.remote_addr
+    if peer_ip not in peer_data:
+        peer_data[peer_ip] = {}
+    peer_data[peer_ip].update(data)
+    logging.info(f"Updated peer data for {peer_ip}: {data}")
+    return jsonify({"status": "updated"})
 
 @app.route('/start', methods=['POST'])
 def start():
@@ -91,10 +102,10 @@ def get_data():
 @app.route('/update_peer_data', methods=['POST'])
 def update_peer_data():
     data = request.json
-    peer_ip = request.remote_addr
-    if peer_ip not in peer_data:
-        peer_data[peer_ip] = {}
-    peer_data[peer_ip].update(data)
+    PEER_IP = request.remote_addr
+    if PEER_IP not in peer_data:
+        peer_data[PEER_IP] = {}
+    peer_data[PEER_IP].update(data)
     return jsonify({"status": "updated"})
 
 @app.route('/get_peer_data', methods=['GET'])
