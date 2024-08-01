@@ -3,7 +3,7 @@ import logging
 import time
 import threading
 from config import PEER_IP, LOCAL_IP
-from main import get_local_state, resynchronize
+from shared import sim_state
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -114,9 +114,9 @@ def wait_for_start():
 @app.route('/checkpoint', methods=['POST'])
 def handle_checkpoint():
     peer_state = request.json
-    local_state = get_local_state()
+    local_state = sim_state.get_local_state()
     if peer_state != local_state:
-        resynchronize(peer_state)
+        sim_state.resynchronize(peer_state)
     return jsonify(local_state)
 
 if __name__ == "__main__":

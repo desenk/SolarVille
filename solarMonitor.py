@@ -50,7 +50,7 @@ def read_ina219(sensor):
 def display_readings(bus_voltage_solar, current_solar, power_solar, bus_voltage_battery, current_battery, power_battery):
     lcd.clear()
     lcd.message = f"S:V:{bus_voltage_solar:.2f}V I:{current_solar:.2f}A\n"
-    lcd.message += f"P:{power_solar:.3f}mW\n"
+    lcd.message += f"Ps:{power_solar:.3f}mW\n"
     lcd.message += f"B:V:{bus_voltage_battery:.2f}V I:{current_battery:.2f}A\n"
     lcd.message += f"P:{power_battery:.3f}mW"
 

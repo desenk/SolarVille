@@ -13,11 +13,12 @@ from dataAnalysis import load_data, calculate_end_date, simulate_generation, upd
 from config import LOCAL_IP, PEER_IP
 import random
 import numpy as np
+from shared import resynchronize, get_local_state, sim_state
 
 max_battery_charge = 1.0
 min_battery_charge = 0.0
 
-CHECKPOINT_INTERVAL = 5  # Check every 10 simulated time steps
+CHECKPOINT_INTERVAL = 5  # Check every 5 simulated time steps
 BASE_TIMESTEP = 6  # 6 seconds per simulated hour
 current_timestep = BASE_TIMESTEP
 
@@ -46,19 +47,14 @@ def start_simulation_local():
     run_simulation()
 
 def run_simulation():
-    global current_timestep, df
+    global current_timestep
     start_time = time.time()
 
-    for i, timestamp in enumerate(df.index):
+    for i, timestamp in enumerate(sim_state.df.index):
         iteration_start_time = time.time()
-        
-        current_data = df.loc[timestamp]
-        
-        if not current_data.empty:
-            df = process_trading_and_lcd(df, timestamp, current_data, current_data['battery_charge'])
-            
-            # Update the plot
-            queue.put(timestamp)
+        process_trading_and_lcd(timestamp)
+        # Update the plot
+        queue.put(timestamp)
         
         # Checkpoint every CHECKPOINT_INTERVAL steps
         if i % CHECKPOINT_INTERVAL == 0:
@@ -72,7 +68,7 @@ def run_simulation():
             current_timestep = max(BASE_TIMESTEP, current_timestep * 0.9)  # Decrease timestep, but not below BASE_TIMESTEP
         
         # Calculate the expected elapsed time based on the simulation speed
-        expected_elapsed_time = (timestamp - df.index[0]).total_seconds() * (current_timestep / 3600)
+        expected_elapsed_time = (timestamp - sim_state.df.index[0]).total_seconds() * (current_timestep / 3600)
         
         # If we're ahead of schedule, wait
         actual_elapsed_time = time.time() - start_time
@@ -116,22 +112,24 @@ def synchronize_start():
     logging.error("Failed to start simulation")
     return False
 
-def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event):
+def plot_data(start_date, end_date, timescale, separate, queue, ready_event):
     if separate:
-        update_plot_separate(df, start_date, end_date, timescale, queue, ready_event)
+        update_plot_separate(sim_state.df, start_date, end_date, timescale, queue, ready_event)
     else:
-        update_plot_same(df, start_date, end_date, timescale, queue, ready_event)
+        update_plot_same(sim_state.df, start_date, end_date, timescale, queue, ready_event)
 
-def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
+def process_trading_and_lcd(timestamp):
+    current_data = sim_state.df.loc[timestamp]
     demand = current_data['energy']
     generation = current_data['generation']
     balance = generation - demand
-    df.loc[timestamp, 'demand'] = demand
-    df.loc[timestamp, 'generation'] = generation
-    df.loc[timestamp, 'balance'] = balance
+
+    sim_state.df.loc[timestamp, 'demand'] = demand
+    sim_state.df.loc[timestamp, 'generation'] = generation
+    sim_state.df.loc[timestamp, 'balance'] = balance
     
     battery_charge = update_battery_charge(generation, demand)
-    df.loc[timestamp, 'battery_charge'] = battery_charge
+    sim_state.df.loc[timestamp, 'battery_charge'] = battery_charge
 
     # Send updates to Flask server
     update_data = {
@@ -157,15 +155,15 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
                 # This household has excess energy to sell
                 trade_amount = min(balance, abs(peer_balance))
                 price = calculate_price(balance, abs(peer_balance))
-                df.loc[timestamp, 'balance'] -= trade_amount
-                df.loc[timestamp, 'currency'] += trade_amount * price
+                sim_state.df.loc[timestamp, 'balance'] -= trade_amount
+                sim_state.df.loc[timestamp, 'currency'] += trade_amount * price
                 logging.info(f"Sold {trade_amount:.2f} kWh at {price:.2f} $/kWh")
             elif balance < 0 and peer_balance > 0:
                 # This household needs to buy energy
                 trade_amount = min(abs(balance), peer_balance)
                 price = calculate_price(peer_balance, abs(balance))
-                df.loc[timestamp, 'balance'] += trade_amount
-                df.loc[timestamp, 'currency'] -= trade_amount * price
+                sim_state.df.loc[timestamp, 'balance'] += trade_amount
+                sim_state.df.loc[timestamp, 'currency'] -= trade_amount * price
                 logging.info(f"Bought {trade_amount:.2f} kWh at {price:.2f} $/kWh")
     else:
         logging.error("Failed to get peer data for trading")
@@ -176,35 +174,17 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
     logging.info(
         f"At {timestamp} - Generation: {generation:.2f}W, "
         f"Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%, "
-        f"Balance: {df.loc[timestamp, 'balance']:.2f}, "
-        f"Currency: {df.loc[timestamp, 'currency']:.2f}, "
+        f"Balance: {sim_state.df.loc[timestamp, 'balance']:.2f}, "
+        f"Currency: {sim_state.df.loc[timestamp, 'currency']:.2f}, "
         f"LCD updated"
     )
 
-    return df
-
 def checkpoint(peer_ip):
-    local_state = get_local_state()
+    local_state = sim_state.get_local_state()
     response = requests.post(f'http://{peer_ip}:5000/checkpoint', json=local_state)
     peer_state = response.json()
     if local_state != peer_state:
-        resynchronize(peer_state)
-
-def get_local_state():
-    return {
-        'timestamp': df.index[-1].strftime('%Y-%m-%d %H:%M:%S'),
-        'balance': float(df.loc[df.index[-1], 'balance']),
-        'battery_charge': float(df.loc[df.index[-1], 'battery_charge']),
-        'currency': float(df.loc[df.index[-1], 'currency'])
-    }
-
-def resynchronize(peer_state):
-    global df
-    current_index = df.index.get_loc(pd.to_datetime(peer_state['timestamp']))
-    df.loc[df.index[current_index], 'balance'] = peer_state['balance']
-    df.loc[df.index[current_index], 'battery_charge'] = peer_state['battery_charge']
-    df.loc[df.index[current_index], 'currency'] = peer_state['currency']
-    logging.info(f"Resynchronized at {peer_state['timestamp']}")
+        sim_state.resynchronize(peer_state)
 
 def make_api_call(url, data, max_retries=3):
     for attempt in range(max_retries):
@@ -219,14 +199,14 @@ def make_api_call(url, data, max_retries=3):
     return None
 
 def initialize_simulation():
-    global df, end_date
+    global end_date
     logging.info("Loading data, please wait...")
     start_time = time.time()
-    df = load_data(args.file_path, args.household, args.start_date, args.timescale)
-    if df.empty:
+    sim_state.df = load_data(args.file_path, args.household, args.start_date, args.timescale)
+    if sim_state.df.empty:
         logging.error("No data loaded. Exiting simulation.")
         return
-    df = simulate_generation(df, mean=0.5, std=0.2)
+    sim_state.df = simulate_generation(sim_state.df, mean=0.5, std=0.2)
     end_date = calculate_end_date(args.start_date, args.timescale)
     logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
 
