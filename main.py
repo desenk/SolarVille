@@ -13,7 +13,7 @@ from dataAnalysis import load_data, calculate_end_date, simulate_generation, upd
 from config import LOCAL_IP, PEER_IP
 import random
 import numpy as np
-from shared import resynchronize, get_local_state, sim_state
+from shared import sim_state
 
 max_battery_charge = 1.0
 min_battery_charge = 0.0
