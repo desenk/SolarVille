@@ -1,5 +1,4 @@
 import argparse
-import queue
 import time
 import pandas as pd # type: ignore
 from multiprocessing import Process, Queue, Event
@@ -44,9 +43,27 @@ def start_simulation_local():
         logging.error('Failed to start simulation')
         return
     
-    run_simulation()
+    plot_queue = Queue()
+    ready_event = Event()
+    
+    try:
+        plot_process = Process(target=plot_data, args=(args.start_date, args.timescale, args.separate, plot_queue, ready_event))
+        plot_process.start()
+    
+        # Wait for the plotting process to be ready
+        ready_event.wait()
+    
+        # Run the simulation
+        run_simulation(plot_queue)
+    finally:
+        # Signal the end of the simulation
+        plot_queue.put("DONE")
+        plot_process.join(timeout=5)  # Wait up to 5 seconds for the process to end
+        if plot_process.is_alive():
+            logging.warning("Plot process did not terminate, forcibly terminating")
+            plot_process.terminate()
 
-def run_simulation():
+def run_simulation(plot_queue):
     global current_timestep
     start_time = time.time()
 
@@ -54,7 +71,7 @@ def run_simulation():
         iteration_start_time = time.time()
         process_trading_and_lcd(timestamp)
         # Update the plot
-        queue.put(timestamp)
+        plot_queue.put(timestamp)
         
         # Checkpoint every CHECKPOINT_INTERVAL steps
         if i % CHECKPOINT_INTERVAL == 0:
@@ -112,11 +129,16 @@ def synchronize_start():
     logging.error("Failed to start simulation")
     return False
 
-def plot_data(start_date, end_date, timescale, separate, queue, ready_event):
-    if separate:
-        update_plot_separate(sim_state.df, start_date, end_date, timescale, queue, ready_event)
-    else:
-        update_plot_same(sim_state.df, start_date, end_date, timescale, queue, ready_event)
+def plot_data(start_date, timescale, separate, plot_queue, ready_event):
+    try:
+        end_date = calculate_end_date(start_date, timescale)
+        if separate:
+            update_plot_separate(sim_state.df, start_date, end_date, timescale, plot_queue, ready_event)
+        else:
+            update_plot_same(sim_state.df, start_date, end_date, timescale, plot_queue, ready_event)
+    except Exception as e:
+        logging.error(f"Error in plotting process: {e}")
+        ready_event.set()  # Ensure the ready event is set even if an error occurs
 
 def process_trading_and_lcd(timestamp):
     current_data = sim_state.df.loc[timestamp]

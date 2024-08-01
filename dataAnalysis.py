@@ -6,6 +6,19 @@ from datetime import datetime, timedelta
 import calendar
 import logging
 import time
+from multiprocessing import Queue, Event
+import matplotlib # type: ignore # Import the matplotlib module
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from multiprocessing.queues import Queue as QueueType
+    from multiprocessing.synchronize import Event as EventType
+else:
+    QueueType = Queue
+    EventType = Event
+
+matplotlib.use('Agg')  # Use non-interactive backend
 
 # Function to load and preprocess data
 def load_data(file_path, household, start_date, timescale, chunk_size=10000):
@@ -73,7 +86,7 @@ def simulate_generation(df, mean=0.5, std=0.2): # Function to simulate energy ge
     df['generation'] = df['generation'].clip(lower=0)
     return df
 
-def update_plot_same(df, start_date, end_date, interval, queue, ready_event): # Function to update plot with same y-axis
+def update_plot_same(df, start_date, end_date, interval, queue: QueueType, ready_event: EventType): # Function to update plot with same y-axis
     df_day = df[start_date:end_date] # Filter data for the specified date range
     df_day = df_day.reset_index() # Reset index
 
@@ -105,23 +118,29 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event): # 
     ready_event.set()  # Signal that the plot is initialized
 
     while True:
-        timestamp = queue.get()
-        if timestamp == "done":
-            break
+        try:
+            timestamp = queue.get(timeout=1)
+            if timestamp == "DONE":
+                break
 
-        # Update the plot with the new data point
-        demand_line.set_data(df.index[:df.index.get_loc(timestamp)+1], df['energy'][:df.index.get_loc(timestamp)+1])
-        generation_line.set_data(df.index[:df.index.get_loc(timestamp)+1], df['generation'][:df.index.get_loc(timestamp)+1])
-        net_line.set_data(df.index[:df.index.get_loc(timestamp)+1], df['generation'][:df.index.get_loc(timestamp)+1] - df['energy'][:df.index.get_loc(timestamp)+1])
-        
-        ax.relim()
-        ax.autoscale_view()
-        plt.draw()
-        plt.pause(0.01)  # Short pause to allow the plot to update
+            # Update the plot with the new data point
+            demand_line.set_data(df.index[:df.index.get_loc(timestamp)+1], df['energy'][:df.index.get_loc(timestamp)+1])
+            generation_line.set_data(df.index[:df.index.get_loc(timestamp)+1], df['generation'][:df.index.get_loc(timestamp)+1])
+            net_line.set_data(df.index[:df.index.get_loc(timestamp)+1], df['generation'][:df.index.get_loc(timestamp)+1] - df['energy'][:df.index.get_loc(timestamp)+1])
+            
+        except Queue.Empty:
+            continue
+        except Exception as e:
+            logging.error(f"Error updating plot: {e}")
 
-    plt.show() 
+            ax.relim()
+            ax.autoscale_view()
+            plt.draw()
+            plt.pause(0.01)  # Short pause to allow the plot to update
 
-def update_plot_separate(df, start_date, end_date, interval, queue, ready_event):
+    plt.close() 
+
+def update_plot_separate(df, start_date, end_date, interval, queue: QueueType, ready_event: EventType):
     df_day = df[start_date:end_date]
     df_day = df_day.reset_index()
 
@@ -159,20 +178,26 @@ def update_plot_separate(df, start_date, end_date, interval, queue, ready_event)
     plt.show(block=False)
 
     while True:
-        timestamp = queue.get()
-        if timestamp == "done":
-            break
+        try:
+            timestamp = queue.get(timeout=1) # Wait for 1 second for new data
+            if timestamp == "DONE":
+                break
 
-        index = df_day.index[df_day['datetime'] <= timestamp][-1]
-        demand_line.set_data(df_day['datetime'][:index+1], df_day['energy'][:index+1])
-        generation_line.set_data(df_day['datetime'][:index+1], df_day['generation'][:index+1])
-        net_line.set_data(df_day['datetime'][:index+1], df_day['generation'][:index+1] - df_day['energy'][:index+1])
-        
+            index = df_day.index[df_day['datetime'] <= timestamp][-1]
+            demand_line.set_data(df_day['datetime'][:index+1], df_day['energy'][:index+1])
+            generation_line.set_data(df_day['datetime'][:index+1], df_day['generation'][:index+1])
+            net_line.set_data(df_day['datetime'][:index+1], df_day['generation'][:index+1] - df_day['energy'][:index+1])
+            
+        except Queue.Empty:
+            continue
+        except Exception as e:
+            logging.error(f"Error updating plot: {e}")
+
         for ax in axs:
             ax.relim()
             ax.autoscale_view()
-        
+            
         plt.draw()
         plt.pause(0.01)  # Short pause to allow the plot to update
 
-    plt.show()
+    plt.close() # Close plot when done
