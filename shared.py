@@ -9,9 +9,9 @@ class SimulationState:
     def get_local_state(self):
         return {
             'timestamp': self.df.index[-1].strftime('%Y-%m-%d %H:%M:%S'),
-            'balance': float(self.df.loc[self.df.index[-1], 'balance']),
-            'battery_charge': float(self.df.loc[self.df.index[-1], 'battery_charge']),
-            'currency': float(self.df.loc[self.df.index[-1], 'currency'])
+            'balance': float(self.df.loc[self.df.index[-1], 'balance']) if 'balance' in self.df.columns else 0,
+            'battery_charge': float(self.df.loc[self.df.index[-1], 'battery_charge']) if 'battery_charge' in self.df.columns else 0,
+            'currency': float(self.df.loc[self.df.index[-1], 'currency']) if 'currency' in self.df.columns else 0
         }
 
     def resynchronize(self, peer_state):

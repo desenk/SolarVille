@@ -171,11 +171,15 @@ def process_trading_and_lcd(timestamp):
     # Update LCD display
     display_message(f"Gen: {generation:.2f}W\nDem: {demand:.2f}W\nBat: {battery_charge * 100:.2f}%")
     
+    currency = sim_state.df.loc[timestamp, 'currency'] if 'currency' in sim_state.df.columns else 0
+    balance = sim_state.df.loc[timestamp, 'balance'] if 'balance' in sim_state.df.columns else 0
+    
+
     logging.info(
         f"At {timestamp} - Generation: {generation:.2f}W, "
         f"Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%, "
-        f"Balance: {sim_state.df.loc[timestamp, 'balance']:.2f}, "
-        f"Currency: {sim_state.df.loc[timestamp, 'currency']:.2f}, "
+        f"Balance: {balance:.2f}, "
+        f"Currency: {currency:.2f}, "
         f"LCD updated"
     )
 
@@ -207,8 +211,21 @@ def initialize_simulation():
         logging.error("No data loaded. Exiting simulation.")
         return
     sim_state.df = simulate_generation(sim_state.df, mean=0.5, std=0.2)
+    
+    # Add 'currency' column if it doesn't exist
+    if 'currency' not in sim_state.df.columns:
+        sim_state.df['currency'] = 100.0  # Initialize with 100 currency units
+    
+    # Add 'balance' column if it doesn't exist
+    if 'balance' not in sim_state.df.columns:
+        sim_state.df['balance'] = sim_state.df['generation'] - sim_state.df['energy']
+    
     end_date = calculate_end_date(args.start_date, args.timescale)
     logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
+    
+    # Add this logging to check the DataFrame structure
+    logging.info(f"DataFrame columns: {sim_state.df.columns.tolist()}")
+    logging.info(f"DataFrame head:\n{sim_state.df.head()}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Smart Grid Simulation')
