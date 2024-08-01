@@ -4,6 +4,7 @@ import time
 import threading
 from config import PEER_IP, LOCAL_IP
 from shared import sim_state
+import pandas as pd # type: ignore
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 

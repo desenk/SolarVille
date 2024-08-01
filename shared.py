@@ -1,9 +1,10 @@
 import pandas as pd # type: ignore
 import logging
+from pandas import DataFrame # type: ignore
 
 class SimulationState:
     def __init__(self):
-        self.df = None
+        self.df: DataFrame = None
 
     def get_local_state(self):
         return {
