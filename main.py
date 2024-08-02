@@ -58,7 +58,6 @@ def start_simulation_local():
     ready_event.wait()
     logging.info("Plot initialized, starting simulation...")
 
-    df['balance'] = df['generation'] - df['energy']  # Calculate the balance for each row
     df['currency'] = 100.0  # Initialize the currency column to 100
     df['battery_charge'] = 0.5  # Assume 50% initial charge
     logging.info("Dataframe for balance, currency and battery charge is created.")
@@ -145,6 +144,7 @@ def process_trading_and_lcd(df, timestamp, current_data):
     
     # Add generation to DataFrame
     df.loc[timestamp, 'generation'] = solar_power
+    df.loc[timestamp, 'demand'] = demand
     
     # Update battery charge
     battery_soc, efficiency = update_battery_charge(solar_current, solar_power, demand)
@@ -232,6 +232,8 @@ def initialize_simulation():
     if df.empty:
         logging.error("No data loaded. Exiting simulation.")
         return
+    df['generation'] = 0.0  # Initialize generation column
+    df['balance'] = 0.0  # Initialize balance column
     end_date = calculate_end_date(args.start_date, args.timescale)
     logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
 
