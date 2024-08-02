@@ -56,8 +56,3 @@ fig.suptitle('Solar Panel and Battery Performance', fontsize=16)
 # Adjust the layout and display the plot
 plt.tight_layout()
 plt.show()
-
-# Save the figure with a name based on the input file
-output_filename = f"graph_{os.path.splitext(latest_file)[0]}.png"
-plt.savefig(output_filename, dpi=300, bbox_inches='tight')
-print(f"Graph saved as: {output_filename}")
