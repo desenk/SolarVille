@@ -46,6 +46,12 @@ def start_simulation_local():
     if df.empty:
         logging.error("No data loaded. Exiting simulation.")
         return
+    
+    df['generation'] = 0.0  # Initialize generation column
+    df['balance'] = 0.0  # Initialize balance column
+    df['currency'] = 100.0  # Initialize the currency column to 100
+    df['battery_charge'] = 0.5  # Assume 50% initial charge
+    
     end_date = calculate_end_date(args.start_date, args.timescale)
     logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
     
@@ -58,25 +64,31 @@ def start_simulation_local():
     ready_event.wait()
     logging.info("Plot initialized, starting simulation...")
 
-    df['currency'] = 100.0  # Initialize the currency column to 100
-    df['battery_charge'] = 0.5  # Assume 50% initial charge
-    logging.info("Dataframe for balance, currency and battery charge is created.")
+    logging.info("Dataframe for generation, balance, currency and battery charge is created.")
     
     plot_update_interval = 6  # seconds
     last_plot_update = time.time()
+    
+    total_simulation_time = (df.index[-1] - df.index[0]).total_seconds()
+    simulation_speed = 30 * 60 / 6  # 30 minutes of data in 6 seconds of simulation
 
     try:
         while True:
             current_time = time.time()
             elapsed_time = current_time - start_time
             
-            timestamp = df.index[int(elapsed_time / (6 / 3600))]  # Calculate current timestamp
+            simulated_elapsed_time = elapsed_time * simulation_speed
             
-            # Add the check here
-            if timestamp > df.index[-1]:
+            if simulated_elapsed_time >= total_simulation_time:
                 logging.info("Simulation completed.")
                 break
             
+            timestamp_index = int(simulated_elapsed_time / (30 * 60))  # 30-minute intervals
+            if timestamp_index >= len(df.index):
+                logging.info("Reached end of data. Simulation completed.")
+                break
+            
+            timestamp = df.index[timestamp_index]
             current_data = df.loc[timestamp]
             
             if not current_data.empty:
@@ -137,9 +149,15 @@ def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event)
         update_plot_same(df, start_date, end_date, timescale, queue, ready_event)
 
 def process_trading_and_lcd(df, timestamp, current_data):
-    readings = get_current_readings()
-    solar_current = readings['solar_current'] * SOLAR_SCALE_FACTOR
-    solar_power = readings['solar_power'] * SOLAR_SCALE_FACTOR
+    try:
+        readings = get_current_readings()
+        solar_current = readings['solar_current'] * SOLAR_SCALE_FACTOR
+        solar_power = readings['solar_power'] * SOLAR_SCALE_FACTOR
+    except Exception as e:
+        logging.error(f"Failed to get solar data: {e}")
+        solar_current = 0
+        solar_power = 0
+    
     demand = current_data['energy']
     
     # Add generation to DataFrame
