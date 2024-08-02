@@ -1,50 +1,112 @@
+import time
+import board # type: ignore
+import busio # type: ignore
+import adafruit_ina219 # type: ignore
+import adafruit_character_lcd.character_lcd as characterlcd # type: ignore
+import digitalio # type: ignore
 import csv
 from datetime import datetime
-import time
-from solarMonitor import get_current_readings, print_readings
 
-def init_csv_file():
-    csv_filename = f"solar_battery_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-    headers = [
-        "Timestamp",
-        "Solar Bus Voltage (V)", "Solar Shunt Voltage (V)", "Solar Current (A)", "Solar Power (mW)",
-        "Battery Bus Voltage (V)", "Battery Shunt Voltage (V)", "Battery Current (A)", "Battery Power (mW)"
-    ]
-    with open(csv_filename, 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(headers)
-    return csv_filename
+# I2C setup
+i2c = busio.I2C(board.SCL, board.SDA)
 
-def log_data(csv_filename, data):
-    with open(csv_filename, 'a', newline='') as csvfile:
+# INA219 setup for solar panel (default address 0x40)
+ina219_solar = adafruit_ina219.INA219(i2c)
+
+# INA219 setup for battery (address 0x41)
+ina219_battery = adafruit_ina219.INA219(i2c, addr=0x41)
+
+# Adjust for higher voltage and current range
+ina219_solar.set_calibration_16V_400mA()
+ina219_battery.set_calibration_16V_400mA()
+
+# Increase ADC resolution for more accurate readings
+ina219_solar.bus_adc_resolution = adafruit_ina219.ADCResolution.ADCRES_12BIT_32S
+ina219_solar.shunt_adc_resolution = adafruit_ina219.ADCResolution.ADCRES_12BIT_32S
+ina219_battery.bus_adc_resolution = adafruit_ina219.ADCResolution.ADCRES_12BIT_32S
+ina219_battery.shunt_adc_resolution = adafruit_ina219.ADCResolution.ADCRES_12BIT_32S
+
+# LCD setup (unchanged)
+lcd_columns = 16
+lcd_rows = 2
+
+lcd_rs = digitalio.DigitalInOut(board.D25)
+lcd_en = digitalio.DigitalInOut(board.D24)
+lcd_d4 = digitalio.DigitalInOut(board.D23)
+lcd_d5 = digitalio.DigitalInOut(board.D17)
+lcd_d6 = digitalio.DigitalInOut(board.D18)
+lcd_d7 = digitalio.DigitalInOut(board.D22)
+
+lcd = characterlcd.Character_LCD_Mono(
+    lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7, lcd_columns, lcd_rows
+)
+
+def read_ina219(sensor):
+    bus_voltage = sensor.bus_voltage
+    shunt_voltage = sensor.shunt_voltage
+    current = sensor.current / 1000  # Convert to A
+    power = bus_voltage * current * 1000  # Calculate power in mW
+    
+    return bus_voltage, shunt_voltage, current, power
+
+def display_readings(bus_voltage_solar, current_solar, power_solar, bus_voltage_battery, current_battery, power_battery):
+    lcd.clear()
+    lcd.message = f"S:V:{bus_voltage_solar:.2f}V I:{current_solar:.2f}A\n"
+    lcd.message += f"P:{power_solar:.3f}mW\n"
+    lcd.message += f"B:V:{bus_voltage_battery:.2f}V I:{current_battery:.2f}A\n"
+    lcd.message += f"P:{power_battery:.3f}mW"
+
+def print_readings(bus_voltage, shunt_voltage, current, power, label):
+    print(f"{label} Bus Voltage:    {bus_voltage:.3f} V")
+    print(f"{label} Shunt Voltage:  {shunt_voltage:.6f} V")
+    print(f"{label} Total Voltage:  {bus_voltage + shunt_voltage:.3f} V")
+    print(f"{label} Current:        {current*1000:.3f} mA")
+    print(f"{label} Power:          {power:.3f} mW")
+    print("------------------------")
+
+def write_to_csv(filename, data):
+    with open(filename, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(data)
 
-def main():
-    csv_filename = init_csv_file()
-    print("Press CTRL+C to stop logging")
-    try:
-        while True:
-            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            readings = get_current_readings()
-            
-            solar_data = readings['solar_current'], readings['solar_power']
-            battery_data = readings['battery_voltage'], readings['battery_current']
-            
-            log_data(csv_filename, [
-                timestamp,
-                *solar_data,
-                *battery_data
-            ])
-            
-            print_readings(*solar_data, "Solar")
-            print_readings(*battery_data, "Battery")
-            
-            time.sleep(3)  # Log every 3 seconds
-    except KeyboardInterrupt:
-        print("\nLogging stopped by user")
-    finally:
-        print(f"Data saved to {csv_filename}")
+# Create and write headers to the CSV file
+csv_filename = f"solar_battery_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+headers = [
+    "Timestamp",
+    "Solar Bus Voltage (V)", "Solar Shunt Voltage (V)", "Solar Current (A)", "Solar Power (mW)",
+    "Battery Bus Voltage (V)", "Battery Shunt Voltage (V)", "Battery Current (A)", "Battery Power (mW)"
+]
+write_to_csv(csv_filename, headers)
 
-if __name__ == "__main__":
-    main()
+try:
+    print("Press CTRL+C to exit")
+    while True:
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        bus_voltage_solar, shunt_voltage_solar, current_solar, power_solar = read_ina219(ina219_solar)
+        bus_voltage_battery, shunt_voltage_battery, current_battery, power_battery = read_ina219(ina219_battery)
+        
+        display_readings(bus_voltage_solar, current_solar, power_solar, bus_voltage_battery, current_battery, power_battery)
+        
+        print_readings(bus_voltage_solar, shunt_voltage_solar, current_solar, power_solar, "Solar")
+        print_readings(bus_voltage_battery, shunt_voltage_battery, current_battery, power_battery, "Battery")
+        
+        # Write data to CSV
+        data = [
+            timestamp,
+            f"{bus_voltage_solar:.3f}", f"{shunt_voltage_solar:.6f}", f"{current_solar:.3f}", f"{power_solar:.3f}",
+            f"{bus_voltage_battery:.3f}", f"{shunt_voltage_battery:.6f}", f"{current_battery:.3f}", f"{power_battery:.3f}"
+        ]
+        write_to_csv(csv_filename, data)
+        
+        time.sleep(2)
+
+except KeyboardInterrupt:
+    print("\nMeasurement stopped by user")
+except Exception as e:
+    print(f"An error occurred: {e}")
+finally:
+    lcd.clear()
+    lcd.message = "Monitoring\nstopped"
+    time.sleep(2)
+    lcd.clear()
+    print(f"Data saved to {csv_filename}")
