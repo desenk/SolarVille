@@ -1,9 +1,17 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
+import os
+import glob
+
+# Find the most recent CSV file
+list_of_files = glob.glob('solar_battery_data_*.csv')
+latest_file = max(list_of_files, key=os.path.getctime)
+
+print(f"Using file: {latest_file}")
 
 # Read the CSV file
-df = pd.read_csv('Solar battery data Aug 02.csv', parse_dates=['Timestamp'])
+df = pd.read_csv(latest_file, parse_dates=['Timestamp'])
 
 # Set the Timestamp as the index
 df.set_index('Timestamp', inplace=True)
@@ -46,5 +54,7 @@ fig.suptitle('Solar Panel and Battery Performance', fontsize=16)
 plt.tight_layout()
 plt.show()
 
-# Save the figure
-plt.savefig('solar_battery_performance.png', dpi=300, bbox_inches='tight')
+# Save the figure with a name based on the input file
+output_filename = f"graph_{os.path.splitext(latest_file)[0]}.png"
+plt.savefig(output_filename, dpi=300, bbox_inches='tight')
+print(f"Graph saved as: {output_filename}")
