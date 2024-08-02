@@ -5,7 +5,7 @@ import adafruit_ina219 # type: ignore
 import adafruit_character_lcd.character_lcd as characterlcd # type: ignore
 import digitalio # type: ignore
 import csv
-import datetime
+from datetime import datetime
 
 # I2C setup
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -63,29 +63,6 @@ def print_readings(bus_voltage, shunt_voltage, current, power, label):
     print(f"{label} Current:        {current*1000:.3f} mA")
     print(f"{label} Power:          {power:.3f} mW")
     print("------------------------")
-
-try:
-    print("Press CTRL+C to exit")
-    while True:
-        bus_voltage_solar, shunt_voltage_solar, current_solar, power_solar = read_ina219(ina219_solar)
-        bus_voltage_battery, shunt_voltage_battery, current_battery, power_battery = read_ina219(ina219_battery)
-        
-        display_readings(bus_voltage_solar, current_solar, power_solar, bus_voltage_battery, current_battery, power_battery)
-        
-        print_readings(bus_voltage_solar, shunt_voltage_solar, current_solar, power_solar, "Solar")
-        print_readings(bus_voltage_battery, shunt_voltage_battery, current_battery, power_battery, "Battery")
-        
-        time.sleep(2)
-
-except KeyboardInterrupt:
-    print("\nMeasurement stopped by user")
-except Exception as e:
-    print(f"An error occurred: {e}")
-finally:
-    lcd.clear()
-    lcd.message = "Monitoring\nstopped"
-    time.sleep(2)
-    lcd.clear()
 
 def write_to_csv(filename, data):
     with open(filename, 'a', newline='') as csvfile:
