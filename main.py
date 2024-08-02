@@ -8,7 +8,7 @@ import platform
 import requests
 from flask import request
 from trading import calculate_price
-from dataAnalysis import load_data, calculate_end_date, simulate_generation, update_plot_separate, update_plot_same
+from dataAnalysis import load_data, calculate_end_date, update_plot_separate, update_plot_same
 from config import LOCAL_IP, PEER_IP
 from solarMonitor import get_current_readings
 from batteryControl import update_battery_charge, read_battery_charge
@@ -46,7 +46,6 @@ def start_simulation_local():
     if df.empty:
         logging.error("No data loaded. Exiting simulation.")
         return
-    df = simulate_generation(df, mean=0.5, std=0.2)
     end_date = calculate_end_date(args.start_date, args.timescale)
     logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
     
