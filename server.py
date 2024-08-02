@@ -18,7 +18,8 @@ energy_data = {
     "balance": 0,
     "currency": 100.0,
     "demand": 0,
-    "generation": 0
+    "generation": 0,
+    "battery_charge": 0,
 }
 
 @app.route('/ready', methods=['POST'])
