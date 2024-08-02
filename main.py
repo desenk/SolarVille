@@ -143,6 +143,9 @@ def process_trading_and_lcd(df, timestamp, current_data):
     solar_power = readings['solar_power'] * SOLAR_SCALE_FACTOR
     demand = current_data['energy']
     
+    # Add generation to DataFrame
+    df.loc[timestamp, 'generation'] = solar_power
+    
     # Update battery charge
     battery_soc, efficiency = update_battery_charge(solar_current, solar_power, demand)
     
