@@ -10,6 +10,10 @@ from flask import request
 from trading import calculate_price
 from dataAnalysis import load_data, calculate_end_date, simulate_generation, update_plot_separate, update_plot_same
 from config import LOCAL_IP, PEER_IP
+from solarMonitor import get_current_readings
+from batteryControl import update_battery_charge, read_battery_charge
+
+SOLAR_SCALE_FACTOR = 1000  # Adjust this value as needed
 
 max_battery_charge = 1.0
 min_battery_charge = 0.0
@@ -60,34 +64,40 @@ def start_simulation_local():
     df['battery_charge'] = 0.5  # Assume 50% initial charge
     logging.info("Dataframe for balance, currency and battery charge is created.")
     
+    plot_update_interval = 6  # seconds
+    last_plot_update = time.time()
+
     try:
-        for timestamp in df.index:
+        while True:
             current_time = time.time()
             elapsed_time = current_time - start_time
             
-            # Calculate the expected elapsed time based on the simulation speed
-            expected_elapsed_time = (timestamp - df.index[0]).total_seconds() * (6 / 3600)  # 6 seconds per hour
+            timestamp = df.index[int(elapsed_time / (6 / 3600))]  # Calculate current timestamp
             
-            # If we're ahead of schedule, wait
-            if elapsed_time < expected_elapsed_time:
-                time.sleep(expected_elapsed_time - elapsed_time)
+            # Add the check here
+            if timestamp > df.index[-1]:
+                logging.info("Simulation completed.")
+                break
             
             current_data = df.loc[timestamp]
             
             if not current_data.empty:
-                df = process_trading_and_lcd(df, timestamp, current_data, current_data['battery_charge'])
+                df = process_trading_and_lcd(df, timestamp, current_data)
                 
-                # Update the plot
-                queue.put(timestamp)
+                if current_time - last_plot_update >= plot_update_interval:
+                    queue.put({
+                        'timestamp': timestamp,
+                        'generation': df.loc[timestamp, 'generation']
+                    })
+                    last_plot_update = current_time
+            
+            time.sleep(0.1)  # Small sleep to prevent CPU overuse
 
     except KeyboardInterrupt:
         logging.info("Simulation interrupted.")
     finally:
         queue.put("done")
         plot_process.join()
-
-import random
-import numpy as np
 
 def synchronize_start():
     current_time = time.time()
@@ -102,10 +112,6 @@ def synchronize_start():
         
         if response.status_code == 200 and peer_response.status_code == 200:
             logging.info(f"Simulation will start at {time.ctime(start_time)}")
-            
-            # Set a fixed seed for random number generation
-            random.seed(42)
-            np.random.seed(42)
             
             # Wait until it's time to start
             wait_time = start_time - time.time()
@@ -132,23 +138,32 @@ def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event)
     else:
         update_plot_same(df, start_date, end_date, timescale, queue, ready_event)
 
-def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
+def process_trading_and_lcd(df, timestamp, current_data):
+    readings = get_current_readings()
+    solar_current = readings['solar_current'] * SOLAR_SCALE_FACTOR
+    solar_power = readings['solar_power'] * SOLAR_SCALE_FACTOR
     demand = current_data['energy']
-    generation = current_data['generation']
-    balance = generation - demand
-    df.loc[timestamp, 'demand'] = demand
-    df.loc[timestamp, 'generation'] = generation
-    df.loc[timestamp, 'balance'] = balance
     
-    battery_charge = update_battery_charge(generation, demand)
-    df.loc[timestamp, 'battery_charge'] = battery_charge
+    # Update battery charge
+    battery_soc, efficiency = update_battery_charge(solar_current, solar_power, demand)
+    
+    # Calculate balance (now in Watts)
+    balance = solar_power - demand
+    
+    # Update dataframe
+    df.loc[timestamp, 'demand'] = demand
+    df.loc[timestamp, 'generation'] = solar_power
+    df.loc[timestamp, 'balance'] = balance
+    df.loc[timestamp, 'battery_charge'] = battery_soc
+    df.loc[timestamp, 'charge_efficiency'] = efficiency
 
     # Send updates to Flask server
     update_data = {
         'demand': demand,
-        'generation': generation,
+        'generation': solar_power,
         'balance': balance,
-        'battery_charge': battery_charge
+        'battery_charge': battery_soc,
+        'charge_efficiency': efficiency
     }
     make_api_call(f'http://{PEER_IP}:5000/update_peer_data', update_data)
 
@@ -162,31 +177,33 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
         if peer_balance is None:
             logging.warning(f"No balance data available for peer {PEER_IP}")
         else:
-            # Perform trading
+            # Perform trading (now in Watt-hours)
+            trade_duration = 1 / 3600  # Assuming 1-second intervals, convert to hours
             if balance > 0 and peer_balance < 0:
                 # This household has excess energy to sell
-                trade_amount = min(balance, abs(peer_balance))
+                trade_amount = min(balance * trade_duration, abs(peer_balance * trade_duration))
                 price = calculate_price(balance, abs(peer_balance))
-                df.loc[timestamp, 'balance'] -= trade_amount
+                df.loc[timestamp, 'balance'] -= trade_amount / trade_duration
                 df.loc[timestamp, 'currency'] += trade_amount * price
-                logging.info(f"Sold {trade_amount:.2f} kWh at {price:.2f} $/kWh")
+                logging.info(f"Sold {trade_amount*1000:.2f} Wh at {price:.2f} $/kWh")
             elif balance < 0 and peer_balance > 0:
                 # This household needs to buy energy
-                trade_amount = min(abs(balance), peer_balance)
+                trade_amount = min(abs(balance * trade_duration), peer_balance * trade_duration)
                 price = calculate_price(peer_balance, abs(balance))
-                df.loc[timestamp, 'balance'] += trade_amount
+                df.loc[timestamp, 'balance'] += trade_amount / trade_duration
                 df.loc[timestamp, 'currency'] -= trade_amount * price
-                logging.info(f"Bought {trade_amount:.2f} kWh at {price:.2f} $/kWh")
+                logging.info(f"Bought {trade_amount*1000:.2f} Wh at {price:.2f} $/kWh")
     else:
         logging.error("Failed to get peer data for trading")
 
     # Update LCD display
-    display_message(f"Gen: {generation:.2f}W\nDem: {demand:.2f}W\nBat: {battery_charge * 100:.2f}%")
+    display_message(f"Bat:{battery_soc:.0f}% Gen:{solar_power*1000:.0f}mW")
     
     logging.info(
-        f"At {timestamp} - Generation: {generation:.2f}W, "
-        f"Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%, "
-        f"Balance: {df.loc[timestamp, 'balance']:.2f}, "
+        f"At {timestamp} - Generation: {solar_power:.6f}W, "
+        f"Demand: {demand:.2f}W, Battery: {battery_soc:.2f}%, "
+        f"Efficiency: {efficiency:.2f}, "
+        f"Balance: {df.loc[timestamp, 'balance']:.6f}W, "
         f"Currency: {df.loc[timestamp, 'currency']:.2f}, "
         f"LCD updated"
     )
@@ -213,7 +230,6 @@ def initialize_simulation():
     if df.empty:
         logging.error("No data loaded. Exiting simulation.")
         return
-    df = simulate_generation(df, mean=0.5, std=0.2)
     end_date = calculate_end_date(args.start_date, args.timescale)
     logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
 

@@ -18,7 +18,8 @@ energy_data = {
     "balance": 0,
     "currency": 100.0,
     "demand": 0,
-    "generation": 0
+    "generation": 0,
+    "battery_charge": 0,
 }
 
 @app.route('/ready', methods=['POST'])
@@ -40,7 +41,10 @@ def update_peer_data():
     if peer_ip not in peer_data:
         peer_data[peer_ip] = {}
     peer_data[peer_ip].update(data)
-    logging.info(f"Updated peer data for {peer_ip}: {data}")
+    logging.info(f"Updated peer data for {peer_ip}: Generation: {data.get('generation', 'N/A')}W, "
+                 f"Demand: {data.get('demand', 'N/A')}W, "
+                 f"Battery: {data.get('battery_charge', 'N/A')}%, "
+                 f"Efficiency: {data.get('charge_efficiency', 'N/A')}")
     return jsonify({"status": "updated"})
 
 @app.route('/start', methods=['POST'])
