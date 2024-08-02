@@ -1,7 +1,7 @@
 import socket
 
-PI_1_IP = '192.168.54.200'
-PI_2_IP = '192.168.54.64'
+PI_1_IP = '192.168.85.200'
+PI_2_IP = '192.168.85.63'
 
 def get_local_and_peer_ip():
     hostname = socket.gethostname()
