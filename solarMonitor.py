@@ -4,6 +4,8 @@ import busio # type: ignore
 import adafruit_ina219 # type: ignore
 import adafruit_character_lcd.character_lcd as characterlcd # type: ignore
 import digitalio # type: ignore
+import csv
+import datetime
 
 # I2C setup
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -84,3 +86,50 @@ finally:
     lcd.message = "Monitoring\nstopped"
     time.sleep(2)
     lcd.clear()
+
+def write_to_csv(filename, data):
+    with open(filename, 'a', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(data)
+
+# Create and write headers to the CSV file
+csv_filename = f"solar_battery_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+headers = [
+    "Timestamp",
+    "Solar Bus Voltage (V)", "Solar Shunt Voltage (V)", "Solar Current (A)", "Solar Power (mW)",
+    "Battery Bus Voltage (V)", "Battery Shunt Voltage (V)", "Battery Current (A)", "Battery Power (mW)"
+]
+write_to_csv(csv_filename, headers)
+
+try:
+    print("Press CTRL+C to exit")
+    while True:
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        bus_voltage_solar, shunt_voltage_solar, current_solar, power_solar = read_ina219(ina219_solar)
+        bus_voltage_battery, shunt_voltage_battery, current_battery, power_battery = read_ina219(ina219_battery)
+        
+        display_readings(bus_voltage_solar, current_solar, power_solar, bus_voltage_battery, current_battery, power_battery)
+        
+        print_readings(bus_voltage_solar, shunt_voltage_solar, current_solar, power_solar, "Solar")
+        print_readings(bus_voltage_battery, shunt_voltage_battery, current_battery, power_battery, "Battery")
+        
+        # Write data to CSV
+        data = [
+            timestamp,
+            f"{bus_voltage_solar:.3f}", f"{shunt_voltage_solar:.6f}", f"{current_solar:.3f}", f"{power_solar:.3f}",
+            f"{bus_voltage_battery:.3f}", f"{shunt_voltage_battery:.6f}", f"{current_battery:.3f}", f"{power_battery:.3f}"
+        ]
+        write_to_csv(csv_filename, data)
+        
+        time.sleep(2)
+
+except KeyboardInterrupt:
+    print("\nMeasurement stopped by user")
+except Exception as e:
+    print(f"An error occurred: {e}")
+finally:
+    lcd.clear()
+    lcd.message = "Monitoring\nstopped"
+    time.sleep(2)
+    lcd.clear()
+    print(f"Data saved to {csv_filename}")
