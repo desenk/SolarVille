@@ -68,6 +68,7 @@ def start():
 
 start_time = None
 
+# remove this in the realTime version
 @app.route('/sync_start', methods=['POST'])
 def sync_start():
     global start_time, peers
