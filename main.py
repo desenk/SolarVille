@@ -6,6 +6,8 @@ import threading
 import logging
 import platform
 import requests
+import random
+import numpy as np
 from flask import request
 from trading import calculate_price
 from dataAnalysis import load_data, calculate_end_date, simulate_generation, update_plot_separate, update_plot_same
@@ -85,9 +87,6 @@ def start_simulation_local():
     finally:
         queue.put("done")
         plot_process.join()
-
-import random
-import numpy as np
 
 def synchronize_start():
     current_time = time.time()
