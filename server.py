@@ -4,16 +4,19 @@ import time
 import threading
 from config import PEER_IP, LOCAL_IP
 
+# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Initialise Flask application
 app = Flask(__name__)
 
-peers = []
-peer_ready = {}
-simulation_started = threading.Event()
-peer_data = {}
+# Global variables
+peers = [] # List of peer IPs
+peer_ready = {} # Dictionary to track readiness of peers
+simulation_started = threading.Event() # Event to signal simulation start
+peer_data = {} # Dictionary to store data from peers
 
-# Shared data for the example
+# Shared data for energy-related information
 energy_data = {
     "balance": 0,
     "currency": 100.0,
@@ -22,6 +25,7 @@ energy_data = {
     "battery_charge": 0,
 }
 
+# Endpoint for peers to signal that they are ready
 @app.route('/ready', methods=['POST'])
 def ready():
     data = request.json
@@ -34,6 +38,7 @@ def ready():
         logging.warning(f"Peer {peer_ip} not recognized")
         return jsonify({"status": "peer not recognized"}), 400
 
+# Endpoint for peers to update their data
 @app.route('/update_peer_data', methods=['POST'])
 def update_peer_data():
     data = request.json
@@ -44,6 +49,7 @@ def update_peer_data():
     logging.info(f"Updated peer data for {peer_ip}: {data}")
     return jsonify({"status": "updated"})
 
+# Endpoint to start the simulation when all peers are ready
 @app.route('/start', methods=['POST'])
 def start():
     global peers, peer_ready
