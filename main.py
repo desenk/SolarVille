@@ -13,7 +13,7 @@ from config import LOCAL_IP, PEER_IP
 from solarMonitor import get_current_readings
 from batteryControl import update_battery_charge, read_battery_charge
 
-SOLAR_SCALE_FACTOR = 1000  # Adjust this value as needed
+SOLAR_SCALE_FACTOR = 10  # Adjust this value as needed
 
 max_battery_charge = 1.0
 min_battery_charge = 0.0
