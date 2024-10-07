@@ -11,7 +11,7 @@ from trading import calculate_price
 from dataAnalysis import load_data, calculate_end_date, update_plot_separate, update_plot_same
 from config import LOCAL_IP, PEER_IP
 from solarMonitor import get_current_readings
-from batteryControl import update_battery_charge, read_battery_charge
+from battery_energy_management import battery_charging, battery_supply
 
 SOLAR_SCALE_FACTOR = 1000  # Adjust this value as needed
 
@@ -23,7 +23,7 @@ if platform.system() == 'Darwin':  # MacOS
     from mock_batteryControl import update_battery_charge, read_battery_charge
     from mock_lcdControlTest import display_message
 else:  # Raspberry Pi
-    from batteryControl import update_battery_charge, read_battery_charge
+    from battery_energy_management import battery_charging, battery_supply
     from lcdControlTest import display_message
 
 # Configure logging
