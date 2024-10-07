@@ -191,7 +191,7 @@ def process_trading_and_lcd(df, timestamp, current_data):
                 if peer_balance >= 0:
                     battery_soc, sell_to_grid = battery_charging(excess_energy=balance, battery_soc=battery_soc, battery_capacity = 5)
                     # the other household has excess energy too, this household energy can sell to grid
-                   df.loc[timestamp, ['balance', 'currency', 'battery_charge']] = [
+                    df.loc[timestamp, ['balance', 'currency', 'battery_charge']] = [
                         df.loc[timestamp, 'balance'] - balance,  # update balance
                         df.loc[timestamp, 'currency'] + sell_to_grid * sell_grid_price,  # update currency
                         battery_soc  # update battery_charge
