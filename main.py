@@ -12,6 +12,7 @@ from dataAnalysis import load_data, calculate_end_date, update_plot_separate, up
 from config import LOCAL_IP, PEER_IP
 from solarMonitor import get_current_readings
 from battery_energy_management import battery_charging, battery_supply
+from lcdControlTest.py import display_message
 
 SOLAR_SCALE_FACTOR = 4000  # Adjust this value as needed
 
@@ -236,7 +237,6 @@ def process_trading_and_lcd(df, timestamp, current_data):
     logging.info(
         f"At {timestamp} - Generation: {solar_power:.6f}W, "
         f"Demand: {demand:.2f}kWh, Battery: {battery_soc:.2f}%, "
-        f"Efficiency: {efficiency:.2f}, "
         f"Balance: {df.loc[timestamp, 'balance']:.6f}W, "
         f"Currency: {df.loc[timestamp, 'currency']:.2f}, "
         f"LCD updated"
