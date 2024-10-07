@@ -160,6 +160,10 @@ def process_trading_and_lcd(df, timestamp, current_data):
 
     trade_amount = 0
     demand = current_data['energy']#unit kWh
+
+    sell_grid_price = calculate_price(generation, demand)
+    peer_price = calculate_price(generation, demand)
+    buy_grid_price = calculate_price(generation, demand)
     
     # Calculate balance (now in Watts)
     balance = solar_power - demand
