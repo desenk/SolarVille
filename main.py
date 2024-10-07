@@ -13,7 +13,7 @@ from config import LOCAL_IP, PEER_IP
 from solarMonitor import get_current_readings
 from battery_energy_management import battery_charging, battery_supply
 
-SOLAR_SCALE_FACTOR = 1000  # Adjust this value as needed
+SOLAR_SCALE_FACTOR = 4000  # Adjust this value as needed
 
 max_battery_charge = 1.0
 min_battery_charge = 0.0
@@ -158,14 +158,12 @@ def process_trading_and_lcd(df, timestamp, current_data):
         solar_current = 0
         solar_power = 0
     
-    demand = current_data['energy']
+    demand = current_data['energy']#unit kWh
     
     # Add generation to DataFrame
     df.loc[timestamp, 'generation'] = solar_power
     df.loc[timestamp, 'demand'] = demand
     
-    # Update battery charge
-    battery_soc, efficiency = update_battery_charge(solar_current, solar_power, demand)
     
     # Calculate balance (now in Watts)
     balance = solar_power - demand
@@ -174,18 +172,16 @@ def process_trading_and_lcd(df, timestamp, current_data):
     df.loc[timestamp, 'demand'] = demand
     df.loc[timestamp, 'generation'] = solar_power
     df.loc[timestamp, 'balance'] = balance
-    df.loc[timestamp, 'battery_charge'] = battery_soc
-    df.loc[timestamp, 'charge_efficiency'] = efficiency
-
+   
     # Send updates to Flask server
-    update_data = {
+    update_data_1 = {
         'demand': demand,
         'generation': solar_power,
         'balance': balance,
         'battery_charge': battery_soc,
         'charge_efficiency': efficiency
     }
-    make_api_call(f'http://{PEER_IP}:5000/update_peer_data', update_data)
+    make_api_call(f'http://{PEER_IP}:5000/update_peer_data', update_data_1)
 
     # Get peer data for trading
     peer_data_response = requests.get(f'http://{PEER_IP}:5000/get_peer_data')
@@ -197,22 +193,38 @@ def process_trading_and_lcd(df, timestamp, current_data):
         if peer_balance is None:
             logging.warning(f"No balance data available for peer {PEER_IP}")
         else:
-            # Perform trading (now in Watt-hours)
-            trade_duration = 1 / 3600  # Assuming 1-second intervals, convert to hours
-            if balance > 0 and peer_balance < 0:
-                # This household has excess energy to sell
-                trade_amount = min(balance * trade_duration, abs(peer_balance * trade_duration))
-                price = calculate_price(balance, abs(peer_balance))
-                df.loc[timestamp, 'balance'] -= trade_amount / trade_duration
-                df.loc[timestamp, 'currency'] += trade_amount * price
-                logging.info(f"Sold {trade_amount*1000:.2f} Wh at {price:.2f} $/kWh")
-            elif balance < 0 and peer_balance > 0:
-                # This household needs to buy energy
-                trade_amount = min(abs(balance * trade_duration), peer_balance * trade_duration)
-                price = calculate_price(peer_balance, abs(balance))
-                df.loc[timestamp, 'balance'] += trade_amount / trade_duration
-                df.loc[timestamp, 'currency'] -= trade_amount * price
-                logging.info(f"Bought {trade_amount*1000:.2f} Wh at {price:.2f} $/kWh")
+            # Perform trading (now in kilo Watt-hours)
+            if balance >= 0:
+                # The household has excess energy
+                if peer_balance >= 0:
+                    battery_soc, sell_to_grid = battery_charging(excess_energy=balance, battery_soc=battery_soc, battery_capacity = 5)
+                    # the other household has excess energy too, this household energy can sell to grid
+                    df.loc[timestamp, 'balance'] -= balance
+                    df.loc[timestamp, 'currency'] += sell_to_grid * sell_grid_price
+                    df.loc[timestamp, 'battery_charge'] = battery_soc
+                    logging.info(f"Sold {balance*1000:.2f} Wh to the grid at {sell_grid_price:.2f} $/kWh")
+                elif peer_balance < 0:
+                    # the other household needs energy
+                    if balance > abs(peer_balance):
+                        # energy is enough to supply the other household
+                        trade_amount = abs(peer_balance)
+                        remaining_balance = balance - trade_amount
+                        battery_soc, sell_to_grid = battery_charging(excess_energy=remaining_balance, battery_soc=battery_soc, battery_capacity = 5)
+                        df.loc[timestamp, 'balance'] -= balance
+                        df.loc[timestamp, 'currency'] += (trade_amount * peer_price) + (sell_to_grid * sell_grid_price)
+                        logging.info(f"Sold {trade_amount*1000:.2f} Wh to peer at {peer_price:.2f} $/kWh and the remaining {sell_to_grid*1000:.2f} Wh to the grid at {sell_grid_price:.2f} $/kWh")
+                    else:
+                        # energy can only supply part of the need of the other household
+                        trade_amount = balance
+                        df.loc[timestamp, 'balance'] -= balance
+                        df.loc[timestamp, 'currency'] += trade_amount * peer_price
+                        logging.info(f"Sold {trade_amount*1000:.2f} Wh to peer at {peer_price:.2f} $/kWh")
+            elif balance < 0:
+                # the household needs energy
+                battery_soc, buy_from_grid = battery_supply(excess_energy = balance, battery_soc = battery_soc, battery_capacity = 5, depth_of_discharge=0.2)
+                df.loc[timestamp, 'balance'] += balance
+                df.loc[timestamp, 'currency'] -= buy_from_grid * buy_grid_price
+                logging.info(f"Bought {buy_from_grid:.2f} kWh from grid at {buy_grid_price:.2f} $/kWh")
     else:
         logging.error("Failed to get peer data for trading")
 
@@ -227,6 +239,12 @@ def process_trading_and_lcd(df, timestamp, current_data):
         f"Currency: {df.loc[timestamp, 'currency']:.2f}, "
         f"LCD updated"
     )
+    # Send updates to Flask server
+    update_data_2 = {
+        'battery_charge': battery_soc,
+        'trade_amount': trade_amount
+    }
+    make_api_call(f'http://{PEER_IP}:5000/update_peer_data', update_data_2)
 
     return df
 
