@@ -7,7 +7,7 @@ import logging
 import platform
 import requests
 from flask import request
-from trading import calculate_price
+from pricing import calculate_price
 from dataAnalysis import load_data, calculate_end_date, update_plot_separate, update_plot_same
 from config import LOCAL_IP, PEER_IP
 from solarMonitor import get_current_readings
@@ -18,13 +18,6 @@ SOLAR_SCALE_FACTOR = 4000  # Adjust this value as needed
 max_battery_charge = 1.0
 min_battery_charge = 0.0
 
-# Conditionally import the correct modules based on the platform
-if platform.system() == 'Darwin':  # MacOS
-    from mock_batteryControl import update_battery_charge, read_battery_charge
-    from mock_lcdControlTest import display_message
-else:  # Raspberry Pi
-    from battery_energy_management import battery_charging, battery_supply
-    from lcdControlTest import display_message
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -151,30 +144,31 @@ def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event)
 def process_trading_and_lcd(df, timestamp, current_data):
     try:
         readings = get_current_readings()
-        solar_current = readings['solar_current'] * SOLAR_SCALE_FACTOR
-        solar_power = readings['solar_power'] * SOLAR_SCALE_FACTOR
+        solar_power = readings['solar_power'] * SOLAR_SCALE_FACTOR# unit: W
+        # Assume the solar power remains the same in every half hour
+        solar_energy = solar_power * 0.5 / 1000 # unit: kWh
     except Exception as e:
         logging.error(f"Failed to get solar data: {e}")
-        solar_current = 0
         solar_power = 0
+        solar_energy = 0
 
     trade_amount = 0
     demand = current_data['energy']#unit kWh
 
-    sell_grid_price = calculate_price(generation, demand)
-    peer_price = calculate_price(generation, demand)
-    buy_grid_price = calculate_price(generation, demand)
+    sell_grid_price = calculate_price(solar_energy, demand)
+    peer_price = calculate_price(solar_energy, demand)
+    buy_grid_price = calculate_price(solar_energy, demand)
     
     # Calculate balance (now in Watts)
-    balance = solar_power - demand
+    balance = solar_energy - demand
     
     # Update dataframe
-    df.loc[timestamp, ['generation', 'demand', 'balance']] = [solar_power, demand, balance]
+    df.loc[timestamp, ['generation', 'demand', 'balance']] = [solar_energy, demand, balance]
 
     # Send updates to Flask server
     update_data_1 = {
         'demand': demand,
-        'generation': solar_power,
+        'generation': solar_energy,
         'balance': balance
     }
     make_api_call(f'http://{PEER_IP}:5000/update_peer_data', update_data_1)
@@ -241,7 +235,7 @@ def process_trading_and_lcd(df, timestamp, current_data):
     
     logging.info(
         f"At {timestamp} - Generation: {solar_power:.6f}W, "
-        f"Demand: {demand:.2f}W, Battery: {battery_soc:.2f}%, "
+        f"Demand: {demand:.2f}kWh, Battery: {battery_soc:.2f}%, "
         f"Efficiency: {efficiency:.2f}, "
         f"Balance: {df.loc[timestamp, 'balance']:.6f}W, "
         f"Currency: {df.loc[timestamp, 'currency']:.2f}, "
