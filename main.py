@@ -207,7 +207,7 @@ def process_trading_and_lcd(df, timestamp, current_data):
                         battery_soc  # update battery_charge
                     ]
 
-                    logging.info(f"Sold {balance*1000:.2f} Wh to the grid at {sell_grid_price:.2f} $/kWh")
+                    logging.info(f"Sold {balance*1000:.2f} Wh to the grid at {sell_grid_price:.2f} ￡/kWh")
                 elif peer_balance < 0:
                     # the other household needs energy
                     if balance > abs(peer_balance):
@@ -220,7 +220,7 @@ def process_trading_and_lcd(df, timestamp, current_data):
                             df.loc[timestamp, 'currency'] + (trade_amount * peer_price) + (sell_to_grid * sell_grid_price), # update currency
                             battery_soc  # update battery_charge
                         ]
-                        logging.info(f"Sold {trade_amount*1000:.2f} Wh to peer at {peer_price:.2f} $/kWh and the remaining {sell_to_grid*1000:.2f} Wh to the grid at {sell_grid_price:.2f} $/kWh")
+                        logging.info(f"Sold {trade_amount*1000:.2f} Wh to peer at {peer_price:.2f} ￡/kWh and the remaining {sell_to_grid*1000:.2f} Wh to the grid at {sell_grid_price:.2f} ￡/kWh")
                     else:
                         # energy can only supply part of the need of the other household
                         trade_amount = balance
@@ -229,20 +229,22 @@ def process_trading_and_lcd(df, timestamp, current_data):
                             df.loc[timestamp, 'currency'] + trade_amount * peer_price, # update currency
                             battery_soc  # update battery_charge
                         ]
-                        logging.info(f"Sold {trade_amount*1000:.2f} Wh to peer at {peer_price:.2f} $/kWh")
+                        logging.info(f"Sold {trade_amount*1000:.2f} Wh to peer at {peer_price:.2f} ￡/kWh")
             elif balance < 0:
                 #test if the program can run to this point
                 logging.info(f"need electricity")
                 # the household needs energy
                 battery_soc, buy_from_grid = battery_supply(excess_energy = balance, battery_soc = battery_soc, battery_capacity = 5, depth_of_discharge=0.2)
                 
-                logging.info(f"Updating DataFrame at timestamp: {timestamp}, Current balance: {df.loc[timestamp, 'balance']}, Current currency: {df.loc[timestamp, 'currency']}")
+                logging.info(f"Updating DataFrame at timestamp: {timestamp}, Current balance: {df.loc[timestamp, 'balance']},"
+                             f" Current currency: {df.loc[timestamp, 'currency']},"
+                             f"buy_from_grid: {buy_from_grid},buy_grid_price:{buy_grid_price}")
                 df.loc[timestamp, ['balance', 'currency']] = [
                     df.loc[timestamp, 'balance'] - balance,  # update balance
                     df.loc[timestamp, 'currency'] - buy_from_grid * buy_grid_price, # update currency
                     battery_soc  # update battery_charge
                 ]
-                logging.info(f"Bought {buy_from_grid:.2f} kWh from grid at {buy_grid_price:.2f} $/kWh")
+                logging.info(f"Bought {buy_from_grid:.2f} kWh from grid at {buy_grid_price:.2f} ￡/kWh")
     else:
         logging.error("Failed to get peer data for trading")
 
