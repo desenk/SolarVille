@@ -43,7 +43,8 @@ def update_peer_data():
     peer_data[peer_ip].update(data)
     logging.info(f"Updated peer data for {peer_ip}: Generation: {data.get('generation', 'N/A')}kWh, "
                  f"Demand: {data.get('demand', 'N/A')}kWh, "
-                 f"Balance: {data.get('balance', 'N/A')}kWh")
+                 f"Balance: {data.get('balance', 'N/A')}kWh,"
+                 f"Initial SoC: {data.get('battery SoC', 'N/A')}%")
     return jsonify({"status": "updated"})
 
 @app.route('/update_trade_data', methods=['POST'])
