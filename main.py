@@ -1,194 +1,73 @@
 import argparse
 import time
-import pandas as pd # type: ignore
+import pandas as pd
 from multiprocessing import Process, Queue, Event
 import threading
 import logging
 import platform
 import requests
-from flask import request
 from trading import calculate_price
 from dataAnalysis import load_data, calculate_end_date, update_plot_separate, update_plot_same
-from config import LOCAL_IP, PEER_IP
+from config import LOCAL_IP, PEER_IP, SOLAR_SCALE_FACTOR
 from solarMonitor import get_current_readings
 from batteryControl import update_battery_charge, read_battery_charge
+from lcdControlTest import display_message
 
-SOLAR_SCALE_FACTOR = 10  # Adjust this value as needed
+PEER_API_URL = f'http://{PEER_IP}:5000'
 
-max_battery_charge = 1.0
-min_battery_charge = 0.0
-
-# Conditionally import the correct modules based on the platform
-if platform.system() == 'Darwin':  # MacOS
-    from mock_batteryControl import update_battery_charge, read_battery_charge
-    from mock_lcdControlTest import display_message
-else:  # Raspberry Pi
-    from batteryControl import update_battery_charge, read_battery_charge
-    from lcdControlTest import display_message
-
-# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def start_simulation_local():
-    if not synchronize_start():
-        logging.error('Failed to start simulation')
-        return
-    
-    # Wait for the simulation to start
-    response = requests.get('http://localhost:5000/wait_for_start')
-    if response.status_code != 200:
-        logging.error('Failed to start simulation')
-        return
-    
-    start_time = time.time()
 
-    df = load_data(args.file_path, args.household, args.start_date, args.timescale)
-    if df.empty:
-        logging.error("No data loaded. Exiting simulation.")
-        return
-    
-    df['generation'] = 0.0  # Initialize generation column
-    df['balance'] = 0.0  # Initialize balance column
-    df['currency'] = 100.0  # Initialize the currency column to 100
-    df['battery_charge'] = 0.5  # Assume 50% initial charge
-    
-    end_date = calculate_end_date(args.start_date, args.timescale)
-    logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
-    
-    queue = Queue()
-    ready_event = Event()
-    plot_process = Process(target=plot_data, args=(df, args.start_date, end_date, args.timescale, args.separate, queue, ready_event))
-    plot_process.start()
-    
-    # Wait for the plotting process to signal that it is ready
-    ready_event.wait()
-    logging.info("Plot initialized, starting simulation...")
-
-    logging.info("Dataframe for generation, balance, currency and battery charge is created.")
-    
-    plot_update_interval = 6  # seconds
-    last_plot_update = time.time()
-    
-    total_simulation_time = (df.index[-1] - df.index[0]).total_seconds()
-    simulation_speed = 30 * 60 / 6  # 30 minutes of data in 6 seconds of simulation
-
-    try:
-        while True:
-            current_time = time.time()
-            elapsed_time = current_time - start_time
-            
-            simulated_elapsed_time = elapsed_time * simulation_speed
-            
-            if simulated_elapsed_time >= total_simulation_time:
-                logging.info("Simulation completed.")
-                break
-            
-            timestamp_index = int(simulated_elapsed_time / (30 * 60))  # 30-minute intervals
-            if timestamp_index >= len(df.index):
-                logging.info("Reached end of data. Simulation completed.")
-                break
-            
-            timestamp = df.index[timestamp_index]
-            current_data = df.loc[timestamp]
-            
-            if not current_data.empty:
-                df = process_trading_and_lcd(df, timestamp, current_data)
-                
-                if current_time - last_plot_update >= plot_update_interval:
-                    queue.put({
-                        'timestamp': timestamp,
-                        'generation': df.loc[timestamp, 'generation']
-                    })
-                    last_plot_update = current_time
-            
-            time.sleep(0.1)  # Small sleep to prevent CPU overuse
-
-    except KeyboardInterrupt:
-        logging.info("Simulation interrupted.")
-    finally:
-        queue.put("done")
-        plot_process.join()
-
-def synchronize_start():
-    current_time = time.time()
-    start_time = current_time + 10  # Start 20 seconds from now
-    
-    try:
-        peers = [LOCAL_IP, PEER_IP]  # List of both IPs
-        
-        # Set start time on both Pis
-        response = requests.post('http://localhost:5000/sync_start', json={"start_time": start_time, "peers": peers})
-        peer_response = requests.post(f'http://{PEER_IP}:5000/sync_start', json={"start_time": start_time, "peers": peers})
-        
-        if response.status_code == 200 and peer_response.status_code == 200:
-            logging.info(f"Simulation will start at {time.ctime(start_time)}")
-            
-            # Wait until it's time to start
-            wait_time = start_time - time.time()
-            if wait_time > 0:
-                logging.info(f"Waiting for {wait_time:.2f} seconds before starting simulation")
-                time.sleep(wait_time)
-            
-            # Start the simulation
-            simulation_start_time = time.time()
-            requests.post('http://localhost:5000/start_simulation', json={'start_time': simulation_start_time})
-            requests.post(f'http://{PEER_IP}:5000/start_simulation', json={'start_time': simulation_start_time})
-            
-            logging.info("Starting simulation now")
-            return True
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Network error during synchronization: {e}")
-    
-    logging.error("Failed to start simulation")
-    return False
-
-def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event):
-    if separate:
-        update_plot_separate(df, start_date, end_date, timescale, queue, ready_event)
-    else:
-        update_plot_same(df, start_date, end_date, timescale, queue, ready_event)
-
-def process_trading_and_lcd(df, timestamp, current_data):
+def process_trading_and_lcd(df, timestamp, current_data, queue):
     try:
         readings = get_current_readings()
-        solar_current = readings['solar_current'] * SOLAR_SCALE_FACTOR
-        solar_power = readings['solar_power'] * SOLAR_SCALE_FACTOR
+        solar_current_a = readings['solar_current_a']
+        solar_power_kwh = readings['solar_power_kwh']
+        solar_power_mw = readings['solar_power_mw']
+        solar_power_scaled_kwh = solar_power_kwh * SOLAR_SCALE_FACTOR  # Scale up the solar generation
     except Exception as e:
         logging.error(f"Failed to get solar data: {e}")
-        solar_current = 0
-        solar_power = 0
+        solar_current_a = 0
+        solar_power_scaled_kwh = 0
+        solar_power_mw = 0
     
     demand = current_data['energy']
     
     # Add generation to DataFrame
-    df.loc[timestamp, 'generation'] = solar_power
+    df.loc[timestamp, 'generation'] = solar_power_scaled_kwh
     df.loc[timestamp, 'demand'] = demand
     
     # Update battery charge
-    battery_soc, efficiency = update_battery_charge(solar_current, solar_power, demand)
+    battery_soc, efficiency = update_battery_charge(solar_current_a, solar_power_scaled_kwh, demand)
     
     # Calculate balance (now in Watts)
-    balance = solar_power - demand
+    balance = solar_power_scaled_kwh - demand
     
     # Update dataframe
     df.loc[timestamp, 'demand'] = demand
-    df.loc[timestamp, 'generation'] = solar_power
+    df.loc[timestamp, 'generation'] = solar_power_scaled_kwh
     df.loc[timestamp, 'balance'] = balance
     df.loc[timestamp, 'battery_charge'] = battery_soc
     df.loc[timestamp, 'charge_efficiency'] = efficiency
 
+    # Put data in queue for plotting
+    queue.put({
+        'timestamp': timestamp,
+        'generation': solar_power_scaled_kwh
+    })
+
     # Send updates to Flask server
     update_data = {
         'demand': demand,
-        'generation': solar_power,
+        'generation': solar_power_scaled_kwh,
         'balance': balance,
         'battery_charge': battery_soc,
         'charge_efficiency': efficiency
     }
-    make_api_call(f'http://{PEER_IP}:5000/update_peer_data', update_data)
+    make_api_call(f'{PEER_API_URL}/update_peer_data', update_data)
 
     # Get peer data for trading
-    peer_data_response = requests.get(f'http://{PEER_IP}:5000/get_peer_data')
+    peer_data_response = requests.get(f'{PEER_API_URL}/get_peer_data')
     if peer_data_response.status_code == 200:
         peer_data = peer_data_response.json()
         
@@ -216,11 +95,14 @@ def process_trading_and_lcd(df, timestamp, current_data):
     else:
         logging.error("Failed to get peer data for trading")
 
-    # Update LCD display
-    display_message(f"Bat:{battery_soc:.0f}% Gen:{solar_power*1000:.0f}mW")
+    # Update LCD display with real solar power in mW
+    # To switch to displaying the scaled solar power in kWh in the future,
+    # modify the display_message function to update LCD display with scaled solar power in kWh, e.g.:
+    # display_message(f"Bat:{battery_soc:.0f}% Gen:{solar_power_scaled_kwh*1000:.0f}Wh")
+    display_message(f"Bat:{battery_soc:.0f}% Gen:{solar_power_mw:.0f}mW")
     
     logging.info(
-        f"At {timestamp} - Generation: {solar_power:.6f}W, "
+        f"At {timestamp} - Generation: {solar_power_scaled_kwh:.6f}W, "
         f"Demand: {demand:.2f}W, Battery: {battery_soc:.2f}%, "
         f"Efficiency: {efficiency:.2f}, "
         f"Balance: {df.loc[timestamp, 'balance']:.6f}W, "
@@ -242,18 +124,60 @@ def make_api_call(url, data, max_retries=3):
                 logging.error(f"Max retries reached for {url}")
     return None
 
-def initialize_simulation():
-    global df, end_date
-    logging.info("Loading data, please wait...")
-    start_time = time.time()
+def start_simulation_local(args):
     df = load_data(args.file_path, args.household, args.start_date, args.timescale)
     if df.empty:
         logging.error("No data loaded. Exiting simulation.")
         return
+    
     df['generation'] = 0.0  # Initialize generation column
     df['balance'] = 0.0  # Initialize balance column
+    df['currency'] = 100.0  # Initialize the currency column to 100
+    df['battery_charge'] = 0.5  # Assume 50% initial charge
+
     end_date = calculate_end_date(args.start_date, args.timescale)
-    logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
+    total_simulation_time = (df.index[-1] - df.index[0]).total_seconds()
+    simulation_speed = 30 * 60 / 6  # 30 minutes of data in 6 seconds of simulation
+
+    queue = Queue()
+    ready_event = Event()
+
+    plot_process = Process(target=update_plot_same, args=(df, args.start_date, end_date, args.timescale, queue, ready_event))
+    plot_process.start()
+
+    ready_event.wait()  # Wait for the plot to be initialized
+
+    start_time = time.time()
+
+    try:
+        while True:
+            current_time = time.time()
+            elapsed_time = current_time - start_time
+
+            simulated_elapsed_time = elapsed_time * simulation_speed
+
+            if simulated_elapsed_time >= total_simulation_time:
+                logging.info("Simulation completed.")
+                break
+
+            timestamp_index = int(simulated_elapsed_time / (30 * 60))  # 30-minute intervals
+            if timestamp_index >= len(df.index):
+                logging.info("Reached end of data. Simulation completed.")
+                break
+
+            timestamp = df.index[timestamp_index]
+            current_data = df.loc[timestamp]
+
+            if not current_data.empty:
+                df = process_trading_and_lcd(df, timestamp, current_data, queue)
+
+            time.sleep(1)  # Adjust sleep time as needed
+
+    except KeyboardInterrupt:
+        logging.info("Simulation interrupted.")
+    finally:
+        queue.put("done")
+        plot_process.join()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Smart Grid Simulation')
@@ -261,19 +185,7 @@ if __name__ == "__main__":
     parser.add_argument('--household', type=str, required=True, help='Household ID for the data')
     parser.add_argument('--start_date', type=str, required=True, help='Start date for the simulation')
     parser.add_argument('--timescale', type=str, required=True, choices=['d', 'w', 'm', 'y'], help='Timescale: d for day, w for week, m for month, y for year')
-    parser.add_argument('--separate', action='store_true', help='Flag to plot data in separate subplots')
-
-    args = parser.parse_args()  # Parse the arguments
-    initialize_simulation()
-
-    from server import app
-    server_thread = threading.Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 5000})
-    server_thread.start()
     
-    time.sleep(2)  # Give the server a moment to start
+    args = parser.parse_args()
     
-    simulation_thread = threading.Thread(target=start_simulation_local)
-    simulation_thread.start()
-    
-    simulation_thread.join()
-    server_thread.join()
+    start_simulation_local(args)

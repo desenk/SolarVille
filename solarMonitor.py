@@ -27,7 +27,7 @@ ina219_battery.bus_adc_resolution = adafruit_ina219.ADCResolution.ADCRES_12BIT_3
 ina219_battery.shunt_adc_resolution = adafruit_ina219.ADCResolution.ADCRES_12BIT_32S
 
 """
-# LCD setup (unchanged)
+# LCD setup
 lcd_columns = 16
 lcd_rows = 2
 
@@ -46,10 +46,10 @@ lcd = characterlcd.Character_LCD_Mono(
 def read_ina219(sensor):
     bus_voltage = sensor.bus_voltage
     shunt_voltage = sensor.shunt_voltage
-    current = sensor.current / 1000  # Convert to A
-    power = bus_voltage * current * 1000  # Calculate power in mW
+    current_ma = sensor.current
+    power_mw = bus_voltage * current_ma
     
-    return bus_voltage, shunt_voltage, current, power
+    return bus_voltage, shunt_voltage, current_ma, power_mw
 
 """
 def display_readings(bus_voltage_solar, current_solar, power_solar, bus_voltage_battery, current_battery, power_battery):
@@ -68,17 +68,23 @@ def print_readings(bus_voltage, shunt_voltage, current, power, label):
     print(f"{label} Power:          {power:.3f} mW")
     print("------------------------")
 
+
 def get_current_readings():
-    bus_voltage_solar, shunt_voltage_solar, current_solar, power_solar = read_ina219(ina219_solar)
-    bus_voltage_battery, shunt_voltage_battery, current_battery, power_battery = read_ina219(ina219_battery)
-    
-    # Convert mA to A and mW to W
-    current_solar_a = current_solar / 1000
-    power_solar_w = power_solar / 1000
-    
+    bus_voltage_solar, shunt_voltage_solar, current_solar_ma, power_solar_mw = read_ina219(ina219_solar)
+    bus_voltage_battery, shunt_voltage_battery, current_battery_ma, power_battery_mw = read_ina219(ina219_battery)
+
+    # Convert mW to W
+    power_solar_w = power_solar_mw / 1000
+
+    # Convert W to kWh (assuming 30-minute intervals)
+    power_solar_kwh = power_solar_w / 2
+
     return {
-        'solar_current': current_solar_a,
-        'solar_power': power_solar_w,
+        'solar_current_ma': current_solar_ma,
+        'solar_current_a': current_solar_ma / 1000,
+        'solar_power_mw': power_solar_mw,
+        'solar_power_kwh': power_solar_kwh,
         'battery_voltage': bus_voltage_battery,
-        'battery_current': current_battery / 1000
+        'battery_current_ma': current_battery_ma,
+        'battery_current_a': current_battery_ma / 1000
     }
