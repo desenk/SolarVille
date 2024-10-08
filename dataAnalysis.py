@@ -138,3 +138,59 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
             break
 
     plt.show()
+
+def update_plot_separate(df, start_date, end_date, interval, queue, ready_event):
+    df_day = df[start_date:end_date]
+    df_day = df_day.reset_index()
+
+    fig, axs = plt.subplots(3, 1, figsize=(15, 18), sharex=True)
+
+    demand_line, = axs[0].plot([], [], label='Energy Demand (kWh)', color='red')
+    generation_line, = axs[1].plot([], [], label='Energy Generation (kWh)', color='green')
+    net_line, = axs[2].plot([], [], label='Net Energy (kWh)', color='blue', linestyle='--')
+
+    for ax in axs:
+        ax.set_ylabel('Energy (kWh)')
+        ax.legend()
+
+    axs[0].set_title(f'Energy Demand for Household on {start_date[:10]}')
+    axs[1].set_title(f'Energy Generation for Household on {start_date[:10]}')
+    axs[2].set_title(f'Net Energy for Household on {start_date[:10]}')
+
+    if interval == 'd':
+        axs[2].xaxis.set_major_locator(mdates.HourLocator(interval=1))
+        axs[2].xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+    elif interval == 'w':
+        axs[2].xaxis.set_major_locator(mdates.DayLocator(interval=1))
+        axs[2].xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+    elif interval == 'm':
+        axs[2].xaxis.set_major_locator(mdates.WeekdayLocator(interval=1))
+        axs[2].xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+    elif interval == 'y':
+        axs[2].xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+        axs[2].xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    ready_event.set()  # Signal that the plot is initialized
+
+    plt.show(block=False)
+
+    while True:
+        timestamp = queue.get()
+        if timestamp == "done":
+            break
+
+        index = df_day.index[df_day['datetime'] <= timestamp][-1]
+        demand_line.set_data(df_day['datetime'][:index+1], df_day['energy'][:index+1])
+        generation_line.set_data(df_day['datetime'][:index+1], df_day['generation'][:index+1])
+        net_line.set_data(df_day['datetime'][:index+1], df_day['generation'][:index+1] - df_day['energy'][:index+1])
+        
+        for ax in axs:
+            ax.relim()
+            ax.autoscale_view()
+        
+        plt.draw()
+        plt.pause(0.01)  # Short pause to allow the plot to update
+
+    plt.show()
