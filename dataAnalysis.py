@@ -7,6 +7,72 @@ import calendar
 import logging
 import time
 
+# Function to load and preprocess data
+def load_data(file_path, household, start_date, timescale, chunk_size=10000):
+    start_time = time.time()
+    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date_obj = calculate_end_date(start_date, timescale)
+    
+    filtered_chunks = []
+    chunks_with_data = 0
+    total_chunks = 0
+    
+    for chunk in pd.read_csv(file_path, chunksize=chunk_size):
+        total_chunks += 1
+        chunk = chunk[chunk["LCLid"] == household]
+        chunk['datetime'] = pd.to_datetime(chunk['tstp'].str.replace('.0000000', ''))
+        chunk = chunk[(chunk['datetime'] >= start_date_obj) & (chunk['datetime'] < end_date_obj)]
+        
+        if not chunk.empty:
+            chunks_with_data += 1
+            chunk['date'] = chunk['datetime'].dt.date
+            chunk['month'] = chunk['datetime'].dt.strftime("%B")
+            chunk['day_of_month'] = chunk['datetime'].dt.strftime("%d")
+            chunk['time'] = chunk['datetime'].dt.strftime('%X')
+            chunk['weekday'] = chunk['datetime'].dt.strftime('%A')
+            chunk['day_seconds'] = (chunk['datetime'] - chunk['datetime'].dt.normalize()).dt.total_seconds()
+
+            chunk['weekday'] = pd.Categorical(chunk['weekday'], categories=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], ordered=True)
+            chunk['month'] = pd.Categorical(chunk['month'], categories=calendar.month_name[1:], ordered=True)
+
+            chunk = chunk[chunk["energy(kWh/hh)"] != "Null"]
+            chunk["energy"] = chunk["energy(kWh/hh)"].astype("float64")
+            chunk["cumulative_sum"] = chunk.groupby('date')["energy"].cumsum()
+            
+            filtered_chunks.append(chunk)
+        else:
+            logging.debug(f"No data found in chunk {total_chunks} for household {household} and date range {start_date} to {end_date_obj}")
+
+    if chunks_with_data > 0:
+        logging.info(f"Data found in {chunks_with_data} out of {total_chunks} chunks for household {household}")
+        df = pd.concat(filtered_chunks)
+        df.set_index("datetime", inplace=True)
+        logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds. Total rows: {len(df)}")
+        return df
+    else:
+        logging.error(f"No data loaded for household {household} and date range {start_date} to {end_date_obj}")
+        return pd.DataFrame()
+
+def calculate_end_date(start_date, timescale): # Function to calculate end date based on timescale
+    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+    if timescale == 'd':
+        end_date_obj = start_date_obj + timedelta(days=1)
+    elif timescale == 'w': 
+        end_date_obj = start_date_obj + timedelta(weeks=1)
+    elif timescale == 'm':
+        end_date_obj = start_date_obj + timedelta(days=30)
+    elif timescale == 'y':
+        end_date_obj = start_date_obj + timedelta(days=365)
+    else:
+        raise ValueError("Invalid timescale. Use 'd' for day, 'w' for week, 'm' for month, or 'y' for year.")
+    return end_date_obj.strftime("%Y-%m-%d %H:%M:%S")
+
+def simulate_generation(df, mean=0.5, std=0.2): # Function to simulate energy generation
+    np.random.seed(42)
+    df['generation'] = np.random.normal(mean, std, df.shape[0])
+    df['generation'] = df['generation'].clip(lower=0)
+    return df
+
 def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
     fig, ax = plt.subplots(figsize=(15, 6))
     
