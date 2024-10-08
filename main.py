@@ -10,7 +10,7 @@ from flask import request
 from pricing import calculate_price
 from dataAnalysis import load_data, calculate_end_date, update_plot_separate, update_plot_same
 from config import LOCAL_IP, PEER_IP
-# from battery_energy_management import battery_charging, battery_supply # Currently we don't need the battery for consumer
+from battery_energy_management import battery_charging, battery_supply
 from lcdControlTest import display_message
 
 SOLAR_SCALE_FACTOR = 4000  # Adjust this value as needed
