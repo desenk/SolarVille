@@ -41,7 +41,8 @@ def update_peer_data():
     if peer_ip not in peer_data:
         peer_data[peer_ip] = {}
     peer_data[peer_ip].update(data)
-    logging.info(f"Updated peer data for {peer_ip}: {data}")
+    logging.info(f"Updated peer data for {peer_ip}: Demand: {data.get('demand', 'N/A')}kWh, "
+                 f"Balance: {data.get('balance', 'N/A')}kWh")
     return jsonify({"status": "updated"})
 
 @app.route('/start', methods=['POST'])
@@ -65,6 +66,7 @@ def start():
 
 start_time = None
 
+# remove this in the realTime version
 @app.route('/sync_start', methods=['POST'])
 def sync_start():
     global start_time, peers
