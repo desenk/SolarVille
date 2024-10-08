@@ -156,6 +156,9 @@ def process_trading_and_lcd(df, timestamp, current_data):
     }
     make_api_call(f'http://{PEER_IP}:5000/update_peer_data', update_data_1)
 
+    # give some time for PI1 to do the calculation first
+    time.sleep(2)
+    
     # Get peer data for trading
     peer_data_response = requests.get(f'http://{PEER_IP}:5000/get_peer_data')
     if peer_data_response.status_code == 200:
