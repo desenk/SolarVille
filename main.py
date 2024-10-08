@@ -219,6 +219,8 @@ def process_trading_and_lcd(df, timestamp, current_data):
                         ]
                         logging.info(f"Sold {trade_amount*1000:.2f} Wh to peer at {peer_price:.2f} $/kWh")
             elif balance < 0:
+                #test if the program can run to this point
+                logging.info(f"need electricity")
                 # the household needs energy
                 battery_soc, buy_from_grid = battery_supply(excess_energy = balance, battery_soc = battery_soc, battery_capacity = 5, depth_of_discharge=0.2)
                 df.loc[timestamp, ['balance', 'currency']] = [
