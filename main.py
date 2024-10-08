@@ -155,48 +155,52 @@ def process_trading_and_lcd(df, timestamp, current_data):
         'balance': balance
     }
     make_api_call(f'http://{PEER_IP}:5000/update_peer_data', update_data_1)
+    
+    while True:
 
-    # give some time for PI1 to do the calculation first
-    time.sleep(2)
-    
-    # Get peer data for trading
-    peer_data_response = requests.get(f'http://{PEER_IP}:5000/get_peer_data')
-    if peer_data_response.status_code == 200:
-        peer_data = peer_data_response.json()
-        
-        peer_price = peer_data.get(PEER_IP, {}).get('peer_price')
-        buy_grid_price = peer_data.get(PEER_IP, {}).get('buy_grid_price')
-    
-        # Get peer balance with error checking
-        trade_amount = peer_data.get(PEER_IP, {}).get('trade_amount')
-        if trade_amount is None:
-            logging.warning(f"No trading data available for peer {PEER_IP}")
-        else:
-            # Perform trading (now in kilo Watt-hours)
+        # Get peer data for trading
+        peer_data_response = requests.get(f'http://{PEER_IP}:5000/get_peer_data')
+        if peer_data_response.status_code == 200:
+            peer_data = peer_data_response.json()
             
-            buy_from_grid = balance - trade_amount
-            df.loc[timestamp, ['balance', 'currency', 'trade_amount']] = [
-                df.loc[timestamp, 'balance'] - balance,  # update balance
-                df.loc[timestamp, 'currency'] - trade_amount * peer_price - buy_from_grid * buy_grid_price,  # update currency
-                trade_amount  # update trade_amountge
-            ]
-                
-            logging.info(f"Bought {trade_amount*1000:.2f} Wh from peer at {peer_price:.2f} $/kWh and the remaining {buy_from_grid*1000:.2f} Wh to the grid at {buy_grid_price:.2f} $/kWh")
-                 
-    else:
-        logging.error("Failed to get peer data for trading")
+            peer_price = peer_data.get(PEER_IP, {}).get('peer_price')
+            buy_grid_price = peer_data.get(PEER_IP, {}).get('buy_grid_price')
 
-    # Update LCD display
-    display_message(f"Dem:{demand:.0f}kWh Tra:{trade_amount*1000:.0f}Wh")
-    
-    logging.info(
-        f"At {timestamp} , "
-        f"Demand: {demand:.2f}kWh, "
-        f"Balance: {df.loc[timestamp, 'balance']:.6f}W, "
-        f"Currency: {df.loc[timestamp, 'currency']:.2f}, "
-        f"LCD updated"
-    )
-    
+            enable = peer_data.get(PEER_IP, {}).get('enable', 0)  # Default is 0
+            # Start the trading for consumer after the prosumer provides trade amount
+            if enable == 1:
+                # Get peer balance with error checking
+                trade_amount = peer_data.get(PEER_IP, {}).get('trade_amount', 0)
+                if trade_amount is None:
+                    logging.warning(f"No trading data available for peer {PEER_IP}")
+                else:
+                    # Perform trading (now in kilo Watt-hours) 
+                    buy_from_grid = abs(balance) - trade_amount
+                    df.loc[timestamp, ['balance', 'currency', 'trade_amount']] = [
+                        df.loc[timestamp, 'balance'] - balance,  # update balance
+                        df.loc[timestamp, 'currency'] - trade_amount * peer_price - buy_from_grid * buy_grid_price,  # update currency
+                        trade_amount  # update trade_amountge
+                    ]
+                        
+                    logging.info(f"Bought {trade_amount*1000:.2f} Wh from peer at {peer_price:.2f} ￡/kWh"
+                                 f"and the remaining {buy_from_grid*1000:.2f} Wh to the grid at {buy_grid_price:.2f} ￡/kWh")
+                    break
+            else:
+                logging.info("The trading is disabled, wait for trading amount. Retrying ")    
+        else:
+            logging.error("Failed to get peer data for trading")
+
+        # Update LCD display
+        display_message(f"Dem:{demand:.0f}kWh Tra:{trade_amount*1000:.0f}Wh")
+        
+        logging.info(
+            f"At {timestamp} , "
+            f"Demand: {demand:.2f}kWh, "
+            f"Balance: {df.loc[timestamp, 'balance']:.6f}W, "
+            f"Currency: {df.loc[timestamp, 'currency']:.2f}, "
+            f"LCD updated"
+        )
+        
     return df
 
 def make_api_call(url, data, max_retries=3):
