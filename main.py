@@ -16,7 +16,6 @@ from lcdControlTest import display_message
 
 SOLAR_SCALE_FACTOR = 4000  # Adjust this value as needed
 
-
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -37,10 +36,12 @@ def start_simulation_local():
     if df.empty:
         logging.error("No data loaded. Exiting simulation.")
         return
+    global trade_amount  # 定义为全局变量
+    trade_amount = 0
     
     df['generation'] = 0.0  # Initialize generation column
     df['balance'] = 0.0  # Initialize balance column
-    df['currency'] = 100.0  # Initialize the currency column to 100
+    df['currency'] = 0  # Initialize the currency column to 100
     df['battery_charge'] = 0.5  # Assume 50% initial charge
     
     end_date = calculate_end_date(args.start_date, args.timescale)
@@ -150,14 +151,15 @@ def process_trading_and_lcd(df, timestamp, current_data):
         solar_power = 0
         solar_energy = 0
 
-    trade_amount = 0
+    global trade_amount
+    
     demand = current_data['energy']#unit kWh
 
     sell_grid_price = calculate_price(solar_energy, demand)
     peer_price = calculate_price(solar_energy, demand)
     buy_grid_price = calculate_price(solar_energy, demand)
     
-    # Calculate balance (now in Watts)
+    # Calculate balance unit kWh
     balance = solar_energy - demand
     
     # Update dataframe
@@ -241,9 +243,12 @@ def process_trading_and_lcd(df, timestamp, current_data):
     # Send updates to Flask server
     update_data_2 = {
         'battery_charge': battery_soc,
-        'trade_amount': trade_amount
+        'trade_amount': trade_amount,
+        'buy_grid_price':buy_grid_price,
+        'peer_price':peer_price
     }
-    make_api_call(f'http://{PEER_IP}:5000/update_peer_data', update_data_2)
+    make_api_call(f'http://{PEER_IP}:5000/update_trade_data', update_data_2)
+    
 
     return df
 
