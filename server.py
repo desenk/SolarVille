@@ -41,11 +41,24 @@ def update_peer_data():
     if peer_ip not in peer_data:
         peer_data[peer_ip] = {}
     peer_data[peer_ip].update(data)
-    logging.info(f"Updated peer data for {peer_ip}: Generation: {data.get('generation', 'N/A')}W, "
-                 f"Demand: {data.get('demand', 'N/A')}W, "
-                 f"Battery: {data.get('battery_charge', 'N/A')}%, "
-                 f"Efficiency: {data.get('charge_efficiency', 'N/A')}")
+    logging.info(f"Updated peer data for {peer_ip}: Generation: {data.get('generation', 'N/A')}kWh, "
+                 f"Demand: {data.get('demand', 'N/A')}kWh, "
+                 f"Balance: {data.get('balance', 'N/A')}kWh")
     return jsonify({"status": "updated"})
+
+@app.route('/update_trade_data', methods=['POST'])
+def update_trade_data():
+    data = request.json
+    peer_ip = request.remote_addr
+    if peer_ip not in peer_data:
+        peer_data[peer_ip] = {}
+    peer_data[peer_ip].update(data)
+    logging.info(f"Updated peer data for {peer_ip}: trade amount: {data.get('trade_amountn', 'N/A')}kWh, "
+                 f"buy grid price: {data.get('buy_grid_price', 'N/A')} pound/kWh, "
+                 f"peer price: {data.get('peer_price', 'N/A')} pound/kWh"
+                 f"Updated peer data for {peer_ip}: Battery Charge: {data.get('battery_charge', 'N/A')}%, ")
+    return jsonify({"status": "updated"}) 
+
 
 @app.route('/start', methods=['POST'])
 def start():
