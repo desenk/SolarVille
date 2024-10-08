@@ -15,6 +15,8 @@ from battery_energy_management import battery_charging, battery_supply
 from lcdControlTest import display_message
 
 SOLAR_SCALE_FACTOR = 4000  # Adjust this value as needed
+trade_amount = 0
+battery_soc = 0.5
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -36,9 +38,11 @@ def start_simulation_local():
     if df.empty:
         logging.error("No data loaded. Exiting simulation.")
         return
-    global trade_amount  # 定义为全局变量
-    trade_amount = 0
     
+    global trade_amount
+    global battery_soc
+    
+
     df['generation'] = 0.0  # Initialize generation column
     df['balance'] = 0.0  # Initialize balance column
     df['currency'] = 0  # Initialize the currency column to 100
@@ -152,6 +156,7 @@ def process_trading_and_lcd(df, timestamp, current_data):
         solar_energy = 0
 
     global trade_amount
+    global battery_soc
     
     demand = current_data['energy']#unit kWh
 
@@ -159,6 +164,11 @@ def process_trading_and_lcd(df, timestamp, current_data):
     peer_price = calculate_price(solar_energy, demand)
     buy_grid_price = calculate_price(solar_energy, demand)
     
+    # Log the calculated prices
+    logging.info(f"Calculated prices - Sell Grid Price: {sell_grid_price:.2f} ￡/kWh, "
+                 f"Peer Price: {peer_price:.2f} ￡/kWh, "
+                 f"Buy Grid Price: {buy_grid_price:.2f} ￡/kWh")
+
     # Calculate balance unit kWh
     balance = solar_energy - demand
     
@@ -223,6 +233,8 @@ def process_trading_and_lcd(df, timestamp, current_data):
                 logging.info(f"need electricity")
                 # the household needs energy
                 battery_soc, buy_from_grid = battery_supply(excess_energy = balance, battery_soc = battery_soc, battery_capacity = 5, depth_of_discharge=0.2)
+                
+                logging.info(f"Updating DataFrame at timestamp: {timestamp}, Current balance: {df.loc[timestamp, 'balance']}, Current currency: {df.loc[timestamp, 'currency']}")
                 df.loc[timestamp, ['balance', 'currency']] = [
                     df.loc[timestamp, 'balance'] - balance,  # update balance
                     df.loc[timestamp, 'currency'] - buy_from_grid * buy_grid_price, # update currency
