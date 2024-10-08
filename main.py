@@ -224,7 +224,7 @@ def process_trading_and_lcd(df, timestamp, current_data):
                     else:
                         # energy can only supply part of the need of the other household
                         trade_amount = balance
-                        df.loc[timestamp, ['balance', 'currency']] = [
+                        df.loc[timestamp, ['balance', 'currency', 'battery_charge']] = [
                             df.loc[timestamp, 'balance'] - balance,  # update balance
                             df.loc[timestamp, 'currency'] + trade_amount * peer_price, # update currency
                             battery_soc  # update battery_charge
@@ -239,7 +239,7 @@ def process_trading_and_lcd(df, timestamp, current_data):
                 logging.info(f"Updating DataFrame at timestamp: {timestamp}, Current balance: {df.loc[timestamp, 'balance']},"
                              f" Current currency: {df.loc[timestamp, 'currency']},"
                              f"buy_from_grid: {buy_from_grid},buy_grid_price:{buy_grid_price}")
-                df.loc[timestamp, ['balance', 'currency']] = [
+                df.loc[timestamp, ['balance', 'currency', 'battery_charge']] = [
                     df.loc[timestamp, 'balance'] - balance,  # update balance
                     df.loc[timestamp, 'currency'] - buy_from_grid * buy_grid_price, # update currency
                     battery_soc  # update battery_charge
