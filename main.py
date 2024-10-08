@@ -179,7 +179,9 @@ def process_trading_and_lcd(df, timestamp, current_data):
     update_data_1 = {
         'demand': demand,
         'generation': solar_energy,
-        'balance': balance
+        'balance': balance,
+        'battery SoC': battery_soc,
+        'enable': 0  # Disable trading
     }
     make_api_call(f'http://{PEER_IP}:5000/update_peer_data', update_data_1)
 
@@ -259,7 +261,8 @@ def process_trading_and_lcd(df, timestamp, current_data):
         'battery_charge': battery_soc,
         'trade_amount': trade_amount,
         'buy_grid_price':buy_grid_price,
-        'peer_price':peer_price
+        'peer_price':peer_price,
+        'enable': 1  # Enable trading
     }
     make_api_call(f'http://{PEER_IP}:5000/update_trade_data', update_data_2)
     
