@@ -14,7 +14,7 @@ from solarMonitor import get_current_readings
 from battery_energy_management import battery_charging, battery_supply
 from lcdControlTest import display_message
 
-SOLAR_SCALE_FACTOR = 4000  # Adjust this value as needed
+SOLAR_SCALE_FACTOR = 8000  # Adjust this value as needed
 trade_amount = 0
 battery_soc = 0.5
 
@@ -45,7 +45,7 @@ def start_simulation_local():
 
     df['generation'] = 0.0  # Initialize generation column
     df['balance'] = 0.0  # Initialize balance column
-    df['currency'] = 0  # Initialize the currency column to 100
+    df['currency'] = 0  # Initialize the currency column to 0
     df['battery_charge'] = 0.5  # Assume 50% initial charge
     
     end_date = calculate_end_date(args.start_date, args.timescale)
@@ -158,7 +158,7 @@ def process_trading_and_lcd(df, timestamp, current_data):
     global trade_amount
     global battery_soc
     
-    demand = current_data['energy']#unit kWh
+    demand = current_data['energy'] # unit kWh
 
     sell_grid_price = calculate_price(solar_energy, demand)
     peer_price = calculate_price(solar_energy, demand)
@@ -244,17 +244,17 @@ def process_trading_and_lcd(df, timestamp, current_data):
                     df.loc[timestamp, 'currency'] - buy_from_grid * buy_grid_price, # update currency
                     battery_soc  # update battery_charge
                 ]
-                logging.info(f"Bought {buy_from_grid:.2f} kWh from grid at {buy_grid_price:.2f} ￡/kWh")
+                logging.info(f"Bought {buy_from_grid*1000:.2f} Wh from grid at {buy_grid_price:.2f} ￡/kWh")
     else:
         logging.error("Failed to get peer data for trading")
 
     # Update LCD display
-    display_message(f"Bat:{battery_soc:.0f}% Gen:{solar_power*1000:.0f}mW")
+    display_message(f"Bat:{battery_soc:.0f}% Gen:{solar_power:.0f}W")
     
     logging.info(
         f"At {timestamp} - Generation: {solar_power:.6f}W, "
         f"Demand: {demand:.2f}kWh, Battery: {battery_soc:.2f}%, "
-        f"Balance: {df.loc[timestamp, 'balance']:.6f}W, "
+        f"Balance: {df.loc[timestamp, 'balance']:.6f}kWh, "
         f"Currency: {df.loc[timestamp, 'currency']:.2f}, "
         f"LCD updated"
     )
