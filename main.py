@@ -234,7 +234,7 @@ def process_trading_and_lcd(df, timestamp, current_data):
                 #test if the program can run to this point
                 logging.info(f"need electricity")
                 # the household needs energy
-                battery_soc, buy_from_grid = battery_supply(excess_energy = balance, battery_soc = battery_soc, battery_capacity = 5, depth_of_discharge=0.2)
+                battery_soc, buy_from_grid = battery_supply(excess_energy = balance, battery_soc = battery_soc, battery_capacity = 5, depth_of_discharge=0.8)
                 
                 logging.info(f"Updating DataFrame at timestamp: {timestamp}, Current balance: {df.loc[timestamp, 'balance']},"
                              f" Current currency: {df.loc[timestamp, 'currency']},"
@@ -249,11 +249,11 @@ def process_trading_and_lcd(df, timestamp, current_data):
         logging.error("Failed to get peer data for trading")
 
     # Update LCD display
-    display_message(f"Bat:{battery_soc:.0f}% Gen:{solar_power:.0f}W")
+    display_message(f"Bat:{battery_soc*100:.0f}% Gen:{solar_power:.0f}W")
     
     logging.info(
         f"At {timestamp} - Generation: {solar_power:.6f}W, "
-        f"Demand: {demand:.2f}kWh, Battery: {battery_soc:.2f}%, "
+        f"Demand: {demand:.2f}kWh, Battery: {battery_soc*100:.2f}%, "
         f"Balance: {df.loc[timestamp, 'balance']:.6f}kWh, "
         f"Currency: {df.loc[timestamp, 'currency']:.2f}, "
         f"LCD updated"
