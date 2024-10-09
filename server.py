@@ -41,10 +41,20 @@ def update_peer_data():
     if peer_ip not in peer_data:
         peer_data[peer_ip] = {}
     peer_data[peer_ip].update(data)
-    logging.info(f"Updated peer data for {peer_ip}: Generation: {data.get('generation', 'N/A'):.2f}kWh, "
-                 f"Demand: {data.get('demand', 'N/A'):.2f}kWh, "
-                 f"Balance: {data.get('balance', 'N/A'):.2f}kWh, "
-                 f"Initial SoC: {data.get('battery SoC', 'N/A')*100 :.2f}%")
+    
+    generation = data.get('generation', 'N/A')
+    demand = data.get('demand', 'N/A')
+    balance = data.get('balance', 'N/A')
+    battery_soc = data.get('battery SoC', 'N/A')
+    
+    # Safely format the logging message with checks for numeric types
+    logging.info(
+    f"Updated peer data for {peer_ip}: "
+    f"Generation: {float(generation):.2f} kWh, " if isinstance(generation, (int, float)) else "Generation: N/A, "
+    f"Demand: {float(demand):.2f} kWh, " if isinstance(demand, (int, float)) else "Demand: N/A, "
+    f"Balance: {float(balance):.2f} kWh, " if isinstance(balance, (int, float)) else "Balance: N/A, "
+    f"Initial SoC: {float(battery_soc) * 100:.2f}% " if isinstance(battery_soc, (int, float)) else "Initial SoC: N/A"
+    )
     return jsonify({"status": "updated"})
 
 @app.route('/update_trade_data', methods=['POST'])
@@ -54,10 +64,20 @@ def update_trade_data():
     if peer_ip not in peer_data:
         peer_data[peer_ip] = {}
     peer_data[peer_ip].update(data)
-    logging.info(f"Updated peer data for {peer_ip}: trade amount: {data.get('trade_amountn', 'N/A'):.2f}kWh, "
-                 f"buy grid price: {data.get('buy_grid_price', 'N/A'):.2f} pound/kWh, "
-                 f"peer price: {data.get('peer_price', 'N/A'):.2f} pound/kWh, "
-                 f"Battery Charge: {data.get('battery_charge', 'N/A')*100 :.2f}%")
+    
+    trade_amount = data.get('trade_amountn', 'N/A')
+    buy_grid_price = data.get('buy_grid_price', 'N/A')
+    peer_price = data.get('peer_price', 'N/A')
+    battery_charge = data.get('battery_charge', 'N/A')
+
+    # Safely format the logging message with checks for numeric types
+    logging.info(
+        f"Updated peer data for {peer_ip}: "
+        f"Trade amount: {float(trade_amount):.2f} kWh, " if isinstance(trade_amount, (int, float)) else "Trade amount: N/A, "
+        f"Buy grid price: {float(buy_grid_price):.2f} pound/kWh, " if isinstance(buy_grid_price, (int, float)) else "Buy grid price: N/A, "
+        f"Peer price: {float(peer_price):.2f} pound/kWh, " if isinstance(peer_price, (int, float)) else "Peer price: N/A, "
+        f"Battery Charge: {float(battery_charge) * 100:.2f}% " if isinstance(battery_charge, (int, float)) else "Battery Charge: N/A"
+    )
     return jsonify({"status": "updated"}) 
 
 
