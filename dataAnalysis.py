@@ -74,7 +74,7 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
     net_line, = ax.plot([], [], label='Net Energy (kWh)', color='blue', linestyle='--', marker='o')
     ax.legend()
     ax.set_xlabel('Time')
-    ax.set_ylabel('Energy')
+    ax.set_ylabel('Energy (kWh')
     ax.set_title(f'Real-Time Energy Demand and Generation for Household on {start_date[:10]}')
 
     if interval == 'd':
