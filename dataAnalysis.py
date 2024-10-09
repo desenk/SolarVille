@@ -70,8 +70,8 @@ def calculate_end_date(start_date, timescale): # Function to calculate end date 
 def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
     fig, ax = plt.subplots(figsize=(15, 6))
     demand_line, = ax.plot([], [], label='Energy Demand (kWh)', color='red', marker='o', linestyle='-')
-    generation_line, = ax.plot([], [], label='Energy Generation (W)', color='green', marker='o', linestyle='-')
-    net_line, = ax.plot([], [], label='Net Energy', color='blue', linestyle='--', marker='o')
+    generation_line, = ax.plot([], [], label='Energy Generation (kWh)', color='green', marker='o', linestyle='-')
+    net_line, = ax.plot([], [], label='Net Energy (kWh)', color='blue', linestyle='--', marker='o')
     ax.legend()
     ax.set_xlabel('Time')
     ax.set_ylabel('Energy')
