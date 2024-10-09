@@ -67,24 +67,15 @@ def calculate_end_date(start_date, timescale): # Function to calculate end date 
         raise ValueError("Invalid timescale. Use 'd' for day, 'w' for week, 'm' for month, or 'y' for year.")
     return end_date_obj.strftime("%Y-%m-%d %H:%M:%S")
 
-def simulate_generation(df, mean=0.5, std=0.2): # Function to simulate energy generation
-    np.random.seed(42)
-    df['generation'] = np.random.normal(mean, std, df.shape[0])
-    df['generation'] = df['generation'].clip(lower=0)
-    return df
-
-def update_plot_same(df, start_date, end_date, interval, queue, ready_event): # Function to update plot with same y-axis
-    df_day = df[start_date:end_date] # Filter data for the specified date range
-    df_day = df_day.reset_index() # Reset index
-
-    fig, ax = plt.subplots(figsize=(15, 6)) # Create a figure and axis
-    demand_line, = ax.plot([], [], label='Energy Demand (kWh)', color='red', marker='o', linestyle='-') # Plot for energy demand
-    generation_line, = ax.plot([], [], label='Energy Generation (kWh)', color='green', marker='o', linestyle='-') # Plot for energy generation
-    net_line, = ax.plot([], [], label='Net Energy (kWh)', color='blue', linestyle='--', marker='o') # Plot for net energy
-    ax.legend() # Add legend to the plot
-    ax.set_xlabel('Time') # Set x-axis label
-    ax.set_ylabel('Energy (kWh)') # Set y-axis label
-    ax.set_title(f'Real-Time Energy Demand and Generation for Household on {start_date[:10]}') # Set title for the plot
+def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
+    fig, ax = plt.subplots(figsize=(15, 6))
+    demand_line, = ax.plot([], [], label='Energy Demand (kWh)', color='red', marker='o', linestyle='-')
+    #generation_line, = ax.plot([], [], label='Energy Generation (kWh)', color='green', marker='o', linestyle='-')
+    net_line, = ax.plot([], [], label='Net Energy', color='blue', linestyle='--', marker='o')
+    ax.legend()
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Energy')
+    ax.set_title(f'Real-Time Energy Demand for Consumer Household on {start_date[:10]}')
 
     if interval == 'd':
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
@@ -104,22 +95,38 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event): # 
     
     ready_event.set()  # Signal that the plot is initialized
 
+    times = []
+    demands = []
+    #generations = []
+    nets = []
+
     while True:
-        timestamp = queue.get()
-        if timestamp == "done":
+        data = queue.get()
+        if data == "done":
             break
 
-        # Update the plot with the new data point
-        demand_line.set_data(df.index[:df.index.get_loc(timestamp)+1], df['energy'][:df.index.get_loc(timestamp)+1])
-        generation_line.set_data(df.index[:df.index.get_loc(timestamp)+1], df['generation'][:df.index.get_loc(timestamp)+1])
-        net_line.set_data(df.index[:df.index.get_loc(timestamp)+1], df['generation'][:df.index.get_loc(timestamp)+1] - df['energy'][:df.index.get_loc(timestamp)+1])
+        timestamp = data['timestamp']
+        #generation = data['generation']
+        
+        # Get demand from the dataframe
+        demand = df.loc[timestamp, 'energy']
+        
+        times.append(timestamp)
+        demands.append(demand)
+        #generations.append(generation)
+        #nets.append(generation - demand)
+        nets.append( - demand)
+
+        demand_line.set_data(times, demands)
+        #generation_line.set_data(times, generations)
+        net_line.set_data(times, nets)
         
         ax.relim()
         ax.autoscale_view()
         plt.draw()
-        plt.pause(0.01)  # Short pause to allow the plot to update
+        plt.pause(0.01)
 
-    plt.show() 
+    plt.show()
 
 def update_plot_separate(df, start_date, end_date, interval, queue, ready_event):
     df_day = df[start_date:end_date]
@@ -128,7 +135,7 @@ def update_plot_separate(df, start_date, end_date, interval, queue, ready_event)
     fig, axs = plt.subplots(3, 1, figsize=(15, 18), sharex=True)
 
     demand_line, = axs[0].plot([], [], label='Energy Demand (kWh)', color='red')
-    generation_line, = axs[1].plot([], [], label='Energy Generation (kWh)', color='green')
+    #generation_line, = axs[1].plot([], [], label='Energy Generation (kWh)', color='green')
     net_line, = axs[2].plot([], [], label='Net Energy (kWh)', color='blue', linestyle='--')
 
     for ax in axs:
@@ -136,7 +143,7 @@ def update_plot_separate(df, start_date, end_date, interval, queue, ready_event)
         ax.legend()
 
     axs[0].set_title(f'Energy Demand for Household on {start_date[:10]}')
-    axs[1].set_title(f'Energy Generation for Household on {start_date[:10]}')
+    #axs[1].set_title(f'Energy Generation for Household on {start_date[:10]}')
     axs[2].set_title(f'Net Energy for Household on {start_date[:10]}')
 
     if interval == 'd':
@@ -165,9 +172,10 @@ def update_plot_separate(df, start_date, end_date, interval, queue, ready_event)
 
         index = df_day.index[df_day['datetime'] <= timestamp][-1]
         demand_line.set_data(df_day['datetime'][:index+1], df_day['energy'][:index+1])
-        generation_line.set_data(df_day['datetime'][:index+1], df_day['generation'][:index+1])
-        net_line.set_data(df_day['datetime'][:index+1], df_day['generation'][:index+1] - df_day['energy'][:index+1])
-        
+        #generation_line.set_data(df_day['datetime'][:index+1], df_day['generation'][:index+1])
+        #net_line.set_data(df_day['datetime'][:index+1], df_day['generation'][:index+1] - df_day['energy'][:index+1])
+        net_line.set_data(df_day['datetime'][:index+1],  - df_day['energy'][:index+1])
+
         for ax in axs:
             ax.relim()
             ax.autoscale_view()
