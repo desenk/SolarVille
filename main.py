@@ -36,7 +36,7 @@ def start_simulation_local():
         logging.error("No data loaded. Exiting simulation.")
         return
     
-    df['generation'] = 0.0  # Initialize generation column
+    
     df['balance'] = 0.0  # Initialize balance column
     df['currency'] = 0  # Initialize the currency column to 0
     df['battery_charge'] = 0.5  # Assume 50% initial charge
@@ -53,7 +53,7 @@ def start_simulation_local():
     ready_event.wait()
     logging.info("Plot initialized, starting simulation...")
 
-    logging.info("Dataframe for generation, balance, currency and battery charge is created.")
+    logging.info("Dataframe for balance, currency and battery charge is created.")
     
     plot_update_interval = 6  # seconds
     last_plot_update = time.time()
@@ -85,8 +85,7 @@ def start_simulation_local():
                 
                 if current_time - last_plot_update >= plot_update_interval:
                     queue.put({
-                        'timestamp': timestamp,
-                        'generation': df.loc[timestamp, 'generation']
+                        'timestamp': timestamp
                     })
                     last_plot_update = current_time
             
@@ -140,10 +139,10 @@ def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event)
 def process_trading_and_lcd(df, timestamp, current_data):
 
     trade_amount = 0
-    demand = current_data['energy']#unit kWh
+    demand = current_data['energy'] # unit kWh
 
     
-    # Calculate balance (now in Watts)
+    # Calculate balance unit: kWh)
     balance = - demand
     
     # Update dataframe
@@ -170,7 +169,7 @@ def process_trading_and_lcd(df, timestamp, current_data):
             # Start the trading for consumer after the prosumer provides trade amount
             if enable == 1:
                 # Get peer balance with error checking
-                trade_amount = peer_data.get(PEER_IP, {}).get('trade_amount', 0)
+                trade_amount = peer_data.get(PEER_IP, {}).get('trade_amount', 0) # unit: kWh
                 if trade_amount is None:
                     logging.warning(f"No trading data available for peer {PEER_IP}")
                 else:
@@ -182,8 +181,8 @@ def process_trading_and_lcd(df, timestamp, current_data):
                         trade_amount  # update trade_amountge
                     ]
                         
-                    logging.info(f"Bought {trade_amount*1000:.2f} Wh from peer at {peer_price:.2f} ￡/kWh"
-                                 f"and the remaining {buy_from_grid*1000:.2f} Wh to the grid at {buy_grid_price:.2f} ￡/kWh")
+                    logging.info(f"Bought {trade_amount*1000:.2f} Wh from peer at {peer_price:.2f} ￡/kWh" # unit
+                                 f"and the remaining {buy_from_grid*1000:.2f} Wh to the grid at {buy_grid_price:.2f} ￡/kWh") # unit
                     break
             else:
                 logging.info("The trading is disabled, wait for trading amount. Retrying ")    
@@ -191,13 +190,13 @@ def process_trading_and_lcd(df, timestamp, current_data):
             logging.error("Failed to get peer data for trading")
 
         # Update LCD display
-        display_message(f"Dem:{demand:.0f}kWh Tra:{trade_amount*1000:.0f}Wh")
+        display_message(f"Dem:{demand*1000:.0f}Wh Tra:{trade_amount*1000:.0f}Wh") # unit
         
         logging.info(
             f"At {timestamp} , "
-            f"Demand: {demand:.2f}kWh, "
-            f"Balance: {df.loc[timestamp, 'balance']:.6f}W, "
-            f"Currency: {df.loc[timestamp, 'currency']:.2f}, "
+            f"Demand: {demand*1000:.2f}Wh, " # unit
+            f"Balance: {df.loc[timestamp, 'balance']:.6f}Wh, "
+            f"Currency: {df.loc[timestamp, 'currency']:.2f}￡, "
             f"LCD updated"
         )
         
@@ -223,7 +222,7 @@ def initialize_simulation():
     if df.empty:
         logging.error("No data loaded. Exiting simulation.")
         return
-    df['generation'] = 0.0  # Initialize generation column
+    
     df['balance'] = 0.0  # Initialize balance column
     end_date = calculate_end_date(args.start_date, args.timescale)
     logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
