@@ -1,7 +1,12 @@
 import socket
 
-PI_1_IP = '192.168.137.85' # IP of Pi 1
-PI_2_IP = '192.168.137.142' #IP of Pi 2
+# IP for hot spot
+#PI_1_IP = '192.168.137.85' # IP of Pi 1
+#PI_2_IP = '192.168.137.142' # IP of Pi 2
+
+# IP for eduroam remote control
+PI_1_IP = '10.126.46.162' # IP of Pi 1
+PI_2_IP = '10.126.50.50' # IP of Pi 2
 
 def get_local_and_peer_ip():
     hostname = socket.gethostname()
