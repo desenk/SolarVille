@@ -141,7 +141,7 @@ def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event)
 def fetch_dataframe():
     try:
         # Replace the URL with the Flask endpoint where the DataFrame is hosted
-        response = requests.get(f'http://{PEER_IP}:5000/get_dataframe')
+        response = requests.get(f'http://{PEER_IP}:5000/get_dataframe', timeout=3)
         if response.status_code == 200:
             # Convert the CSV data back to DataFrame
             df = pd.read_csv(StringIO(response.text))
