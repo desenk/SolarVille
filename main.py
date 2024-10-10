@@ -140,6 +140,7 @@ def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event)
 # reading the dataframe
 def fetch_dataframe():
     try:
+        logging.info(f"Attempting to fetch DataFrame from peer {PEER_IP}...")
         # Replace the URL with the Flask endpoint where the DataFrame is hosted
         response = requests.get(f'http://{PEER_IP}:5000/get_dataframe', timeout=3)
         if response.status_code == 200:
@@ -147,8 +148,11 @@ def fetch_dataframe():
             df = pd.read_csv(StringIO(response.text))
             return df
         else:
-            logging.error("Failed to fetch DataFrame from peer.")
+            logging.error("Failed to fetch DataFrame from peer. Status code: " + str(response.status_code))
             return None
+    except requests.Timeout:
+        logging.error("Request timed out while fetching DataFrame.")
+        return None
     except Exception as e:
         logging.error(f"Error fetching DataFrame: {e}")
         return None
@@ -157,7 +161,6 @@ def process_trading_and_lcd(df, timestamp, current_data):
 
     trade_amount = 0
     demand = current_data['energy'] # unit kWh
-
     
     # Calculate balance unit: kWh)
     balance = - demand
@@ -172,8 +175,10 @@ def process_trading_and_lcd(df, timestamp, current_data):
     }
     make_api_call(f'http://{PEER_IP}:5000/update_peer_data', update_data_1)
     
+    retry_count = 0
+    
     while True:
-
+        logging.info(f"Retry attempt {retry_count + 1}")
         # Fetch DataFrame from the server
         df = fetch_dataframe()
     
@@ -211,6 +216,8 @@ def process_trading_and_lcd(df, timestamp, current_data):
                 logging.info("Disabled, wait for trading amount. Retrying ")    
         else:
             logging.error("Failed to get peer data for trading")
+
+        retry_count += 1
 
         # Update LCD display
         display_message(f"Dem:{demand*1000:.0f}Wh Tra:{trade_amount*1000:.0f}Wh") # unit
