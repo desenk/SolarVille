@@ -22,6 +22,7 @@ battery_soc = 0.5
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def start_simulation_local():
+    # run synchronize_start(), if the result is false, exit the function
     if not synchronize_start():
         logging.error('Failed to start simulation')
         return
@@ -148,7 +149,7 @@ def process_trading_and_lcd(df, timestamp, current_data):
     try:
         readings = get_current_readings()
         solar_power = readings['solar_power'] * SOLAR_SCALE_FACTOR# unit: W
-        # Assume the solar power remains the same in every half hour
+        # Assume the solar power remains the same in every half hour, convert W to kW
         solar_energy = solar_power * 0.5 / 1000 # unit: kWh
     except Exception as e:
         logging.error(f"Failed to get solar data: {e}")
@@ -159,11 +160,23 @@ def process_trading_and_lcd(df, timestamp, current_data):
     global battery_soc
     
     demand = current_data['energy'] # unit kWh
+    # Get peer data for trading
+    peer_data_response = requests.get(f'http://{PEER_IP}:5000/get_peer_data')
+    if peer_data_response.status_code == 200:
+        peer_data = peer_data_response.json()
+         # Get peer demand with error checking
+        peer_demand = peer_data.get(PEER_IP, {}).get('demand', 0)
+    else:
+        logging.error("Failed to get peer demand")
+        peer_demand = 0
 
-    sell_grid_price = calculate_price(solar_energy, demand)
-    peer_price = calculate_price(solar_energy, demand)
-    buy_grid_price = calculate_price(solar_energy, demand)
-    
+    total_demand = demand + peer_demand
+    total_supply = solar_energy
+
+    sell_grid_price = 0.05 # unit: ￡/kWh
+    buy_grid_price = 0.25 # unit: ￡/kWh
+    peer_price = calculate_price(total_demand, total_supply, buy_grid_price = buy_grid_price, sell_grid_price = sell_grid_price)
+
     # Log the calculated prices
     logging.info(f"Calculated prices - Sell Grid Price: {sell_grid_price:.2f} ￡/kWh, "
                  f"Peer Price: {peer_price:.2f} ￡/kWh, "
