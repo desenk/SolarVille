@@ -48,6 +48,7 @@ def start_simulation_local():
     df['balance'] = 0.0  # Initialize balance column
     df['currency'] = 0  # Initialize the currency column to 0
     df['battery_charge'] = 0.5  # Assume 50% initial charge
+    df['Enable'] = 0  # Initialize Enable column with 0
     
     end_date = calculate_end_date(args.start_date, args.timescale)
     logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
@@ -271,16 +272,23 @@ def process_trading_and_lcd(df, timestamp, current_data):
         f"Currency: {df.loc[timestamp, 'currency']:.2f}, "
         f"LCD updated"
     )
+    
+    # Set Enable = 1 for the current timestamp
+    df.loc[timestamp, 'Enable'] = 1
+
+    # Convert the DataFrame to JSON format
+    df_json = df.to_json(orient='split')
+
     # Send updates to Flask server
     update_data_2 = {
         'battery_charge': battery_soc,
         'trade_amount': trade_amount,
         'buy_grid_price':buy_grid_price,
         'peer_price':peer_price,
-        'enable': 1  # Enable trading
+        'df': df_json 
     }
     make_api_call(f'http://{PEER_IP}:5000/update_trade_data', update_data_2)
-    
+
 
     return df
 
