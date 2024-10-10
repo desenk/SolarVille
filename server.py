@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import pandas as pd
 import logging
 import time
 import threading
@@ -12,6 +13,9 @@ peers = []
 peer_ready = {}
 simulation_started = threading.Event()
 peer_data = {}
+
+# Initialize a global DataFrame
+df = pd.DataFrame(columns=['Enable', 'demand', 'balance', 'currency', 'trade_amount'])
 
 # Shared data for the example
 energy_data = {
@@ -108,11 +112,18 @@ def get_peer_data():
 
 @app.route('/get_dataframe', methods=['GET'])
 def get_dataframe():
-    if not df.empty:
-        # Convert DataFrame to CSV and return it as text
-        return df.to_csv(index=True)
-    else:
-        return jsonify({"error": "No DataFrame available"}), 404
+    try:
+        # Check if the DataFrame is defined
+        if df.empty:
+            logging.warning("DataFrame is empty. Returning an empty DataFrame.")
+            return df.to_csv(index=False), 200
+        
+        # Convert DataFrame to CSV format and return it
+        csv_data = df.to_csv(index=False)
+        return csv_data, 200
+    except Exception as e:
+        logging.error(f"Error serving DataFrame: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/wait_for_start', methods=['GET'])
 def wait_for_start():
