@@ -106,6 +106,14 @@ def get_data():
 def get_peer_data():
     return jsonify(peer_data)
 
+@app.route('/get_dataframe', methods=['GET'])
+def get_dataframe():
+    if not df.empty:
+        # Convert DataFrame to CSV and return it as text
+        return df.to_csv(index=True)
+    else:
+        return jsonify({"error": "No DataFrame available"}), 404
+
 @app.route('/wait_for_start', methods=['GET'])
 def wait_for_start():
     if simulation_started.wait(timeout=30):  # Wait up to 30 seconds
