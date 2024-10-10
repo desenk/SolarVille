@@ -7,6 +7,7 @@ import logging
 import platform
 import requests
 from flask import request
+from io import StringIO
 from pricing import calculate_price
 from dataAnalysis import load_data, calculate_end_date, update_plot_separate, update_plot_same
 from config import LOCAL_IP, PEER_IP
@@ -136,6 +137,22 @@ def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event)
     else:
         update_plot_same(df, start_date, end_date, timescale, queue, ready_event)
 
+# reading the dataframe
+def fetch_dataframe():
+    try:
+        # Replace the URL with the Flask endpoint where the DataFrame is hosted
+        response = requests.get(f'http://{PEER_IP}:5000/get_dataframe')
+        if response.status_code == 200:
+            # Convert the CSV data back to DataFrame
+            df = pd.read_csv(StringIO(response.text))
+            return df
+        else:
+            logging.error("Failed to fetch DataFrame from peer.")
+            return None
+    except Exception as e:
+        logging.error(f"Error fetching DataFrame: {e}")
+        return None
+    
 def process_trading_and_lcd(df, timestamp, current_data):
 
     trade_amount = 0
@@ -157,35 +174,41 @@ def process_trading_and_lcd(df, timestamp, current_data):
     
     while True:
 
-        # Get peer data for trading
-        peer_data_response = requests.get(f'http://{PEER_IP}:5000/get_peer_data')
-        if peer_data_response.status_code == 200:
-            peer_data = peer_data_response.json()
-            
-            peer_price = peer_data.get(PEER_IP, {}).get('peer_price')
-            buy_grid_price = peer_data.get(PEER_IP, {}).get('buy_grid_price')
-
-            enable = peer_data.get(PEER_IP, {}).get('enable', 0)  # Default is 0
+        # Fetch DataFrame from the server
+        df = fetch_dataframe()
+    
+        if df is not None:
+            # Check the Enable value for the current timestamp
+            enable = df.loc[timestamp, 'Enable']
+        
             # Start the trading for consumer after the prosumer provides trade amount
             if enable == 1:
-                # Get peer balance with error checking
-                trade_amount = peer_data.get(PEER_IP, {}).get('trade_amount', 0) # unit: kWh
-                if trade_amount is None:
-                    logging.warning(f"No trading data available for peer {PEER_IP}")
+                peer_data_response = requests.get(f'http://{PEER_IP}:5000/get_peer_data')
+                if peer_data_response.status_code == 200:
+                    peer_data = peer_data_response.json()
+                    peer_price = peer_data.get(PEER_IP, {}).get('peer_price')
+                    buy_grid_price = peer_data.get(PEER_IP, {}).get('buy_grid_price')
+
+                    trade_amount = peer_data.get(PEER_IP, {}).get('trade_amount', 0)# unit: kWh
+
+                    if trade_amount is None:
+                        logging.warning(f"No trading data available for peer {PEER_IP}")
+                    else:
+                        # Perform trading (now in kilo Watt-hours) 
+                        buy_from_grid = abs(balance) - trade_amount
+                        df.loc[timestamp, ['balance', 'currency', 'trade_amount']] = [
+                            df.loc[timestamp, 'balance'] - balance,  # update balance
+                            df.loc[timestamp, 'currency'] - trade_amount * peer_price - buy_from_grid * buy_grid_price,  # update currency
+                            trade_amount  # update trade_amountge
+                        ]
+                            
+                        logging.info(f"Bought {trade_amount*1000:.2f} Wh from peer at {peer_price:.2f} ￡/kWh" # unit
+                                    f"and the remaining {buy_from_grid*1000:.2f} Wh to the grid at {buy_grid_price:.2f} ￡/kWh") # unit
+                        break
                 else:
-                    # Perform trading (now in kilo Watt-hours) 
-                    buy_from_grid = abs(balance) - trade_amount
-                    df.loc[timestamp, ['balance', 'currency', 'trade_amount']] = [
-                        df.loc[timestamp, 'balance'] - balance,  # update balance
-                        df.loc[timestamp, 'currency'] - trade_amount * peer_price - buy_from_grid * buy_grid_price,  # update currency
-                        trade_amount  # update trade_amountge
-                    ]
-                        
-                    logging.info(f"Bought {trade_amount*1000:.2f} Wh from peer at {peer_price:.2f} ￡/kWh" # unit
-                                 f"and the remaining {buy_from_grid*1000:.2f} Wh to the grid at {buy_grid_price:.2f} ￡/kWh") # unit
-                    break
+                    logging.error("Failed to get peer data for trading.")
             else:
-                logging.info("The trading is disabled, wait for trading amount. Retrying ")    
+                logging.info("Disabled, wait for trading amount. Retrying ")    
         else:
             logging.error("Failed to get peer data for trading")
 
