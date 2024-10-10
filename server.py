@@ -3,6 +3,7 @@ import logging
 import time
 import threading
 from config import PEER_IP, LOCAL_IP
+import pandas as pd
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -65,6 +66,12 @@ def update_trade_data():
         peer_data[peer_ip] = {}
     peer_data[peer_ip].update(data)
     
+    # Handle the incoming DataFrame
+    df_json = data.get('df')
+    if df_json:
+        df = pd.read_json(df_json, orient='split')
+        logging.info(f"Received updated DataFrame with Enable column updated.")
+        
     trade_amount = data.get('trade_amountn', 'N/A')
     buy_grid_price = data.get('buy_grid_price', 'N/A')
     peer_price = data.get('peer_price', 'N/A')
