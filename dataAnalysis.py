@@ -108,6 +108,7 @@ def update_plot_same(df, start_date, end_date, interval, queue, ready_event):
     generations = []
     nets = []
 
+    data = None
     while True:
         while not queue.empty():
             data = queue.get()
