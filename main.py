@@ -179,6 +179,8 @@ def start_simulation_local(args):
         queue.put("done")
         plot_process.join()
 
+# ... (rest of the main.py code remains the same)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Smart Grid Simulation')
     parser.add_argument('--file_path', type=str, required=True, help='Path to the CSV file')
@@ -188,4 +190,16 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    start_simulation_local(args)
+    from server import app  # Import the Flask app
+    
+    # Start the server and simulation in separate threads to run concurrently
+    server_thread = threading.Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 5000})
+    server_thread.start()  # Start the server thread
+    
+    time.sleep(2)  # Give the server a moment to start
+    
+    simulation_thread = threading.Thread(target=start_simulation_local, args=(args,))
+    simulation_thread.start()  # Start the simulation thread
+    
+    simulation_thread.join()  # Wait for the simulation to complete
+    server_thread.join()  # Wait for the server to finish (if needed)
