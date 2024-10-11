@@ -14,6 +14,7 @@ from batteryControl import update_battery_charge, read_battery_charge
 from lcdControlTest import display_message
 
 PEER_API_URL = f'http://{PEER_IP}:5000'
+LOCAL_IP_URL = f'http://{LOCAL_IP}:5000'
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -67,7 +68,7 @@ def process_trading_and_lcd(df, timestamp, current_data, queue):
     make_api_call(f'{PEER_API_URL}/update_peer_data', update_data)
 
     # Get peer data for trading
-    peer_data_response = requests.get(f'{PEER_API_URL}/get_peer_data')
+    peer_data_response = requests.get(f'{LOCAL_IP_URL}/get_peer_data') # Was using wrong IP check other instances
     if peer_data_response.status_code == 200:
         peer_data = peer_data_response.json()
         
