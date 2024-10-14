@@ -4,7 +4,7 @@ PI_1_IP = '10.126.46.162'  # IP of Pi 1
 PI_2_IP = '10.126.50.50'  # IP of Pi 2
 
 def get_network_ip():
-    """Get the non-loopback IP address of the machine."""
+    # Get the non-loopback IP address of the machine.
     try:
         # Get all network interfaces
         interfaces = netifaces.interfaces()
