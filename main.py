@@ -142,7 +142,7 @@ def fetch_dataframe():
     try:
         logging.info(f"Attempting to fetch DataFrame from peer {PEER_IP}...")
         # Replace the URL with the Flask endpoint where the DataFrame is hosted
-        response = requests.get(f'http://{PEER_IP}:5000/get_dataframe', timeout=3)
+        response = requests.get(f'http://localhost:5000/get_dataframe', timeout=3)
         if response.status_code == 200:
             # Convert the CSV data back to DataFrame
             df = pd.read_csv(StringIO(response.text))
@@ -188,13 +188,13 @@ def process_trading_and_lcd(df, timestamp, current_data):
         
             # Start the trading for consumer after the prosumer provides trade amount
             if enable == 1:
-                peer_data_response = requests.get(f'http://{PEER_IP}:5000/get_peer_data')
+                peer_data_response = requests.get(f'http://localhost:5000/get_peer_data')
                 if peer_data_response.status_code == 200:
                     peer_data = peer_data_response.json()
-                    peer_price = peer_data.get(PEER_IP, {}).get('peer_price')
-                    buy_grid_price = peer_data.get(PEER_IP, {}).get('buy_grid_price')
-
-                    trade_amount = peer_data.get(PEER_IP, {}).get('trade_amount', 0)# unit: kWh
+                    
+                    peer_price = peer_data.get('peer_price')
+                    buy_grid_price = peer_data.get('buy_grid_price')
+                    trade_amount = peer_data.get('trade_amount', 0)# unit: kWh
 
                     if trade_amount is None:
                         logging.warning(f"No trading data available for peer {PEER_IP}")
