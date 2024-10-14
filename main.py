@@ -116,6 +116,10 @@ def start_simulation_local():
                 # Update the plot by putting the timestamp in the queue to signal the plotting process
                 queue.put(timestamp)
 
+            # Periodically check server health
+            if timestamp.minute % 5 == 0:
+                check_server_health()
+
     # Handle keyboard interrupt
     except KeyboardInterrupt:
         logging.info("Simulation interrupted.")
@@ -136,7 +140,7 @@ def synchronize_start():
         peer_response = requests.post(f'http://{PEER_IP}:5000/sync_start', json={"start_time": start_time, "peers": peers})
         
         if response.status_code == 200 and peer_response.status_code == 200: # Check if both responses are successful
-            logging.info(f"Simulation will start at {time.ctime(start_time)}")
+            logging.info(f"Simulation will start at {time.ctime(start_time):.2}")
             
             # Set a fixed seed for random number generation
             random.seed(42)
@@ -192,42 +196,42 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
     update_peer_data(update_data) # Calls the function to update the peer data with the update data
 
     # Get peer data for trading
-    peer_data_response = requests.get(f'http://{PEER_IP}:5000/get_peer_data') # Make a GET request to get the peer data
-    if peer_data_response.status_code == 200: # Checks if the response was successful
-        peer_data = peer_data_response.json() # Set the peer data to the JSON response
-        # Get peer balance with error checking
+    peer_data = get_peer_data() # Calls the function to get the peer data for trading
+    if peer_data:
         peer_balance = peer_data.get('balance') # Get the peer balance from the peer data
         if peer_balance is not None: # Checks if the peer balance is not None
-            if balance > 0 and peer_balance < 0: # Checks if local energy is in a surplus and peer energy is in a deficit
-                # This household has excess energy to sell
+            logging.info(f"Local balance: {balance:.2f}, Peer balance: {peer_balance:.2f}")
+            if balance > 0 and peer_balance < 0:
                 trade_amount = min(balance, abs(peer_balance)) # Calculate the trade amount
-                price = calculate_price(balance, abs(peer_balance)) # Sets the price by calling the calculate_price function
+                price = calculate_price(balance, abs(peer_balance)) # Calculate the price
                 df.loc[timestamp, 'balance'] -= trade_amount # Update the balance column in the dataframe after the trade is completed
                 df.loc[timestamp, 'currency'] += trade_amount * price # Update the currency column in the dataframe after the trade is completed
-                logging.info(f"Sold {trade_amount:.2f} kWh at {price:.2f} £/kWh") # Logs a message with the amount sold and the price
-            elif balance < 0 and peer_balance > 0: # Checks if local energy is in a deficit and peer energy is in a surplus
-                # This household needs to buy energy
-                trade_amount = min(abs(balance), peer_balance) # Calculate the trade amount
-                price = calculate_price(peer_balance, abs(balance)) # Sets the price by calling the calculate_price function
-                df.loc[timestamp, 'balance'] += trade_amount # Update the balance column in the dataframe after the trade is completed
-                df.loc[timestamp, 'currency'] -= trade_amount * price # Update the currency column in the dataframe after the trade is completed
-                logging.info(f"Bought {trade_amount:.2f} kWh at {price:.2f} £/kWh") # Logs a message with the amount bought and the price
+                logging.info(f"Trade executed: Sold {trade_amount:.2f} kWh at {price:.2f} £/kWh")
+            elif balance < 0 and peer_balance > 0:
+                trade_amount = min(abs(balance), peer_balance)
+                price = calculate_price(peer_balance, abs(balance))
+                df.loc[timestamp, 'balance'] += trade_amount
+                df.loc[timestamp, 'currency'] -= trade_amount * price
+                logging.info(f"Trade executed: Bought {trade_amount:.2f} kWh at {price:.2f} £/kWh")
+            else:
+                logging.info("No trade executed: Conditions not met")
+        else:
+            logging.warning("Peer balance not available for trading")
     else:
         logging.error("Failed to get peer data for trading")
 
     # Update LCD display
     display_message(f"Gen: {generation:.2f}W\nDem: {demand:.2f}W\nBat: {battery_charge * 100:.2f}%")
-    
-    # Log the important readings at that timestamp
+
     logging.info(
-        f"At {timestamp} - Generation: {generation:.2f}W, "
+         f"At {timestamp} - Generation: {generation:.2f}W, "
         f"Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%, "
         f"Balance: {df.loc[timestamp, 'balance']:.2f}, "
         f"Currency: {df.loc[timestamp, 'currency']:.2f}, "
         f"LCD updated"
     )
 
-    return df # Return the updated dataframe
+    return df
 
 # This function initializes the simulation by loading the data and simulating the generation
 # It is called by the main function
