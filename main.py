@@ -263,7 +263,7 @@ if __name__ == "__main__":
     
     time.sleep(2)  # Give the server a moment to start
     
-    simulation_thread = threading.Thread(target=start_simulation_local)
+    simulation_thread = threading.Thread(target=start_simulation_local, args=(args,))
     simulation_thread.start()
     
     simulation_thread.join()
