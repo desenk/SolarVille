@@ -12,20 +12,52 @@ from flask import request
 from trading import calculate_price
 from dataAnalysis import load_data, calculate_end_date, simulate_generation, update_plot_separate, update_plot_same
 from config import LOCAL_IP, PEER_IP
+from batteryControl import update_battery_charge, read_battery_charge
+from lcdControlTest import display_message
+from server import app
 
 max_battery_charge = 1.0
 min_battery_charge = 0.0
 
-# Conditionally import the correct modules based on the platform
-if platform.system() == 'Darwin':  # MacOS
-    from mock_batteryControl import update_battery_charge, read_battery_charge
-    from mock_lcdControlTest import display_message
-else:  # Raspberry Pi
-    from batteryControl import update_battery_charge, read_battery_charge
-    from lcdControlTest import display_message
-
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def update_peer_data(data):
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(f'http://{PEER_IP}:5000/update_peer_data', json=data, timeout=5)
+            response.raise_for_status()
+            logging.info(f"Successfully updated peer data: {data}")
+            return
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to update peer data (attempt {attempt + 1}/{max_retries}): {e}")
+    logging.error("Max retries reached for updating peer data")
+
+def get_peer_data():
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = requests.get(f'http://{PEER_IP}:5000/get_peer_data', timeout=5)
+            response.raise_for_status()
+            data = response.json()
+            logging.info(f"Successfully retrieved peer data: {data}")
+            return data
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to get peer data (attempt {attempt + 1}/{max_retries}): {e}")
+    logging.error("Max retries reached for getting peer data")
+    return None
+
+def check_server_health():
+    try:
+        response = requests.get(f'http://{PEER_IP}:5000/health', timeout=5)
+        response.raise_for_status()
+        health_data = response.json()
+        logging.info(f"Server health: {health_data}")
+        return health_data
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Failed to check server health: {e}")
+        return None
 
 # This function is the main driver of the simulation
 def start_simulation_local():
@@ -157,19 +189,15 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
         'balance': balance,
         'battery_charge': battery_charge
     }
-    make_api_call(f'http://{PEER_IP}:5000/update_peer_data', update_data) # Make an API call to update the peer data
+    update_peer_data(update_data) # Calls the function to update the peer data with the update data
 
     # Get peer data for trading
     peer_data_response = requests.get(f'http://{PEER_IP}:5000/get_peer_data') # Make a GET request to get the peer data
     if peer_data_response.status_code == 200: # Checks if the response was successful
         peer_data = peer_data_response.json() # Set the peer data to the JSON response
-        
         # Get peer balance with error checking
-        peer_balance = peer_data.get(PEER_IP, {}).get('balance')
-        if peer_balance is None:
-            logging.warning(f"No balance data available for peer {PEER_IP}")
-        else:
-            # Perform trading
+        peer_balance = peer_data.get('balance') # Get the peer balance from the peer data
+        if peer_balance is not None: # Checks if the peer balance is not None
             if balance > 0 and peer_balance < 0: # Checks if local energy is in a surplus and peer energy is in a deficit
                 # This household has excess energy to sell
                 trade_amount = min(balance, abs(peer_balance)) # Calculate the trade amount
@@ -201,20 +229,6 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
 
     return df # Return the updated dataframe
 
-# This function makes API calls with retry logic
-# It is called by the process_trading_and_lcd function to update the peer data
-def make_api_call(url, data, max_retries=3): # Takes the URL, data and max_retries as arguments
-    for attempt in range(max_retries):
-        try:
-            response = requests.post(url, json=data, timeout=5)
-            response.raise_for_status()
-            return response
-        except requests.exceptions.RequestException as e:
-            logging.error(f"API call failed (attempt {attempt + 1}/{max_retries}): {e}")
-            if attempt == max_retries - 1:
-                logging.error(f"Max retries reached for {url}")
-    return None
-
 # This function initializes the simulation by loading the data and simulating the generation
 # It is called by the main function
 def initialize_simulation():
@@ -242,7 +256,6 @@ if __name__ == "__main__":
     args = parser.parse_args()  # Parse the arguments
     initialize_simulation() # Initialize the simulation
 
-    from server import app # Import the Flask app
     # Start the server and simulation in separate threads to run concurrently
     server_thread = threading.Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 5000})
     server_thread.start() # Start the server thread

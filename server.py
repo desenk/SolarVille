@@ -36,13 +36,17 @@ def ready():
 
 @app.route('/update_peer_data', methods=['POST'])
 def update_peer_data():
-    data = request.json
-    peer_ip = request.remote_addr
-    if peer_ip not in peer_data:
-        peer_data[peer_ip] = {}
-    peer_data[peer_ip].update(data)
-    logging.info(f"Updated peer data for {peer_ip}: {data}")
-    return jsonify({"status": "updated"})
+    try:
+        data = request.json
+        peer_ip = request.remote_addr
+        if peer_ip not in peer_data:
+            peer_data[peer_ip] = {}
+        peer_data[peer_ip].update(data)
+        logging.info(f"Updated peer data for {peer_ip}: {data}")
+        return jsonify({"status": "updated"})
+    except Exception as e:
+        logging.error(f"Error updating peer data: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/start', methods=['POST'])
 def start():
@@ -102,7 +106,17 @@ def get_data():
 
 @app.route('/get_peer_data', methods=['GET'])
 def get_peer_data():
-    return jsonify(peer_data)
+    try:
+        # Return data for the peer IP
+        peer_ip = request.remote_addr
+        if peer_ip in peer_data:
+            return jsonify(peer_data[peer_ip])
+        else:
+            logging.warning(f"No data available for peer {peer_ip}")
+            return jsonify({"error": "No data available"}), 404
+    except Exception as e:
+        logging.error(f"Error getting peer data: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/wait_for_start', methods=['GET'])
 def wait_for_start():
@@ -110,6 +124,10 @@ def wait_for_start():
         return jsonify({"status": "Simulation started"})
     else:
         return jsonify({"status": "Timeout waiting for simulation to start"}), 408
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({"status": "ok", "peer_data": bool(peer_data), "peers": peers})
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
