@@ -6,7 +6,6 @@ import threading
 import logging
 import platform
 import requests
-from flask import request
 from io import StringIO
 from pricing import calculate_price
 from dataAnalysis import load_data, calculate_end_date, update_plot_separate, update_plot_same
@@ -20,10 +19,6 @@ SOLAR_SCALE_FACTOR = 4000  # Adjust this value as needed
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def start_simulation_local():
-    if not synchronize_start():
-        logging.error('Failed to start simulation')
-        return
-    
     # Wait for the simulation to start
     response = requests.get('http://localhost:5000/wait_for_start')
     if response.status_code != 200:
@@ -40,14 +35,15 @@ def start_simulation_local():
     
     df['balance'] = 0.0  # Initialize balance column
     df['currency'] = 0  # Initialize the currency column to 0
-    df['battery_charge'] = 0.5  # Assume 50% initial charge
     
     end_date = calculate_end_date(args.start_date, args.timescale)
+    total_simulation_time = (df.index[-1] - df.index[0]).total_seconds()
+    simulation_speed = 30 * 60 / 6  # 30 minutes of data in 6 seconds of simulation
     logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
     
     queue = Queue()
     ready_event = Event()
-    plot_process = Process(target=plot_data, args=(df, args.start_date, end_date, args.timescale, args.separate, queue, ready_event))
+    plot_process = Process(target=update_plot_same, args=(df, args.start_date, end_date, args.timescale, queue, ready_event))
     plot_process.start()
     
     # Wait for the plotting process to signal that it is ready
@@ -56,11 +52,7 @@ def start_simulation_local():
 
     logging.info("Dataframe for balance, currency and battery charge is created.")
     
-    plot_update_interval = 6  # seconds
-    last_plot_update = time.time()
-    
-    total_simulation_time = (df.index[-1] - df.index[0]).total_seconds()
-    simulation_speed = 30 * 60 / 6  # 30 minutes of data in 6 seconds of simulation
+    start_time = time.time()
 
     try:
         while True:
@@ -83,14 +75,9 @@ def start_simulation_local():
             
             if not current_data.empty:
                 df = process_trading_and_lcd(df, timestamp, current_data)
-                
-                if current_time - last_plot_update >= plot_update_interval:
-                    queue.put({
-                        'timestamp': timestamp
-                    })
-                    last_plot_update = current_time
+
             
-            time.sleep(0.1)  # Small sleep to prevent CPU overuse
+            time.sleep(1)  # Small sleep to prevent CPU overuse
 
     except KeyboardInterrupt:
         logging.info("Simulation interrupted.")
@@ -98,51 +85,13 @@ def start_simulation_local():
         queue.put("done")
         plot_process.join()
 
-def synchronize_start():
-    current_time = time.time()
-    start_time = current_time + 10  # Start 20 seconds from now
-    
-    try:
-        peers = [LOCAL_IP, PEER_IP]  # List of both IPs
-        
-        # Set start time on both Pis
-        response = requests.post('http://localhost:5000/sync_start', json={"start_time": start_time, "peers": peers})
-        peer_response = requests.post(f'http://{PEER_IP}:5000/sync_start', json={"start_time": start_time, "peers": peers})
-        
-        if response.status_code == 200 and peer_response.status_code == 200:
-            logging.info(f"Simulation will start at {time.ctime(start_time)}")
-            
-            # Wait until it's time to start
-            wait_time = start_time - time.time()
-            if wait_time > 0:
-                logging.info(f"Waiting for {wait_time:.2f} seconds before starting simulation")
-                time.sleep(wait_time)
-            
-            # Start the simulation
-            simulation_start_time = time.time()
-            requests.post('http://localhost:5000/start_simulation', json={'start_time': simulation_start_time})
-            requests.post(f'http://{PEER_IP}:5000/start_simulation', json={'start_time': simulation_start_time})
-            
-            logging.info("Starting simulation now")
-            return True
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Network error during synchronization: {e}")
-    
-    logging.error("Failed to start simulation")
-    return False
-
-def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event):
-    if separate:
-        update_plot_separate(df, start_date, end_date, timescale, queue, ready_event)
-    else:
-        update_plot_same(df, start_date, end_date, timescale, queue, ready_event)
 
 # reading the dataframe
 def fetch_dataframe():
     try:
         logging.info(f"Attempting to fetch DataFrame from peer {PEER_IP}...")
         # Replace the URL with the Flask endpoint where the DataFrame is hosted
-        response = requests.get(f'http://localhost:5000/get_dataframe', timeout=3)
+        response = requests.get(f'http://{LOCAL_IP}:5000/get_dataframe', timeout=3)
         if response.status_code == 200:
             # Convert the CSV data back to DataFrame
             df = pd.read_csv(StringIO(response.text))
@@ -157,16 +106,22 @@ def fetch_dataframe():
         logging.error(f"Error fetching DataFrame: {e}")
         return None
     
-def process_trading_and_lcd(df, timestamp, current_data):
+def process_trading_and_lcd(df, timestamp, current_data, queue):
 
     trade_amount = 0
     demand = current_data['energy'] # unit kWh
     
-    # Calculate balance unit: kWh)
+    # Calculate balance unit: kWh
     balance = - demand
     
     # Update dataframe
     df.loc[timestamp, [ 'demand', 'balance']] = [demand, balance]
+
+    # Put data in queue for plotting
+    queue.put({
+        'timestamp': timestamp,
+        'balance': balance
+    })
 
     # Send updates to Flask server
     update_data_1 = {
@@ -188,7 +143,7 @@ def process_trading_and_lcd(df, timestamp, current_data):
         
             # Start the trading for consumer after the prosumer provides trade amount
             if enable == 1:
-                peer_data_response = requests.get(f'http://localhost:5000/get_peer_data')
+                peer_data_response = requests.get(f'http://{LOCAL_IP}:5000/get_peer_data')
                 if peer_data_response.status_code == 200:
                     peer_data = peer_data_response.json()
                     
@@ -263,10 +218,10 @@ if __name__ == "__main__":
     parser.add_argument('--household', type=str, required=True, help='Household ID for the data')
     parser.add_argument('--start_date', type=str, required=True, help='Start date for the simulation')
     parser.add_argument('--timescale', type=str, required=True, choices=['d', 'w', 'm', 'y'], help='Timescale: d for day, w for week, m for month, y for year')
-    parser.add_argument('--separate', action='store_true', help='Flag to plot data in separate subplots')
+
 
     args = parser.parse_args()  # Parse the arguments
-    initialize_simulation()
+    
 
     from server import app
     server_thread = threading.Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 5000})
