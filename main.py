@@ -162,11 +162,11 @@ def process_trading_and_lcd(df, timestamp, current_data):
     
     demand = current_data['energy'] # unit kWh
     # Get peer data for trading
-    peer_data_response = requests.get(f'http://{PEER_IP}:5000/get_peer_data')
+    peer_data_response = requests.get(f'http://localhost:5000/get_peer_data')
     if peer_data_response.status_code == 200:
         peer_data = peer_data_response.json()
          # Get peer demand with error checking
-        peer_demand = peer_data.get(PEER_IP, {}).get('demand', 0)
+        peer_demand = peer_data.get('demand', 0)
     else:
         logging.error("Failed to get peer demand")
         peer_demand = 0
@@ -200,12 +200,12 @@ def process_trading_and_lcd(df, timestamp, current_data):
     make_api_call(f'http://{PEER_IP}:5000/update_peer_data', update_data_1)
 
     # Get peer data for trading
-    peer_data_response = requests.get(f'http://{PEER_IP}:5000/get_peer_data')
+    peer_data_response = requests.get(f'http://localhost:5000/get_peer_data')
     if peer_data_response.status_code == 200:
         peer_data = peer_data_response.json()
         
         # Get peer balance with error checking
-        peer_balance = peer_data.get(PEER_IP, {}).get('balance')
+        peer_balance = peer_data.get('balance')
         if peer_balance is None:
             logging.warning(f"No balance data available for peer {PEER_IP}")
         else:
@@ -288,7 +288,6 @@ def process_trading_and_lcd(df, timestamp, current_data):
         'df': df_json 
     }
     make_api_call(f'http://{PEER_IP}:5000/update_trade_data', update_data_2)
-
 
     return df
 
