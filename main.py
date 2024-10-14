@@ -18,7 +18,7 @@ SOLAR_SCALE_FACTOR = 4000  # Adjust this value as needed
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def start_simulation_local():
+def start_simulation_local(args):
     # Wait for the simulation to start
     response = requests.get('http://localhost:5000/wait_for_start')
     if response.status_code != 200:
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     
     time.sleep(2)  # Give the server a moment to start
     
-    simulation_thread = threading.Thread(target=start_simulation_local)
+    simulation_thread = threading.Thread(target=start_simulation_local, args=(args,))
     simulation_thread.start()
     
     simulation_thread.join()
