@@ -1,5 +1,4 @@
-import socket
-import netifaces
+import netifaces # type: ignore
 
 PI_1_IP = '10.126.46.162'  # IP of Pi 1
 PI_2_IP = '10.126.50.50'  # IP of Pi 2
@@ -30,17 +29,6 @@ def get_local_and_peer_ip():
             return PI_1_IP, PI_2_IP
         elif local_ip == PI_2_IP:
             return PI_2_IP, PI_1_IP
-    """
-    # Fallback to hostname method if network IP couldn't be determined
-    hostname = socket.gethostname()
-    local_ip = socket.gethostbyname(hostname)
-    if local_ip == PI_1_IP:
-        return PI_1_IP, PI_2_IP
-    elif local_ip == PI_2_IP:
-        return PI_2_IP, PI_1_IP
-    else:
-        raise ValueError(f"Unable to determine local and peer IP. Local IP: {local_ip}")
-    """
 
 LOCAL_IP, PEER_IP = get_local_and_peer_ip()
 
