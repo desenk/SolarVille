@@ -3,6 +3,7 @@ import logging
 import time
 import threading
 from config import PEER_IP, LOCAL_IP
+from datetime import datetime
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -76,7 +77,8 @@ def sync_start():
     start_time = data.get('start_time')
     peers = data.get('peers', [])
     if start_time and peers:
-        logging.info(f"Sync start received. Start time: {start_time}, Peers: {peers}")
+        readable_time = datetime.fromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')
+        logging.info(f"Sync start received. Start time: {readable_time}")
         return jsonify({"status": "start time and peers set", "start_time": start_time, "peers": peers})
     else:
         logging.warning("Invalid start time or peers in sync_start request")

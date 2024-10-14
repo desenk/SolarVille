@@ -38,7 +38,7 @@ def get_peer_data():
     max_retries = 3
     for attempt in range(max_retries):
         try:
-            response = requests.get(f'http://{PEER_IP}:5000/get_peer_data', timeout=5)
+            response = requests.get(f'http://{PEER_IP}:5000/get_data', timeout=5)
             response.raise_for_status()
             data = response.json()
             logging.info(f"Successfully retrieved peer data: {data}")
@@ -176,36 +176,34 @@ def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event)
 
 # This function processes the trading and updates the LCD display
 def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
-    demand = current_data['energy'] # Get the energy demand for the current timestamp
-    generation = current_data['generation'] # Get the energy generation for the current timestamp
-    balance = generation - demand # Calculate the energy balance, which is the difference between generation and demand
-    df.loc[timestamp, 'demand'] = demand # Update the demand column in the dataframe
-    df.loc[timestamp, 'generation'] = generation # Update the generation column in the dataframe
-    df.loc[timestamp, 'balance'] = balance # Update the balance column in the dataframe
+    demand = current_data['energy']
+    generation = current_data['generation']
+    balance = generation - demand
+    df.loc[timestamp, 'demand'] = demand
+    df.loc[timestamp, 'generation'] = generation
+    df.loc[timestamp, 'balance'] = balance
     
-    battery_charge = update_battery_charge(generation, demand) # Calls the function to update the battery charge based on generation and demand
-    df.loc[timestamp, 'battery_charge'] = battery_charge # Update the battery charge column in the dataframe
+    battery_charge = update_battery_charge(generation, demand)
+    df.loc[timestamp, 'battery_charge'] = battery_charge
 
-    # Send updates to Flask server
-    update_data = { # Create a dictionary with the update data
+    update_data = {
         'demand': demand,
         'generation': generation,
         'balance': balance,
         'battery_charge': battery_charge
     }
-    update_peer_data(update_data) # Calls the function to update the peer data with the update data
+    update_peer_data(update_data)
 
-    # Get peer data for trading
-    peer_data = get_peer_data() # Calls the function to get the peer data for trading
+    peer_data = get_peer_data()
     if peer_data:
-        peer_balance = peer_data.get('balance') # Get the peer balance from the peer data
-        if peer_balance is not None: # Checks if the peer balance is not None
+        peer_balance = peer_data.get('balance')
+        if peer_balance is not None:
             logging.info(f"Local balance: {balance:.2f}, Peer balance: {peer_balance:.2f}")
             if balance > 0 and peer_balance < 0:
-                trade_amount = min(balance, abs(peer_balance)) # Calculate the trade amount
-                price = calculate_price(balance, abs(peer_balance)) # Calculate the price
-                df.loc[timestamp, 'balance'] -= trade_amount # Update the balance column in the dataframe after the trade is completed
-                df.loc[timestamp, 'currency'] += trade_amount * price # Update the currency column in the dataframe after the trade is completed
+                trade_amount = min(balance, abs(peer_balance))
+                price = calculate_price(balance, abs(peer_balance))
+                df.loc[timestamp, 'balance'] -= trade_amount
+                df.loc[timestamp, 'currency'] += trade_amount * price
                 logging.info(f"Trade executed: Sold {trade_amount:.2f} kWh at {price:.2f} £/kWh")
             elif balance < 0 and peer_balance > 0:
                 trade_amount = min(abs(balance), peer_balance)
@@ -216,15 +214,14 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
             else:
                 logging.info("No trade executed: Conditions not met")
         else:
-            logging.warning("Peer balance not available for trading")
+            logging.warning("Peer balance data not available")
     else:
         logging.error("Failed to get peer data for trading")
 
-    # Update LCD display
     display_message(f"Gen: {generation:.2f}W\nDem: {demand:.2f}W\nBat: {battery_charge * 100:.2f}%")
-
+    
     logging.info(
-         f"At {timestamp} - Generation: {generation:.2f}W, "
+        f"At {timestamp} - Generation: {generation:.2f}W, "
         f"Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%, "
         f"Balance: {df.loc[timestamp, 'balance']:.2f}, "
         f"Currency: {df.loc[timestamp, 'currency']:.2f}, "
