@@ -49,6 +49,35 @@ def update_peer_data():
                  f"Balance: {data.get('balance', 'N/A')}kWh")
     return jsonify({"status": "updated"})
 
+@app.route('/update_trade_data', methods=['POST'])
+def update_trade_data():
+    data = request.json
+    peer_ip = request.remote_addr
+    if peer_ip not in peer_data:
+        peer_data[peer_ip] = {}
+    peer_data[peer_ip].update(data)
+    
+    # Handle the incoming DataFrame
+    df_json = data.get('df')
+    if df_json:
+        df = pd.read_json(df_json, orient='split')
+        logging.info(f"Received updated DataFrame with Enable column updated.")
+        
+    trade_amount = data.get('trade_amountn', 'N/A')
+    buy_grid_price = data.get('buy_grid_price', 'N/A')
+    peer_price = data.get('peer_price', 'N/A')
+    battery_charge = data.get('battery_charge', 'N/A')
+
+    # Safely format the logging message with checks for numeric types
+    logging.info(
+        f"Updated peer data for {peer_ip}: "
+        f"Trade amount: {float(trade_amount):.2f} kWh, " if isinstance(trade_amount, (int, float)) else "Trade amount: N/A, "
+        f"Buy grid price: {float(buy_grid_price):.2f} pound/kWh, " if isinstance(buy_grid_price, (int, float)) else "Buy grid price: N/A, "
+        f"Peer price: {float(peer_price):.2f} pound/kWh, " if isinstance(peer_price, (int, float)) else "Peer price: N/A, "
+        f"Battery Charge: {float(battery_charge) * 100:.2f}% " if isinstance(battery_charge, (int, float)) else "Battery Charge: N/A"
+    )
+    return jsonify({"status": "updated"}) 
+
 @app.route('/start', methods=['POST'])
 def start():
     global peers, peer_ready
