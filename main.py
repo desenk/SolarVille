@@ -185,6 +185,11 @@ def make_api_call(url, data, max_retries=3):
     for attempt in range(max_retries):
         try:
             response = requests.post(url, json=data, timeout=5)
+            if response.status_code == 200:
+            print("Data sent successfully!")
+            else:
+            print(f"Failed to send data. Status code: {response.status_code}")
+        
             response.raise_for_status()
             return response
         except requests.exceptions.RequestException as e:
