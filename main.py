@@ -1,7 +1,7 @@
 import requests
 import threading
 from config import LOCAL_IP, PEER_IP
-from server import app  # 确保server.py中有app定义
+from server import app  # 确保server.py中定义了app
 
 def send_data_to_peer(data):
     try:
@@ -25,7 +25,15 @@ def fetch_data_from_peer():
         print(f"Error fetching data: {e}")
 
 if __name__ == "__main__":
-    # 测试数据上传to prosumer
+    # 启动 Flask 服务器
+    server_thread = threading.Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 5000})
+    server_thread.start()
+
+    # 等待服务器启动
+    import time
+    time.sleep(2)  # 等待服务器完全启动
+
+    # 测试数据上传到 prosumer
     test_data = {
         'demand': 10,
         'generation': 5,
@@ -33,9 +41,7 @@ if __name__ == "__main__":
         'battery SoC': 0.5,
         'enable': 1
     }
-    send_data_to_peer(test_data)
+    #send_data_to_peer(test_data)
 
-    # Test data fetch from own server
-    server_thread = threading.Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 5000})
-    server_thread.start()
+    # 测试从自己的服务器获取数据
     fetch_data_from_peer()
