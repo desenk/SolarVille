@@ -38,23 +38,20 @@ def ready():
 @app.route('/update_peer_data', methods=['POST'])
 def update_peer_data():
     data = request.json
+    print("server received data from consumer:", data)
     peer_ip = request.remote_addr
     if peer_ip not in peer_data:
         peer_data[peer_ip] = {}
     peer_data[peer_ip].update(data)
     
-    generation = data.get('generation', 'N/A')
     demand = data.get('demand', 'N/A')
     balance = data.get('balance', 'N/A')
-    battery_soc = data.get('battery SoC', 'N/A')
     
     # Safely format the logging message with checks for numeric types
     logging.info(
-    f"Updated peer data for {peer_ip}: "
-    f"Generation: {float(generation):.2f} kWh, " if isinstance(generation, (int, float)) else "Generation: N/A, "
+    f"Updated server peer data for {peer_ip}: "
     f"Demand: {float(demand):.2f} kWh, " if isinstance(demand, (int, float)) else "Demand: N/A, "
-    f"Balance: {float(balance):.2f} kWh, " if isinstance(balance, (int, float)) else "Balance: N/A, "
-    f"Initial SoC: {float(battery_soc) * 100:.2f}% " if isinstance(battery_soc, (int, float)) else "Initial SoC: N/A"
+    f"Balance: {float(balance):.2f} kWh, " if isinstance(balance, (int, float)) else "Balance: N/A"
     )
     return jsonify({"status": "updated"})
 
@@ -79,7 +76,7 @@ def update_trade_data():
 
     # Safely format the logging message with checks for numeric types
     logging.info(
-        f"Updated peer data for {peer_ip}: "
+        f"Updated server trade data for {peer_ip}: "
         f"Trade amount: {float(trade_amount):.2f} kWh, " if isinstance(trade_amount, (int, float)) else "Trade amount: N/A, "
         f"Buy grid price: {float(buy_grid_price):.2f} pound/kWh, " if isinstance(buy_grid_price, (int, float)) else "Buy grid price: N/A, "
         f"Peer price: {float(peer_price):.2f} pound/kWh, " if isinstance(peer_price, (int, float)) else "Peer price: N/A, "
