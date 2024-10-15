@@ -74,7 +74,7 @@ def start_simulation_local(args):
             current_data = df.loc[timestamp]
             
             if not current_data.empty:
-                df = process_trading_and_lcd(df, timestamp, current_data)
+                df = process_trading_and_lcd(df, timestamp, current_data, queue)
 
             
             time.sleep(1)  # Small sleep to prevent CPU overuse
