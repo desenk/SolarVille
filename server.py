@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from io import StringIO
 import pandas as pd
 import logging
 import time
@@ -61,7 +62,7 @@ def update_trade_data():
     # Handle the incoming DataFrame
     df_json = data.get('df')
     if df_json:
-        df = pd.read_json(df_json, orient='split')
+        df = pd.read_json(StringIO(df_json), orient='split')
         logging.info(f"Server received updated DataFrame with Enable column updated.")
         
     trade_amount = data.get('trade_amountn', 'N/A')
