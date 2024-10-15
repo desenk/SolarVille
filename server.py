@@ -38,6 +38,7 @@ def ready():
 @app.route('/update_peer_data', methods=['POST'])
 def update_peer_data():
     data = request.json
+    print("Received data:", data)
     peer_ip = request.remote_addr
     if peer_ip not in peer_data:
         peer_data[peer_ip] = {}
