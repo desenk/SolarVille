@@ -1,5 +1,7 @@
 import requests
+import threading
 from config import LOCAL_IP, PEER_IP
+from server import app  # 确保server.py中有app定义
 
 def send_data_to_peer(data):
     try:
@@ -33,8 +35,7 @@ if __name__ == "__main__":
     }
     send_data_to_peer(test_data)
 
-    #Test data fetch from own server
-    from server import app
+    # Test data fetch from own server
     server_thread = threading.Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 5000})
     server_thread.start()
     fetch_data_from_peer()
