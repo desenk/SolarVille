@@ -122,11 +122,13 @@ def process_trading_and_lcd(df, timestamp, current_data, queue):
         'timestamp': timestamp,
         'balance': balance
     })
-
+    print(demand, balance)
     # Send updates to Flask server
     update_data_1 = {
-        'demand': demand,
-        'balance': balance
+        #'demand': demand,
+        #'balance': balance
+        'demand': 1,
+        'balance': -1
     }
     make_api_call(f'http://{PEER_IP}:5000/update_peer_data', update_data_1)
     
