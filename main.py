@@ -106,8 +106,7 @@ def process_trading_and_lcd(df, timestamp, current_data, queue):
     # Put data in queue for plotting
     queue.put({
         'timestamp': timestamp,
-        'generation': solar_energy,
-        'balance': balance
+        'generation': solar_energy
     })
 
     # Send updates to Flask server
@@ -199,10 +198,10 @@ def process_trading_and_lcd(df, timestamp, current_data, queue):
         ]
         logging.info(f"Bought {buy_from_grid*1000:.2f} Wh from grid at {buy_grid_price:.2f} ￡/kWh")
     
-    queue.put({
-        'timestamp': timestamp,
-        'trade amount': trade_amount
-    })
+    #queue.put({
+     #   'timestamp': timestamp,
+      #  'trade amount': trade_amount
+    #})
     
     # Update LCD display
     display_message(f"Bat:{battery_soc*100:.0f}% Gen:{solar_power:.0f}W")
