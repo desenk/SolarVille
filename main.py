@@ -19,11 +19,6 @@ SOLAR_SCALE_FACTOR = 4000  # Adjust this value as needed
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def start_simulation_local(args):
-    # Wait for the simulation to start
-    response = requests.get('http://{LOCAL_IP}:5000/wait_for_start')
-    if response.status_code != 200:
-        logging.error('Failed to start simulation')
-        return
 
     df = load_data(args.file_path, args.household, args.start_date, args.timescale)
     if df.empty:
