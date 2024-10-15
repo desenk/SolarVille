@@ -20,12 +20,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 def start_simulation_local(args):
     # Wait for the simulation to start
-    response = requests.get('http://localhost:5000/wait_for_start')
+    response = requests.get('http://{LOCAL_IP}:5000/wait_for_start')
     if response.status_code != 200:
         logging.error('Failed to start simulation')
         return
-    
-    start_time = time.time()
 
     df = load_data(args.file_path, args.household, args.start_date, args.timescale)
     if df.empty:
@@ -76,7 +74,6 @@ def start_simulation_local(args):
             if not current_data.empty:
                 df = process_trading_and_lcd(df, timestamp, current_data, queue)
 
-            
             time.sleep(1)  # Small sleep to prevent CPU overuse
 
     except KeyboardInterrupt:
@@ -155,18 +152,18 @@ def process_trading_and_lcd(df, timestamp, current_data, queue):
 
                     if trade_amount is None:
                         logging.warning(f"No trading data available for peer {PEER_IP}")
-                    else:
-                        # Perform trading (now in kilo Watt-hours) 
-                        buy_from_grid = abs(balance) - trade_amount
-                        df.loc[timestamp, ['balance', 'currency', 'trade_amount']] = [
-                            df.loc[timestamp, 'balance'] - balance,  # update balance
-                            df.loc[timestamp, 'currency'] - trade_amount * peer_price - buy_from_grid * buy_grid_price,  # update currency
-                            trade_amount  # update trade_amountge
-                        ]
-                            
-                        logging.info(f"Bought {trade_amount*1000:.2f} Wh from peer at {peer_price:.2f} ￡/kWh" # unit
-                                    f"and the remaining {buy_from_grid*1000:.2f} Wh to the grid at {buy_grid_price:.2f} ￡/kWh") # unit
-                        break
+                    
+                    # Perform trading (now in kilo Watt-hours) 
+                    buy_from_grid = abs(balance) - trade_amount
+                    df.loc[timestamp, ['balance', 'currency', 'trade_amount']] = [
+                        df.loc[timestamp, 'balance'] - balance,  # update balance
+                        df.loc[timestamp, 'currency'] - trade_amount * peer_price - buy_from_grid * buy_grid_price,  # update currency
+                        trade_amount  # update trade_amountge
+                    ]
+                        
+                    logging.info(f"Bought {trade_amount*1000:.2f} Wh from peer at {peer_price:.2f} ￡/kWh" # unit
+                                f"and the remaining {buy_from_grid*1000:.2f} Wh to the grid at {buy_grid_price:.2f} ￡/kWh") # unit
+                    break
                 else:
                     logging.error("Failed to get peer data for trading.")
             else:
@@ -201,18 +198,6 @@ def make_api_call(url, data, max_retries=3):
                 logging.error(f"Max retries reached for {url}")
     return None
 
-def initialize_simulation():
-    global df, end_date
-    logging.info("Loading data, please wait...")
-    start_time = time.time()
-    df = load_data(args.file_path, args.household, args.start_date, args.timescale)
-    if df.empty:
-        logging.error("No data loaded. Exiting simulation.")
-        return
-    
-    df['balance'] = 0.0  # Initialize balance column
-    end_date = calculate_end_date(args.start_date, args.timescale)
-    logging.info(f"Data loaded in {time.time() - start_time:.2f} seconds")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Smart Grid Simulation')
