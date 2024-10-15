@@ -21,6 +21,8 @@ battery_soc = 0.5
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def start_simulation_local(args):
+    start_time = time.time()
+    logging.info("Starting simulation...")
     df = load_data(args.file_path, args.household, args.start_date, args.timescale)
     if df.empty:
         logging.error("No data loaded. Exiting simulation.")
@@ -68,8 +70,13 @@ def start_simulation_local(args):
             timestamp = df.index[timestamp_index]
             current_data = df.loc[timestamp]
 
+            logging.info(f"Elapsed time: {elapsed_time:.2f}, Current data: {current_data}")
+
             if not current_data.empty:
                 df = process_trading_and_lcd(df, timestamp, current_data, queue)
+                logging.info("Processed data and LCD update")
+            else:
+                logging.warning("Empty current_data, skipping processing")
 
             time.sleep(1)  # Adjust sleep time as needed
 
