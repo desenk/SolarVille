@@ -99,12 +99,16 @@ def start_simulation():
 
 @app.route('/get_data', methods=['GET'])
 def get_data():
-    global energy_data
     try:
-        return jsonify(energy_data)
+        peer_ip = request.remote_addr
+        if peer_ip in peer_data:
+            return jsonify(peer_data[peer_ip])
+        else:
+            logging.warning(f"No data available for peer {peer_ip}")
+            return jsonify({"error": "No data available"}), 404
     except Exception as e:
-        logging.error(f"Error getting data: {e}")
-        return jsonify({"error": str(e)}), 400
+        logging.error(f"Error getting data: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/get_peer_data', methods=['GET'])
 def get_peer_data():
