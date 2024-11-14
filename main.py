@@ -199,25 +199,29 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
     # Get peer's data
     peer_data = get_peer_data()
     if peer_data:
+        # Important: Store the peer's actual balance from the data
         peer_balance = peer_data.get('balance')
         if peer_balance is not None:
+            # Log the DIFFERENT local and peer balances
             logging.info(f"Local balance: {local_balance:.2f}, Peer balance: {peer_balance:.2f}")
             
-            # Now make trading decisions based on different local and peer balances
+            # Now we can properly check trade conditions since we have different balances
             if local_balance > 0 and peer_balance < 0:
+                # We have excess, they have deficit
                 trade_amount = min(local_balance, abs(peer_balance))
                 price = calculate_price(local_balance, abs(peer_balance))
                 df.loc[timestamp, 'balance'] -= trade_amount
                 df.loc[timestamp, 'currency'] += trade_amount * price
                 logging.info(f"Trade executed: Sold {trade_amount:.2f} kWh at {price:.2f} £/kWh")
             elif local_balance < 0 and peer_balance > 0:
+                # We have deficit, they have excess
                 trade_amount = min(abs(local_balance), peer_balance)
                 price = calculate_price(peer_balance, abs(local_balance))
                 df.loc[timestamp, 'balance'] += trade_amount
                 df.loc[timestamp, 'currency'] -= trade_amount * price
                 logging.info(f"Trade executed: Bought {trade_amount:.2f} kWh at {price:.2f} £/kWh")
             else:
-                logging.info("No trade executed: Conditions not met")
+                logging.info("No trade executed: Both nodes have same sign balance")
         else:
             logging.warning("Peer balance data not available")
     else:
@@ -228,7 +232,7 @@ def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
     logging.info(
         f"At {timestamp} - Generation: {generation:.2f}W, "
         f"Demand: {demand:.2f}W, Battery: {battery_charge * 100:.2f}%, "
-        f"Balance: {df.loc[timestamp, 'balance']:.2f}, "
+        f"Local Balance: {local_balance:.2f}, "  # Changed to be explicit
         f"Currency: {df.loc[timestamp, 'currency']:.2f}, "
         f"LCD updated"
     )
