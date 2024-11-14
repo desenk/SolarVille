@@ -176,38 +176,43 @@ def plot_data(df, start_date, end_date, timescale, separate, queue, ready_event)
 
 # This function processes the trading and updates the LCD display
 def process_trading_and_lcd(df, timestamp, current_data, battery_charge):
+    # Calculate local balance
     demand = current_data['energy']
     generation = current_data['generation']
-    balance = generation - demand
+    local_balance = generation - demand
     df.loc[timestamp, 'demand'] = demand
     df.loc[timestamp, 'generation'] = generation
-    df.loc[timestamp, 'balance'] = balance
+    df.loc[timestamp, 'balance'] = local_balance
     
     battery_charge = update_battery_charge(generation, demand)
     df.loc[timestamp, 'battery_charge'] = battery_charge
 
+    # Send our data to peer
     update_data = {
         'demand': demand,
         'generation': generation,
-        'balance': balance,
+        'balance': local_balance,
         'battery_charge': battery_charge
     }
     update_peer_data(update_data)
 
+    # Get peer's data
     peer_data = get_peer_data()
     if peer_data:
         peer_balance = peer_data.get('balance')
         if peer_balance is not None:
-            logging.info(f"Local balance: {balance:.2f}, Peer balance: {peer_balance:.2f}")
-            if balance > 0 and peer_balance < 0:
-                trade_amount = min(balance, abs(peer_balance))
-                price = calculate_price(balance, abs(peer_balance))
+            logging.info(f"Local balance: {local_balance:.2f}, Peer balance: {peer_balance:.2f}")
+            
+            # Now make trading decisions based on different local and peer balances
+            if local_balance > 0 and peer_balance < 0:
+                trade_amount = min(local_balance, abs(peer_balance))
+                price = calculate_price(local_balance, abs(peer_balance))
                 df.loc[timestamp, 'balance'] -= trade_amount
                 df.loc[timestamp, 'currency'] += trade_amount * price
                 logging.info(f"Trade executed: Sold {trade_amount:.2f} kWh at {price:.2f} £/kWh")
-            elif balance < 0 and peer_balance > 0:
-                trade_amount = min(abs(balance), peer_balance)
-                price = calculate_price(peer_balance, abs(balance))
+            elif local_balance < 0 and peer_balance > 0:
+                trade_amount = min(abs(local_balance), peer_balance)
+                price = calculate_price(peer_balance, abs(local_balance))
                 df.loc[timestamp, 'balance'] += trade_amount
                 df.loc[timestamp, 'currency'] -= trade_amount * price
                 logging.info(f"Trade executed: Bought {trade_amount:.2f} kWh at {price:.2f} £/kWh")
