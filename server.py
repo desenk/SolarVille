@@ -14,6 +14,18 @@ peer_ready = {}
 simulation_started = threading.Event()
 peer_data = {}
 
+
+def ensure_peer_data_exists(peer_ip):
+    """Make sure peer data structure exists"""
+    if peer_ip not in peer_data:
+        peer_data[peer_ip] = {
+            "balance": 0,
+            "currency": 100.0,
+            "demand": 0,
+            "generation": 0,
+            "battery_charge": 0,
+        }
+
 # Shared data for the example
 energy_data = {
     "balance": 0,
@@ -40,8 +52,7 @@ def update_peer_data():
     try:
         data = request.json
         peer_ip = request.remote_addr
-        if peer_ip not in peer_data:
-            peer_data[peer_ip] = {}
+        ensure_peer_data_exists(peer_ip)  # Make sure structure exists
         peer_data[peer_ip].update(data)
         logging.info(f"Updated peer data for {peer_ip}: {data}")
         return jsonify({"status": "updated"})
@@ -77,6 +88,9 @@ def sync_start():
     start_time = data.get('start_time')
     peers = data.get('peers', [])
     if start_time and peers:
+        # Initialize data structures for all peers
+        for peer in peers:
+            ensure_peer_data_exists(peer)
         readable_time = datetime.fromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')
         logging.info(f"Sync start received. Start time: {readable_time}")
         return jsonify({"status": "start time and peers set", "start_time": start_time, "peers": peers})
@@ -106,15 +120,17 @@ def get_other_peer_ip(requesting_ip):
 def get_data():
     try:
         requesting_ip = request.remote_addr
-        other_peer_ip = get_other_peer_ip(requesting_ip)
+        # Get the other peer's IP (not the requesting one)
+        other_peer_ip = next((ip for ip in peers if ip != requesting_ip), None)
         
-        if other_peer_ip and other_peer_ip in peer_data:
+        if other_peer_ip:
+            ensure_peer_data_exists(other_peer_ip)  # Make sure structure exists
             # Return the OTHER peer's data
             logging.info(f"Returning {other_peer_ip}'s data to {requesting_ip}")
             return jsonify(peer_data[other_peer_ip])
         else:
-            logging.warning(f"No data available from other peer for {requesting_ip}")
-            return jsonify({"error": "No data available"}), 404
+            logging.warning(f"Could not find peer IP for {requesting_ip}")
+            return jsonify({"error": "No peer found"}), 404
     except Exception as e:
         logging.error(f"Error getting data: {str(e)}")
         return jsonify({"error": str(e)}), 500
