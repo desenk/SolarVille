@@ -97,14 +97,23 @@ def start_simulation():
     else:
         return jsonify({"error": "Invalid start time"}), 400
 
+def get_other_peer_ip(requesting_ip):
+    """Helper function to get the other peer's IP"""
+    return next((ip for ip in peers if ip != requesting_ip), None)
+
+# Then we can update our /get_data route to use it:
 @app.route('/get_data', methods=['GET'])
 def get_data():
     try:
-        peer_ip = request.remote_addr
-        if peer_ip in peer_data:
-            return jsonify(peer_data[peer_ip])
+        requesting_ip = request.remote_addr
+        other_peer_ip = get_other_peer_ip(requesting_ip)
+        
+        if other_peer_ip and other_peer_ip in peer_data:
+            # Return the OTHER peer's data
+            logging.info(f"Returning {other_peer_ip}'s data to {requesting_ip}")
+            return jsonify(peer_data[other_peer_ip])
         else:
-            logging.warning(f"No data available for peer {peer_ip}")
+            logging.warning(f"No data available from other peer for {requesting_ip}")
             return jsonify({"error": "No data available"}), 404
     except Exception as e:
         logging.error(f"Error getting data: {str(e)}")
