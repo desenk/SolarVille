@@ -1,7 +1,7 @@
 # Branch: consumerJack
 # File: main.py
 
-from energy_types import ProsumerReading, EnergyReading
+from energy_types import EnergyReading
 from visualisation_manager import VisualisationManager
 from trading_manager import TradingManager
 from trading_integration import TradingIntegration
