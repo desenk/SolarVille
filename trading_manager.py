@@ -7,7 +7,8 @@ from energy_types import TradeData, EnergyReading
 from config import PEER_IP, LOCAL_IP
 
 class TradingManager:
-    def __init__(self):
+    def __init__(self, is_prosumer: bool):
+        # We ignore is_prosumer since this is the consumer branch
         self.peer_ip = PEER_IP
         # Constants for pricing
         self.grid_buy_price = 0.25  # £/kWh
