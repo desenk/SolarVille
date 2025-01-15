@@ -1,8 +1,8 @@
 # consumer
 import netifaces # type: ignore
 
-PI_1_IP = '10.126.46.162'  # IP of Pi 1
-PI_2_IP = '10.126.50.50'  # IP of Pi 2
+PI_1_IP = '10.126.56.181'  # IP of Pi 1
+PI_2_IP = '10.126.167.128'  # IP of Pi 2
 
 def get_network_ip():
     # Get the non-loopback IP address of the machine.
