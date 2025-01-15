@@ -1,0 +1,750 @@
+2024-11-27 11:02:05,029 - INFO - root - Log file created at: logs/solarville_prosumer_20241127_110205.log
+2024-11-27 11:02:05,029 - INFO - root - Initializing visualization manager...
+2024-11-27 11:02:05,057 - INFO - root - Starting Prosumer simulation...
+2024-11-27 11:02:05,058 - INFO - root - Using data file: /home/pi/block_0.csv
+2024-11-27 11:02:05,058 - INFO - root - Household ID: MAC000246
+2024-11-27 11:02:05,058 - INFO - root - Start date: 2012-10-24
+2024-11-27 11:02:05,058 - INFO - root - Starting simulation...
+2024-11-27 11:02:05,058 - INFO - root - Loading data from file...
+2024-11-27 11:02:05,059 - INFO - root - Loading data from /home/pi/block_0.csv
+2024-11-27 11:02:05,059 - INFO - root - Looking for household: MAC000246
+2024-11-27 11:02:05,059 - INFO - root - Date range: 2012-10-24 to 2012-10-25 00:00:00
+2024-11-27 11:02:05,059 - INFO - root - File size: 54.81 MB
+2024-11-27 11:02:05,060 - INFO - root - CSV header: LCLid,tstp,energy(kWh/hh)
+2024-11-27 11:02:05,061 - INFO - root - First data line: MAC000002,2012-10-12 00:30:00.0000000, 0
+2024-11-27 11:02:05,061 - INFO - root - Sample of first few lines:
+MAC000002,2012-10-12 01:00:00.0000000, 0 
+
+MAC000002,2012-10-12 01:30:00.0000000, 0 
+
+MAC000002,2012-10-12 02:00:00.0000000, 0 
+
+MAC000002,2012-10-12 02:30:00.0000000, 0 
+
+MAC000002,2012-10-12 03:00:00.0000000, 0 
+
+MAC000002,2012-10-12 03:30:00.0000000, 0 
+
+MAC000002,2012-10-12 04:00:00.0000000, 0 
+
+MAC000002,2012-10-12 04:30:00.0000000, 0 
+
+MAC000002,2012-10-12 05:00:00.0000000, 0 
+
+MAC000002,2012-10-12 05:30:00.0000000, 0 
+
+2024-11-27 11:02:05,114 - INFO - root - Processing chunk 1...
+2024-11-27 11:02:05,132 - INFO - root - Households in chunk 1: ['MAC000002']
+2024-11-27 11:02:05,132 - DEBUG - root - Household MAC000246 not found in chunk 1
+2024-11-27 11:02:05,161 - INFO - root - Processing chunk 2...
+2024-11-27 11:02:05,164 - INFO - root - Households in chunk 2: ['MAC000002']
+2024-11-27 11:02:05,164 - DEBUG - root - Household MAC000246 not found in chunk 2
+2024-11-27 11:02:05,194 - INFO - root - Processing chunk 3...
+2024-11-27 11:02:05,197 - INFO - root - Households in chunk 3: ['MAC000002' 'MAC000246']
+2024-11-27 11:02:05,213 - INFO - root - Found 5859 rows for household MAC000246 in chunk 3
+2024-11-27 11:02:05,261 - INFO - root - Processing chunk 4...
+2024-11-27 11:02:05,263 - INFO - root - Households in chunk 4: ['MAC000246']
+2024-11-27 11:02:05,269 - INFO - root - Found 10000 rows for household MAC000246 in chunk 4
+2024-11-27 11:02:05,283 - INFO - root - Added 48 rows from chunk 4 to filtered data
+2024-11-27 11:02:05,308 - INFO - root - Processing chunk 5...
+2024-11-27 11:02:05,310 - INFO - root - Households in chunk 5: ['MAC000246']
+2024-11-27 11:02:05,317 - INFO - root - Found 10000 rows for household MAC000246 in chunk 5
+2024-11-27 11:02:05,360 - INFO - root - Processing chunk 6...
+2024-11-27 11:02:05,362 - INFO - root - Households in chunk 6: ['MAC000246']
+2024-11-27 11:02:05,368 - INFO - root - Found 10000 rows for household MAC000246 in chunk 6
+2024-11-27 11:02:05,411 - INFO - root - Processing chunk 7...
+2024-11-27 11:02:05,414 - INFO - root - Households in chunk 7: ['MAC000246' 'MAC000450']
+2024-11-27 11:02:05,418 - INFO - root - Found 3386 rows for household MAC000246 in chunk 7
+2024-11-27 11:02:05,459 - INFO - root - Processing chunk 8...
+2024-11-27 11:02:05,462 - INFO - root - Households in chunk 8: ['MAC000450']
+2024-11-27 11:02:05,462 - DEBUG - root - Household MAC000246 not found in chunk 8
+2024-11-27 11:02:05,492 - INFO - root - Processing chunk 9...
+2024-11-27 11:02:05,495 - INFO - root - Households in chunk 9: ['MAC000450' 'MAC001074']
+2024-11-27 11:02:05,495 - DEBUG - root - Household MAC000246 not found in chunk 9
+2024-11-27 11:02:05,524 - INFO - root - Processing chunk 10...
+2024-11-27 11:02:05,527 - INFO - root - Households in chunk 10: ['MAC001074' 'MAC003223']
+2024-11-27 11:02:05,527 - DEBUG - root - Household MAC000246 not found in chunk 10
+2024-11-27 11:02:05,557 - INFO - root - Processing chunk 11...
+2024-11-27 11:02:05,560 - INFO - root - Households in chunk 11: ['MAC003223']
+2024-11-27 11:02:05,560 - DEBUG - root - Household MAC000246 not found in chunk 11
+2024-11-27 11:02:05,591 - INFO - root - Processing chunk 12...
+2024-11-27 11:02:05,593 - INFO - root - Households in chunk 12: ['MAC003223' 'MAC003239']
+2024-11-27 11:02:05,593 - DEBUG - root - Household MAC000246 not found in chunk 12
+2024-11-27 11:02:05,626 - INFO - root - Processing chunk 13...
+2024-11-27 11:02:05,629 - INFO - root - Households in chunk 13: ['MAC003239']
+2024-11-27 11:02:05,629 - DEBUG - root - Household MAC000246 not found in chunk 13
+2024-11-27 11:02:05,659 - INFO - root - Processing chunk 14...
+2024-11-27 11:02:05,662 - INFO - root - Households in chunk 14: ['MAC003239']
+2024-11-27 11:02:05,663 - DEBUG - root - Household MAC000246 not found in chunk 14
+2024-11-27 11:02:05,688 - INFO - root - Processing chunk 15...
+2024-11-27 11:02:05,690 - INFO - root - Households in chunk 15: ['MAC003239' 'MAC003252']
+2024-11-27 11:02:05,691 - DEBUG - root - Household MAC000246 not found in chunk 15
+2024-11-27 11:02:05,721 - INFO - root - Processing chunk 16...
+2024-11-27 11:02:05,724 - INFO - root - Households in chunk 16: ['MAC003252']
+2024-11-27 11:02:05,725 - DEBUG - root - Household MAC000246 not found in chunk 16
+2024-11-27 11:02:05,755 - INFO - root - Processing chunk 17...
+2024-11-27 11:02:05,757 - INFO - root - Households in chunk 17: ['MAC003252' 'MAC003281']
+2024-11-27 11:02:05,758 - DEBUG - root - Household MAC000246 not found in chunk 17
+2024-11-27 11:02:05,791 - INFO - root - Processing chunk 18...
+2024-11-27 11:02:05,793 - INFO - root - Households in chunk 18: ['MAC003281']
+2024-11-27 11:02:05,794 - DEBUG - root - Household MAC000246 not found in chunk 18
+2024-11-27 11:02:05,824 - INFO - root - Processing chunk 19...
+2024-11-27 11:02:05,827 - INFO - root - Households in chunk 19: ['MAC003281']
+2024-11-27 11:02:05,828 - DEBUG - root - Household MAC000246 not found in chunk 19
+2024-11-27 11:02:05,859 - INFO - root - Processing chunk 20...
+2024-11-27 11:02:05,861 - INFO - root - Households in chunk 20: ['MAC003281' 'MAC003305']
+2024-11-27 11:02:05,862 - DEBUG - root - Household MAC000246 not found in chunk 20
+2024-11-27 11:02:05,892 - INFO - root - Processing chunk 21...
+2024-11-27 11:02:05,895 - INFO - root - Households in chunk 21: ['MAC003305']
+2024-11-27 11:02:05,895 - DEBUG - root - Household MAC000246 not found in chunk 21
+2024-11-27 11:02:05,925 - INFO - root - Processing chunk 22...
+2024-11-27 11:02:05,927 - INFO - root - Households in chunk 22: ['MAC003305' 'MAC003348']
+2024-11-27 11:02:05,928 - DEBUG - root - Household MAC000246 not found in chunk 22
+2024-11-27 11:02:05,960 - INFO - root - Processing chunk 23...
+2024-11-27 11:02:05,962 - INFO - root - Households in chunk 23: ['MAC003348']
+2024-11-27 11:02:05,963 - DEBUG - root - Household MAC000246 not found in chunk 23
+2024-11-27 11:02:05,992 - INFO - root - Processing chunk 24...
+2024-11-27 11:02:05,995 - INFO - root - Households in chunk 24: ['MAC003348']
+2024-11-27 11:02:05,995 - DEBUG - root - Household MAC000246 not found in chunk 24
+2024-11-27 11:02:06,021 - INFO - root - Processing chunk 25...
+2024-11-27 11:02:06,023 - INFO - root - Households in chunk 25: ['MAC003348' 'MAC003388']
+2024-11-27 11:02:06,023 - DEBUG - root - Household MAC000246 not found in chunk 25
+2024-11-27 11:02:06,054 - INFO - root - Processing chunk 26...
+2024-11-27 11:02:06,056 - INFO - root - Households in chunk 26: ['MAC003388']
+2024-11-27 11:02:06,056 - DEBUG - root - Household MAC000246 not found in chunk 26
+2024-11-27 11:02:06,089 - INFO - root - Processing chunk 27...
+2024-11-27 11:02:06,092 - INFO - root - Households in chunk 27: ['MAC003388' 'MAC003394']
+2024-11-27 11:02:06,092 - DEBUG - root - Household MAC000246 not found in chunk 27
+2024-11-27 11:02:06,122 - INFO - root - Processing chunk 28...
+2024-11-27 11:02:06,125 - INFO - root - Households in chunk 28: ['MAC003394']
+2024-11-27 11:02:06,125 - DEBUG - root - Household MAC000246 not found in chunk 28
+2024-11-27 11:02:06,154 - INFO - root - Processing chunk 29...
+2024-11-27 11:02:06,156 - INFO - root - Households in chunk 29: ['MAC003394']
+2024-11-27 11:02:06,157 - DEBUG - root - Household MAC000246 not found in chunk 29
+2024-11-27 11:02:06,189 - INFO - root - Processing chunk 30...
+2024-11-27 11:02:06,191 - INFO - root - Households in chunk 30: ['MAC003394' 'MAC003400']
+2024-11-27 11:02:06,192 - DEBUG - root - Household MAC000246 not found in chunk 30
+2024-11-27 11:02:06,222 - INFO - root - Processing chunk 31...
+2024-11-27 11:02:06,224 - INFO - root - Households in chunk 31: ['MAC003400']
+2024-11-27 11:02:06,225 - DEBUG - root - Household MAC000246 not found in chunk 31
+2024-11-27 11:02:06,257 - INFO - root - Processing chunk 32...
+2024-11-27 11:02:06,259 - INFO - root - Households in chunk 32: ['MAC003400' 'MAC003422']
+2024-11-27 11:02:06,260 - DEBUG - root - Household MAC000246 not found in chunk 32
+2024-11-27 11:02:06,290 - INFO - root - Processing chunk 33...
+2024-11-27 11:02:06,292 - INFO - root - Households in chunk 33: ['MAC003422']
+2024-11-27 11:02:06,293 - DEBUG - root - Household MAC000246 not found in chunk 33
+2024-11-27 11:02:06,315 - INFO - root - Processing chunk 34...
+2024-11-27 11:02:06,318 - INFO - root - Households in chunk 34: ['MAC003422' 'MAC003423']
+2024-11-27 11:02:06,319 - DEBUG - root - Household MAC000246 not found in chunk 34
+2024-11-27 11:02:06,351 - INFO - root - Processing chunk 35...
+2024-11-27 11:02:06,354 - INFO - root - Households in chunk 35: ['MAC003423']
+2024-11-27 11:02:06,354 - DEBUG - root - Household MAC000246 not found in chunk 35
+2024-11-27 11:02:06,385 - INFO - root - Processing chunk 36...
+2024-11-27 11:02:06,387 - INFO - root - Households in chunk 36: ['MAC003423']
+2024-11-27 11:02:06,387 - DEBUG - root - Household MAC000246 not found in chunk 36
+2024-11-27 11:02:06,420 - INFO - root - Processing chunk 37...
+2024-11-27 11:02:06,423 - INFO - root - Households in chunk 37: ['MAC003423' 'MAC003428']
+2024-11-27 11:02:06,423 - DEBUG - root - Household MAC000246 not found in chunk 37
+2024-11-27 11:02:06,454 - INFO - root - Processing chunk 38...
+2024-11-27 11:02:06,456 - INFO - root - Households in chunk 38: ['MAC003428']
+2024-11-27 11:02:06,457 - DEBUG - root - Household MAC000246 not found in chunk 38
+2024-11-27 11:02:06,485 - INFO - root - Processing chunk 39...
+2024-11-27 11:02:06,488 - INFO - root - Households in chunk 39: ['MAC003428' 'MAC003449']
+2024-11-27 11:02:06,488 - DEBUG - root - Household MAC000246 not found in chunk 39
+2024-11-27 11:02:06,521 - INFO - root - Processing chunk 40...
+2024-11-27 11:02:06,524 - INFO - root - Households in chunk 40: ['MAC003449']
+2024-11-27 11:02:06,524 - DEBUG - root - Household MAC000246 not found in chunk 40
+2024-11-27 11:02:06,554 - INFO - root - Processing chunk 41...
+2024-11-27 11:02:06,557 - INFO - root - Households in chunk 41: ['MAC003449']
+2024-11-27 11:02:06,557 - DEBUG - root - Household MAC000246 not found in chunk 41
+2024-11-27 11:02:06,590 - INFO - root - Processing chunk 42...
+2024-11-27 11:02:06,593 - INFO - root - Households in chunk 42: ['MAC003449' 'MAC003463']
+2024-11-27 11:02:06,593 - DEBUG - root - Household MAC000246 not found in chunk 42
+2024-11-27 11:02:06,623 - INFO - root - Processing chunk 43...
+2024-11-27 11:02:06,625 - INFO - root - Households in chunk 43: ['MAC003463' 'MAC003482']
+2024-11-27 11:02:06,626 - DEBUG - root - Household MAC000246 not found in chunk 43
+2024-11-27 11:02:06,651 - INFO - root - Processing chunk 44...
+2024-11-27 11:02:06,653 - INFO - root - Households in chunk 44: ['MAC003482']
+2024-11-27 11:02:06,653 - DEBUG - root - Household MAC000246 not found in chunk 44
+2024-11-27 11:02:06,684 - INFO - root - Processing chunk 45...
+2024-11-27 11:02:06,686 - INFO - root - Households in chunk 45: ['MAC003482']
+2024-11-27 11:02:06,687 - DEBUG - root - Household MAC000246 not found in chunk 45
+2024-11-27 11:02:06,722 - INFO - root - Processing chunk 46...
+2024-11-27 11:02:06,724 - INFO - root - Households in chunk 46: ['MAC003482' 'MAC003553']
+2024-11-27 11:02:06,725 - DEBUG - root - Household MAC000246 not found in chunk 46
+2024-11-27 11:02:06,756 - INFO - root - Processing chunk 47...
+2024-11-27 11:02:06,758 - INFO - root - Households in chunk 47: ['MAC003553']
+2024-11-27 11:02:06,759 - DEBUG - root - Household MAC000246 not found in chunk 47
+2024-11-27 11:02:06,797 - INFO - root - Processing chunk 48...
+2024-11-27 11:02:06,800 - INFO - root - Households in chunk 48: ['MAC003553' 'MAC003557']
+2024-11-27 11:02:06,800 - DEBUG - root - Household MAC000246 not found in chunk 48
+2024-11-27 11:02:06,831 - INFO - root - Processing chunk 49...
+2024-11-27 11:02:06,834 - INFO - root - Households in chunk 49: ['MAC003557']
+2024-11-27 11:02:06,834 - DEBUG - root - Household MAC000246 not found in chunk 49
+2024-11-27 11:02:06,864 - INFO - root - Processing chunk 50...
+2024-11-27 11:02:06,867 - INFO - root - Households in chunk 50: ['MAC003557' 'MAC003566']
+2024-11-27 11:02:06,867 - DEBUG - root - Household MAC000246 not found in chunk 50
+2024-11-27 11:02:06,900 - INFO - root - Processing chunk 51...
+2024-11-27 11:02:06,902 - INFO - root - Households in chunk 51: ['MAC003566']
+2024-11-27 11:02:06,903 - DEBUG - root - Household MAC000246 not found in chunk 51
+2024-11-27 11:02:06,933 - INFO - root - Processing chunk 52...
+2024-11-27 11:02:06,936 - INFO - root - Households in chunk 52: ['MAC003566']
+2024-11-27 11:02:06,937 - DEBUG - root - Household MAC000246 not found in chunk 52
+2024-11-27 11:02:06,969 - INFO - root - Processing chunk 53...
+2024-11-27 11:02:06,972 - INFO - root - Households in chunk 53: ['MAC003566' 'MAC003579']
+2024-11-27 11:02:06,973 - DEBUG - root - Household MAC000246 not found in chunk 53
+2024-11-27 11:02:06,996 - INFO - root - Processing chunk 54...
+2024-11-27 11:02:06,998 - INFO - root - Households in chunk 54: ['MAC003579']
+2024-11-27 11:02:06,999 - DEBUG - root - Household MAC000246 not found in chunk 54
+2024-11-27 11:02:07,032 - INFO - root - Processing chunk 55...
+2024-11-27 11:02:07,035 - INFO - root - Households in chunk 55: ['MAC003579' 'MAC003597']
+2024-11-27 11:02:07,035 - DEBUG - root - Household MAC000246 not found in chunk 55
+2024-11-27 11:02:07,065 - INFO - root - Processing chunk 56...
+2024-11-27 11:02:07,068 - INFO - root - Households in chunk 56: ['MAC003597']
+2024-11-27 11:02:07,068 - DEBUG - root - Household MAC000246 not found in chunk 56
+2024-11-27 11:02:07,098 - INFO - root - Processing chunk 57...
+2024-11-27 11:02:07,101 - INFO - root - Households in chunk 57: ['MAC003597']
+2024-11-27 11:02:07,101 - DEBUG - root - Household MAC000246 not found in chunk 57
+2024-11-27 11:02:07,133 - INFO - root - Processing chunk 58...
+2024-11-27 11:02:07,135 - INFO - root - Households in chunk 58: ['MAC003597' 'MAC003613']
+2024-11-27 11:02:07,136 - DEBUG - root - Household MAC000246 not found in chunk 58
+2024-11-27 11:02:07,167 - INFO - root - Processing chunk 59...
+2024-11-27 11:02:07,169 - INFO - root - Households in chunk 59: ['MAC003613']
+2024-11-27 11:02:07,170 - DEBUG - root - Household MAC000246 not found in chunk 59
+2024-11-27 11:02:07,203 - INFO - root - Processing chunk 60...
+2024-11-27 11:02:07,205 - INFO - root - Households in chunk 60: ['MAC003613' 'MAC003646']
+2024-11-27 11:02:07,206 - DEBUG - root - Household MAC000246 not found in chunk 60
+2024-11-27 11:02:07,236 - INFO - root - Processing chunk 61...
+2024-11-27 11:02:07,239 - INFO - root - Households in chunk 61: ['MAC003646']
+2024-11-27 11:02:07,239 - DEBUG - root - Household MAC000246 not found in chunk 61
+2024-11-27 11:02:07,269 - INFO - root - Processing chunk 62...
+2024-11-27 11:02:07,272 - INFO - root - Households in chunk 62: ['MAC003646' 'MAC003656']
+2024-11-27 11:02:07,272 - DEBUG - root - Household MAC000246 not found in chunk 62
+2024-11-27 11:02:07,297 - INFO - root - Processing chunk 63...
+2024-11-27 11:02:07,300 - INFO - root - Households in chunk 63: ['MAC003656']
+2024-11-27 11:02:07,300 - DEBUG - root - Household MAC000246 not found in chunk 63
+2024-11-27 11:02:07,331 - INFO - root - Processing chunk 64...
+2024-11-27 11:02:07,333 - INFO - root - Households in chunk 64: ['MAC003656']
+2024-11-27 11:02:07,334 - DEBUG - root - Household MAC000246 not found in chunk 64
+2024-11-27 11:02:07,367 - INFO - root - Processing chunk 65...
+2024-11-27 11:02:07,369 - INFO - root - Households in chunk 65: ['MAC003656' 'MAC003668']
+2024-11-27 11:02:07,370 - DEBUG - root - Household MAC000246 not found in chunk 65
+2024-11-27 11:02:07,400 - INFO - root - Processing chunk 66...
+2024-11-27 11:02:07,403 - INFO - root - Households in chunk 66: ['MAC003668']
+2024-11-27 11:02:07,403 - DEBUG - root - Household MAC000246 not found in chunk 66
+2024-11-27 11:02:07,437 - INFO - root - Processing chunk 67...
+2024-11-27 11:02:07,439 - INFO - root - Households in chunk 67: ['MAC003668' 'MAC003680']
+2024-11-27 11:02:07,439 - DEBUG - root - Household MAC000246 not found in chunk 67
+2024-11-27 11:02:07,469 - INFO - root - Processing chunk 68...
+2024-11-27 11:02:07,471 - INFO - root - Households in chunk 68: ['MAC003680']
+2024-11-27 11:02:07,471 - DEBUG - root - Household MAC000246 not found in chunk 68
+2024-11-27 11:02:07,501 - INFO - root - Processing chunk 69...
+2024-11-27 11:02:07,503 - INFO - root - Households in chunk 69: ['MAC003680']
+2024-11-27 11:02:07,504 - DEBUG - root - Household MAC000246 not found in chunk 69
+2024-11-27 11:02:07,536 - INFO - root - Processing chunk 70...
+2024-11-27 11:02:07,539 - INFO - root - Households in chunk 70: ['MAC003680' 'MAC003686']
+2024-11-27 11:02:07,539 - DEBUG - root - Household MAC000246 not found in chunk 70
+2024-11-27 11:02:07,569 - INFO - root - Processing chunk 71...
+2024-11-27 11:02:07,572 - INFO - root - Households in chunk 71: ['MAC003686']
+2024-11-27 11:02:07,572 - DEBUG - root - Household MAC000246 not found in chunk 71
+2024-11-27 11:02:07,605 - INFO - root - Processing chunk 72...
+2024-11-27 11:02:07,607 - INFO - root - Households in chunk 72: ['MAC003686' 'MAC003718']
+2024-11-27 11:02:07,608 - DEBUG - root - Household MAC000246 not found in chunk 72
+2024-11-27 11:02:07,631 - INFO - root - Processing chunk 73...
+2024-11-27 11:02:07,633 - INFO - root - Households in chunk 73: ['MAC003718']
+2024-11-27 11:02:07,633 - DEBUG - root - Household MAC000246 not found in chunk 73
+2024-11-27 11:02:07,665 - INFO - root - Processing chunk 74...
+2024-11-27 11:02:07,668 - INFO - root - Households in chunk 74: ['MAC003718' 'MAC003719']
+2024-11-27 11:02:07,668 - DEBUG - root - Household MAC000246 not found in chunk 74
+2024-11-27 11:02:07,699 - INFO - root - Processing chunk 75...
+2024-11-27 11:02:07,701 - INFO - root - Households in chunk 75: ['MAC003719']
+2024-11-27 11:02:07,702 - DEBUG - root - Household MAC000246 not found in chunk 75
+2024-11-27 11:02:07,734 - INFO - root - Processing chunk 76...
+2024-11-27 11:02:07,737 - INFO - root - Households in chunk 76: ['MAC003719' 'MAC003737']
+2024-11-27 11:02:07,737 - DEBUG - root - Household MAC000246 not found in chunk 76
+2024-11-27 11:02:07,768 - INFO - root - Processing chunk 77...
+2024-11-27 11:02:07,770 - INFO - root - Households in chunk 77: ['MAC003737']
+2024-11-27 11:02:07,771 - DEBUG - root - Household MAC000246 not found in chunk 77
+2024-11-27 11:02:07,799 - INFO - root - Processing chunk 78...
+2024-11-27 11:02:07,802 - INFO - root - Households in chunk 78: ['MAC003737' 'MAC003740']
+2024-11-27 11:02:07,803 - DEBUG - root - Household MAC000246 not found in chunk 78
+2024-11-27 11:02:07,834 - INFO - root - Processing chunk 79...
+2024-11-27 11:02:07,837 - INFO - root - Households in chunk 79: ['MAC003740']
+2024-11-27 11:02:07,837 - DEBUG - root - Household MAC000246 not found in chunk 79
+2024-11-27 11:02:07,867 - INFO - root - Processing chunk 80...
+2024-11-27 11:02:07,870 - INFO - root - Households in chunk 80: ['MAC003740']
+2024-11-27 11:02:07,870 - DEBUG - root - Household MAC000246 not found in chunk 80
+2024-11-27 11:02:07,904 - INFO - root - Processing chunk 81...
+2024-11-27 11:02:07,906 - INFO - root - Households in chunk 81: ['MAC003740' 'MAC003775']
+2024-11-27 11:02:07,907 - DEBUG - root - Household MAC000246 not found in chunk 81
+2024-11-27 11:02:07,930 - INFO - root - Processing chunk 82...
+2024-11-27 11:02:07,932 - INFO - root - Households in chunk 82: ['MAC003775']
+2024-11-27 11:02:07,933 - DEBUG - root - Household MAC000246 not found in chunk 82
+2024-11-27 11:02:07,966 - INFO - root - Processing chunk 83...
+2024-11-27 11:02:07,968 - INFO - root - Households in chunk 83: ['MAC003775' 'MAC003805']
+2024-11-27 11:02:07,969 - DEBUG - root - Household MAC000246 not found in chunk 83
+2024-11-27 11:02:08,000 - INFO - root - Processing chunk 84...
+2024-11-27 11:02:08,002 - INFO - root - Households in chunk 84: ['MAC003805']
+2024-11-27 11:02:08,003 - DEBUG - root - Household MAC000246 not found in chunk 84
+2024-11-27 11:02:08,033 - INFO - root - Processing chunk 85...
+2024-11-27 11:02:08,035 - INFO - root - Households in chunk 85: ['MAC003805' 'MAC003817']
+2024-11-27 11:02:08,036 - DEBUG - root - Household MAC000246 not found in chunk 85
+2024-11-27 11:02:08,069 - INFO - root - Processing chunk 86...
+2024-11-27 11:02:08,071 - INFO - root - Households in chunk 86: ['MAC003817']
+2024-11-27 11:02:08,071 - DEBUG - root - Household MAC000246 not found in chunk 86
+2024-11-27 11:02:08,100 - INFO - root - Processing chunk 87...
+2024-11-27 11:02:08,103 - INFO - root - Households in chunk 87: ['MAC003817']
+2024-11-27 11:02:08,103 - DEBUG - root - Household MAC000246 not found in chunk 87
+2024-11-27 11:02:08,136 - INFO - root - Processing chunk 88...
+2024-11-27 11:02:08,138 - INFO - root - Households in chunk 88: ['MAC003817' 'MAC003826']
+2024-11-27 11:02:08,139 - DEBUG - root - Household MAC000246 not found in chunk 88
+2024-11-27 11:02:08,169 - INFO - root - Processing chunk 89...
+2024-11-27 11:02:08,172 - INFO - root - Households in chunk 89: ['MAC003826']
+2024-11-27 11:02:08,172 - DEBUG - root - Household MAC000246 not found in chunk 89
+2024-11-27 11:02:08,205 - INFO - root - Processing chunk 90...
+2024-11-27 11:02:08,207 - INFO - root - Households in chunk 90: ['MAC003826' 'MAC003844']
+2024-11-27 11:02:08,208 - DEBUG - root - Household MAC000246 not found in chunk 90
+2024-11-27 11:02:08,238 - INFO - root - Processing chunk 91...
+2024-11-27 11:02:08,240 - INFO - root - Households in chunk 91: ['MAC003844']
+2024-11-27 11:02:08,241 - DEBUG - root - Household MAC000246 not found in chunk 91
+2024-11-27 11:02:08,264 - INFO - root - Processing chunk 92...
+2024-11-27 11:02:08,266 - INFO - root - Households in chunk 92: ['MAC003844' 'MAC003851']
+2024-11-27 11:02:08,267 - DEBUG - root - Household MAC000246 not found in chunk 92
+2024-11-27 11:02:08,299 - INFO - root - Processing chunk 93...
+2024-11-27 11:02:08,301 - INFO - root - Households in chunk 93: ['MAC003851']
+2024-11-27 11:02:08,302 - DEBUG - root - Household MAC000246 not found in chunk 93
+2024-11-27 11:02:08,332 - INFO - root - Processing chunk 94...
+2024-11-27 11:02:08,335 - INFO - root - Households in chunk 94: ['MAC003851']
+2024-11-27 11:02:08,335 - DEBUG - root - Household MAC000246 not found in chunk 94
+2024-11-27 11:02:08,368 - INFO - root - Processing chunk 95...
+2024-11-27 11:02:08,371 - INFO - root - Households in chunk 95: ['MAC003851' 'MAC003856']
+2024-11-27 11:02:08,371 - DEBUG - root - Household MAC000246 not found in chunk 95
+2024-11-27 11:02:08,402 - INFO - root - Processing chunk 96...
+2024-11-27 11:02:08,404 - INFO - root - Households in chunk 96: ['MAC003856']
+2024-11-27 11:02:08,405 - DEBUG - root - Household MAC000246 not found in chunk 96
+2024-11-27 11:02:08,437 - INFO - root - Processing chunk 97...
+2024-11-27 11:02:08,440 - INFO - root - Households in chunk 97: ['MAC003856' 'MAC003863']
+2024-11-27 11:02:08,440 - DEBUG - root - Household MAC000246 not found in chunk 97
+2024-11-27 11:02:08,470 - INFO - root - Processing chunk 98...
+2024-11-27 11:02:08,473 - INFO - root - Households in chunk 98: ['MAC003863']
+2024-11-27 11:02:08,473 - DEBUG - root - Household MAC000246 not found in chunk 98
+2024-11-27 11:02:08,503 - INFO - root - Processing chunk 99...
+2024-11-27 11:02:08,506 - INFO - root - Households in chunk 99: ['MAC003863']
+2024-11-27 11:02:08,506 - DEBUG - root - Household MAC000246 not found in chunk 99
+2024-11-27 11:02:08,538 - INFO - root - Processing chunk 100...
+2024-11-27 11:02:08,541 - INFO - root - Households in chunk 100: ['MAC003863' 'MAC003874']
+2024-11-27 11:02:08,541 - DEBUG - root - Household MAC000246 not found in chunk 100
+2024-11-27 11:02:08,564 - INFO - root - Processing chunk 101...
+2024-11-27 11:02:08,567 - INFO - root - Households in chunk 101: ['MAC003874']
+2024-11-27 11:02:08,567 - DEBUG - root - Household MAC000246 not found in chunk 101
+2024-11-27 11:02:08,597 - INFO - root - Processing chunk 102...
+2024-11-27 11:02:08,600 - INFO - root - Households in chunk 102: ['MAC003874' 'MAC004034']
+2024-11-27 11:02:08,600 - DEBUG - root - Household MAC000246 not found in chunk 102
+2024-11-27 11:02:08,632 - INFO - root - Processing chunk 103...
+2024-11-27 11:02:08,635 - INFO - root - Households in chunk 103: ['MAC004034']
+2024-11-27 11:02:08,635 - DEBUG - root - Household MAC000246 not found in chunk 103
+2024-11-27 11:02:08,666 - INFO - root - Processing chunk 104...
+2024-11-27 11:02:08,668 - INFO - root - Households in chunk 104: ['MAC004034' 'MAC004179']
+2024-11-27 11:02:08,669 - DEBUG - root - Household MAC000246 not found in chunk 104
+2024-11-27 11:02:08,702 - INFO - root - Processing chunk 105...
+2024-11-27 11:02:08,705 - INFO - root - Households in chunk 105: ['MAC004179']
+2024-11-27 11:02:08,705 - DEBUG - root - Household MAC000246 not found in chunk 105
+2024-11-27 11:02:08,736 - INFO - root - Processing chunk 106...
+2024-11-27 11:02:08,739 - INFO - root - Households in chunk 106: ['MAC004179']
+2024-11-27 11:02:08,739 - DEBUG - root - Household MAC000246 not found in chunk 106
+2024-11-27 11:02:08,768 - INFO - root - Processing chunk 107...
+2024-11-27 11:02:08,771 - INFO - root - Households in chunk 107: ['MAC004179' 'MAC004247']
+2024-11-27 11:02:08,771 - DEBUG - root - Household MAC000246 not found in chunk 107
+2024-11-27 11:02:08,804 - INFO - root - Processing chunk 108...
+2024-11-27 11:02:08,806 - INFO - root - Households in chunk 108: ['MAC004247']
+2024-11-27 11:02:08,807 - DEBUG - root - Household MAC000246 not found in chunk 108
+2024-11-27 11:02:08,837 - INFO - root - Processing chunk 109...
+2024-11-27 11:02:08,839 - INFO - root - Households in chunk 109: ['MAC004247']
+2024-11-27 11:02:08,840 - DEBUG - root - Household MAC000246 not found in chunk 109
+2024-11-27 11:02:08,870 - INFO - root - Processing chunk 110...
+2024-11-27 11:02:08,872 - INFO - root - Households in chunk 110: ['MAC004247' 'MAC004319']
+2024-11-27 11:02:08,873 - DEBUG - root - Household MAC000246 not found in chunk 110
+2024-11-27 11:02:08,907 - INFO - root - Processing chunk 111...
+2024-11-27 11:02:08,909 - INFO - root - Households in chunk 111: ['MAC004319']
+2024-11-27 11:02:08,909 - DEBUG - root - Household MAC000246 not found in chunk 111
+2024-11-27 11:02:08,933 - INFO - root - Processing chunk 112...
+2024-11-27 11:02:08,935 - INFO - root - Households in chunk 112: ['MAC004319']
+2024-11-27 11:02:08,936 - DEBUG - root - Household MAC000246 not found in chunk 112
+2024-11-27 11:02:08,966 - INFO - root - Processing chunk 113...
+2024-11-27 11:02:08,968 - INFO - root - Households in chunk 113: ['MAC004319' 'MAC004387']
+2024-11-27 11:02:08,969 - DEBUG - root - Household MAC000246 not found in chunk 113
+2024-11-27 11:02:08,999 - INFO - root - Processing chunk 114...
+2024-11-27 11:02:09,001 - INFO - root - Households in chunk 114: ['MAC004387']
+2024-11-27 11:02:09,002 - DEBUG - root - Household MAC000246 not found in chunk 114
+2024-11-27 11:02:09,033 - INFO - root - Processing chunk 115...
+2024-11-27 11:02:09,036 - INFO - root - Households in chunk 115: ['MAC004387']
+2024-11-27 11:02:09,036 - DEBUG - root - Household MAC000246 not found in chunk 115
+2024-11-27 11:02:09,066 - INFO - root - Processing chunk 116...
+2024-11-27 11:02:09,069 - INFO - root - Households in chunk 116: ['MAC004387']
+2024-11-27 11:02:09,069 - DEBUG - root - Household MAC000246 not found in chunk 116
+2024-11-27 11:02:09,099 - INFO - root - Processing chunk 117...
+2024-11-27 11:02:09,101 - INFO - root - Households in chunk 117: ['MAC004387' 'MAC004431']
+2024-11-27 11:02:09,102 - DEBUG - root - Household MAC000246 not found in chunk 117
+2024-11-27 11:02:09,134 - INFO - root - Processing chunk 118...
+2024-11-27 11:02:09,137 - INFO - root - Households in chunk 118: ['MAC004431']
+2024-11-27 11:02:09,137 - DEBUG - root - Household MAC000246 not found in chunk 118
+2024-11-27 11:02:09,168 - INFO - root - Processing chunk 119...
+2024-11-27 11:02:09,170 - INFO - root - Households in chunk 119: ['MAC004431']
+2024-11-27 11:02:09,171 - DEBUG - root - Household MAC000246 not found in chunk 119
+2024-11-27 11:02:09,201 - INFO - root - Processing chunk 120...
+2024-11-27 11:02:09,203 - INFO - root - Households in chunk 120: ['MAC004431' 'MAC005492']
+2024-11-27 11:02:09,203 - DEBUG - root - Household MAC000246 not found in chunk 120
+2024-11-27 11:02:09,228 - INFO - root - Processing chunk 121...
+2024-11-27 11:02:09,230 - INFO - root - Households in chunk 121: ['MAC005492']
+2024-11-27 11:02:09,231 - DEBUG - root - Household MAC000246 not found in chunk 121
+2024-11-27 11:02:09,261 - INFO - root - Processing chunk 122...
+2024-11-27 11:02:09,263 - INFO - root - Households in chunk 122: ['MAC005492']
+2024-11-27 11:02:09,264 - DEBUG - root - Household MAC000246 not found in chunk 122
+2024-11-27 11:02:09,272 - INFO - root - Processing chunk 123...
+2024-11-27 11:02:09,274 - INFO - root - Households in chunk 123: ['MAC005492']
+2024-11-27 11:02:09,274 - DEBUG - root - Household MAC000246 not found in chunk 123
+2024-11-27 11:02:09,276 - INFO - root - Successfully loaded 48 rows in 4.22 seconds
+2024-11-27 11:02:09,277 - INFO - root - Successfully loaded 48 rows of data
+2024-11-27 11:02:09,277 - INFO - root - Starting visualization...
+2024-11-27 11:02:09,277 - INFO - root - Starting visualization process...
+2024-11-27 11:02:09,286 - INFO - root - Waiting for plot initialization...
+2024-11-27 11:02:09,289 - INFO - root - Initializing plot...
+2024-11-27 11:02:09,308 - DEBUG - matplotlib.pyplot - Loaded backend agg version v2.2.
+2024-11-27 11:02:09,325 - DEBUG - matplotlib.font_manager - findfont: Matching sans\-serif:style=normal:variant=normal:weight=normal:stretch=normal:size=10.0.
+2024-11-27 11:02:09,327 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneral.ttf', name='STIXGeneral', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,327 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerifDisplay.ttf', name='DejaVu Serif Display', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,327 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,328 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizFourSymReg.ttf', name='STIXSizeFourSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,328 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 0.05
+2024-11-27 11:02:09,328 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansDisplay.ttf', name='DejaVu Sans Display', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,328 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-Bold.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 0.33499999999999996
+2024-11-27 11:02:09,329 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/cmss10.ttf', name='cmss10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,329 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono-Oblique.ttf', name='DejaVu Sans Mono', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,329 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizOneSymReg.ttf', name='STIXSizeOneSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,329 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/cmsy10.ttf', name='cmsy10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,329 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono-BoldOblique.ttf', name='DejaVu Sans Mono', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,330 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizFiveSymReg.ttf', name='STIXSizeFiveSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,330 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,330 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/cmmi10.ttf', name='cmmi10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,330 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUni.ttf', name='STIXNonUnicode', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,330 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-BoldOblique.ttf', name='DejaVu Sans', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 1.335
+2024-11-27 11:02:09,331 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizThreeSymReg.ttf', name='STIXSizeThreeSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,331 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizTwoSymReg.ttf', name='STIXSizeTwoSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,331 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif-BoldItalic.ttf', name='DejaVu Serif', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,331 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/cmtt10.ttf', name='cmtt10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,331 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneralItalic.ttf', name='STIXGeneral', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,332 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif-Bold.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,332 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono-Bold.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,332 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizFourSymBol.ttf', name='STIXSizeFourSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,332 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizThreeSymBol.ttf', name='STIXSizeThreeSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,332 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUniBolIta.ttf', name='STIXNonUnicode', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,332 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizOneSymBol.ttf', name='STIXSizeOneSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,333 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/cmr10.ttf', name='cmr10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,333 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUniBol.ttf', name='STIXNonUnicode', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,333 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif-Italic.ttf', name='DejaVu Serif', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,333 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneralBolIta.ttf', name='STIXGeneral', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,333 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizTwoSymBol.ttf', name='STIXSizeTwoSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,333 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-Oblique.ttf', name='DejaVu Sans', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 1.05
+2024-11-27 11:02:09,334 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUniIta.ttf', name='STIXNonUnicode', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,334 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/cmex10.ttf', name='cmex10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,334 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneralBol.ttf', name='STIXGeneral', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,334 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/cmb10.ttf', name='cmb10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,334 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf', name='FreeSerif', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,335 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWBookman-LightItalic.otf', name='URW Bookman', style='italic', variant='normal', weight=300, stretch='normal', size='scalable')) = 11.145
+2024-11-27 11:02:09,335 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/noto/NotoMono-Regular.ttf', name='Noto Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,335 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/PibotoCondensed-Bold.ttf', name='Piboto Condensed', style='normal', variant='normal', weight=700, stretch='condensed', size='scalable')) = 10.535
+2024-11-27 11:02:09,335 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWGothic-BookOblique.otf', name='URW Gothic', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,335 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSansOblique.ttf', name='FreeSans', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,335 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusMonoPS-Regular.otf', name='Nimbus Mono PS', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,336 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/P052-Italic.otf', name='P052', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,336 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/PibotoCondensed-Regular.ttf', name='Piboto Condensed', style='normal', variant='normal', weight=400, stretch='condensed', size='scalable')) = 10.25
+2024-11-27 11:02:09,336 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSans-Bold.otf', name='Nimbus Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,336 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusMonoPS-Italic.otf', name='Nimbus Mono PS', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,336 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/C059-Bold.otf', name='C059', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,337 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf', name='FreeMono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,337 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/C059-Italic.otf', name='C059', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,337 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSans-Italic.ttf', name='Liberation Sans', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,337 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWBookman-Light.otf', name='URW Bookman', style='normal', variant='normal', weight=300, stretch='normal', size='scalable')) = 10.145
+2024-11-27 11:02:09,337 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSerifBoldItalic.ttf', name='FreeSerif', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,338 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSansNarrow-Oblique.otf', name='Nimbus Sans Narrow', style='oblique', variant='normal', weight=400, stretch='condensed', size='scalable')) = 11.25
+2024-11-27 11:02:09,338 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/quicksand/Quicksand-Medium.ttf', name='Quicksand Medium', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+2024-11-27 11:02:09,338 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/cantarell/Cantarell-Thin.otf', name='Cantarell', style='normal', variant='normal', weight=100, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,338 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/StandardSymbolsPS.otf', name='Standard Symbols PS', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,338 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/P052-Bold.otf', name='P052', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,339 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/P052-BoldItalic.otf', name='P052', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,339 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/Piboto-Thin.ttf', name='Piboto', style='normal', variant='normal', weight=100, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,339 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSerif.ttf', name='FreeSerif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,339 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 0.33499999999999996
+2024-11-27 11:02:09,339 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSansNarrow-Regular.otf', name='Nimbus Sans Narrow', style='normal', variant='normal', weight=400, stretch='condensed', size='scalable')) = 10.25
+2024-11-27 11:02:09,339 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWGothic-Book.otf', name='URW Gothic', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,340 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSansBoldOblique.ttf', name='FreeSans', style='oblique', variant='normal', weight=600, stretch='normal', size='scalable')) = 11.24
+2024-11-27 11:02:09,340 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/C059-BdIta.otf', name='C059', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,340 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/PibotoCondensed-BoldItalic.ttf', name='Piboto Condensed', style='italic', variant='normal', weight=700, stretch='condensed', size='scalable')) = 11.535
+2024-11-27 11:02:09,340 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/D050000L.otf', name='D050000L', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,340 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/C059-Roman.otf', name='C059', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,340 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWGothic-Demi.otf', name='URW Gothic', style='normal', variant='normal', weight=600, stretch='normal', size='scalable')) = 10.24
+2024-11-27 11:02:09,341 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/P052-Roman.otf', name='P052', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,341 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf', name='Droid Sans Fallback', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,341 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf', name='FreeSerif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,341 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationMono-Bold.ttf', name='Liberation Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,341 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSerif-Bold.ttf', name='Liberation Serif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,342 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,342 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/Piboto-Light.ttf', name='Piboto', style='normal', variant='normal', weight=300, stretch='normal', size='scalable')) = 10.145
+2024-11-27 11:02:09,342 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSans-Italic.otf', name='Nimbus Sans', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,342 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSerif-Italic.ttf', name='Liberation Serif', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,342 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSans-BoldItalic.ttf', name='Liberation Sans', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,343 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/PibotoCondensed-Italic.ttf', name='Piboto Condensed', style='italic', variant='normal', weight=400, stretch='condensed', size='scalable')) = 11.25
+2024-11-27 11:02:09,343 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusMonoPS-BoldItalic.otf', name='Nimbus Mono PS', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,343 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/cantarell/Cantarell-Light.otf', name='Cantarell', style='normal', variant='normal', weight=300, stretch='normal', size='scalable')) = 10.145
+2024-11-27 11:02:09,343 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSans-Regular.otf', name='Nimbus Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,343 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf', name='Liberation Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,344 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf', name='Noto Sans Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,344 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf', name='Liberation Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,344 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationMono-Italic.ttf', name='Liberation Mono', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,344 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,344 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/PibotoLt-Regular.ttf', name='PibotoLt', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,344 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/quicksand/Quicksand-Bold.ttf', name='Quicksand', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,345 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeMono.ttf', name='FreeMono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,345 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSerif-Regular.ttf', name='Liberation Serif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,345 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/Piboto-BoldItalic.ttf', name='Piboto', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,345 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/noto/NotoSansMono-Bold.ttf', name='Noto Sans Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,345 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWBookman-DemiItalic.otf', name='URW Bookman', style='italic', variant='normal', weight=600, stretch='normal', size='scalable')) = 11.24
+2024-11-27 11:02:09,345 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/Piboto-ThinItalic.ttf', name='Piboto', style='italic', variant='normal', weight=100, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,346 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSansNarrow-BoldOblique.otf', name='Nimbus Sans Narrow', style='oblique', variant='normal', weight=700, stretch='condensed', size='scalable')) = 11.535
+2024-11-27 11:02:09,346 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeMonoBoldOblique.ttf', name='FreeMono', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,346 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusRoman-Regular.otf', name='Nimbus Roman', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,346 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSans-BoldItalic.otf', name='Nimbus Sans', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,346 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/Piboto-LightItalic.ttf', name='Piboto', style='italic', variant='normal', weight=300, stretch='normal', size='scalable')) = 11.145
+2024-11-27 11:02:09,347 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSansNarrow-Bold.otf', name='Nimbus Sans Narrow', style='normal', variant='normal', weight=700, stretch='condensed', size='scalable')) = 10.535
+2024-11-27 11:02:09,347 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 0.05
+2024-11-27 11:02:09,347 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWGothic-DemiOblique.otf', name='URW Gothic', style='oblique', variant='normal', weight=600, stretch='normal', size='scalable')) = 11.24
+2024-11-27 11:02:09,347 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/cantarell/Cantarell-Bold.otf', name='Cantarell', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,347 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusRoman-BoldItalic.otf', name='Nimbus Roman', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,348 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/cantarell/Cantarell-ExtraBold.otf', name='Cantarell', style='normal', variant='normal', weight=800, stretch='normal', size='scalable')) = 10.43
+2024-11-27 11:02:09,348 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/Z003-MediumItalic.otf', name='Z003', style='italic', variant='normal', weight=500, stretch='normal', size='scalable')) = 11.145
+2024-11-27 11:02:09,348 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/PibotoLtItalic.ttf', name='PibotoLt', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,348 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationMono-Regular.ttf', name='Liberation Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,348 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusRoman-Italic.otf', name='Nimbus Roman', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,349 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/Piboto-Bold.ttf', name='Piboto', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,349 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSerif-BoldItalic.ttf', name='Liberation Serif', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,349 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/quicksand/Quicksand-Light.ttf', name='Quicksand Light', style='normal', variant='normal', weight=300, stretch='normal', size='scalable')) = 10.145
+2024-11-27 11:02:09,349 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,349 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/PibotoLtBoldItalic.ttf', name='PibotoLt', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,349 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWBookman-Demi.otf', name='URW Bookman', style='normal', variant='normal', weight=600, stretch='normal', size='scalable')) = 10.24
+2024-11-27 11:02:09,350 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusMonoPS-Bold.otf', name='Nimbus Mono PS', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,350 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/Piboto-Italic.ttf', name='Piboto', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,350 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationMono-BoldItalic.ttf', name='Liberation Mono', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,350 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/Piboto-Regular.ttf', name='Piboto', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,350 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/cantarell/Cantarell-Regular.otf', name='Cantarell', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,350 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,351 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSansBold.ttf', name='FreeSans', style='normal', variant='normal', weight=600, stretch='normal', size='scalable')) = 10.24
+2024-11-27 11:02:09,351 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSans.ttf', name='FreeSans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,351 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusRoman-Bold.otf', name='Nimbus Roman', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,351 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/PibotoLtBold.ttf', name='PibotoLt', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,351 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeMonoOblique.ttf', name='FreeMono', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,351 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/quicksand/Quicksand-Regular.ttf', name='Quicksand', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,351 - DEBUG - matplotlib.font_manager - findfont: Matching sans\-serif:style=normal:variant=normal:weight=normal:stretch=normal:size=10.0 to DejaVu Sans ('/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans.ttf') with score of 0.050000.
+2024-11-27 11:02:09,753 - DEBUG - matplotlib.font_manager - findfont: Matching sans\-serif:style=normal:variant=normal:weight=normal:stretch=normal:size=12.0.
+2024-11-27 11:02:09,753 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneral.ttf', name='STIXGeneral', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,753 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerifDisplay.ttf', name='DejaVu Serif Display', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,754 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,754 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizFourSymReg.ttf', name='STIXSizeFourSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,754 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 0.05
+2024-11-27 11:02:09,754 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansDisplay.ttf', name='DejaVu Sans Display', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,754 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-Bold.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 0.33499999999999996
+2024-11-27 11:02:09,755 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/cmss10.ttf', name='cmss10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,755 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono-Oblique.ttf', name='DejaVu Sans Mono', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,755 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizOneSymReg.ttf', name='STIXSizeOneSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,755 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/cmsy10.ttf', name='cmsy10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,755 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono-BoldOblique.ttf', name='DejaVu Sans Mono', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,755 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizFiveSymReg.ttf', name='STIXSizeFiveSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,756 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,756 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/cmmi10.ttf', name='cmmi10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,756 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUni.ttf', name='STIXNonUnicode', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,756 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-BoldOblique.ttf', name='DejaVu Sans', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 1.335
+2024-11-27 11:02:09,756 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizThreeSymReg.ttf', name='STIXSizeThreeSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,756 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizTwoSymReg.ttf', name='STIXSizeTwoSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,757 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif-BoldItalic.ttf', name='DejaVu Serif', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,757 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/cmtt10.ttf', name='cmtt10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,757 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneralItalic.ttf', name='STIXGeneral', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,757 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif-Bold.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,757 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono-Bold.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,757 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizFourSymBol.ttf', name='STIXSizeFourSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,758 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizThreeSymBol.ttf', name='STIXSizeThreeSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,758 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUniBolIta.ttf', name='STIXNonUnicode', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,758 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizOneSymBol.ttf', name='STIXSizeOneSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,758 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/cmr10.ttf', name='cmr10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,759 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUniBol.ttf', name='STIXNonUnicode', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,759 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif-Italic.ttf', name='DejaVu Serif', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,759 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneralBolIta.ttf', name='STIXGeneral', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,759 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizTwoSymBol.ttf', name='STIXSizeTwoSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,760 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-Oblique.ttf', name='DejaVu Sans', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 1.05
+2024-11-27 11:02:09,760 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUniIta.ttf', name='STIXNonUnicode', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,760 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/cmex10.ttf', name='cmex10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,760 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneralBol.ttf', name='STIXGeneral', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,761 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/cmb10.ttf', name='cmb10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,761 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf', name='FreeSerif', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,761 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWBookman-LightItalic.otf', name='URW Bookman', style='italic', variant='normal', weight=300, stretch='normal', size='scalable')) = 11.145
+2024-11-27 11:02:09,761 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/noto/NotoMono-Regular.ttf', name='Noto Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,762 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/PibotoCondensed-Bold.ttf', name='Piboto Condensed', style='normal', variant='normal', weight=700, stretch='condensed', size='scalable')) = 10.535
+2024-11-27 11:02:09,762 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWGothic-BookOblique.otf', name='URW Gothic', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,762 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSansOblique.ttf', name='FreeSans', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,762 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusMonoPS-Regular.otf', name='Nimbus Mono PS', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,763 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/P052-Italic.otf', name='P052', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,763 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/PibotoCondensed-Regular.ttf', name='Piboto Condensed', style='normal', variant='normal', weight=400, stretch='condensed', size='scalable')) = 10.25
+2024-11-27 11:02:09,763 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSans-Bold.otf', name='Nimbus Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,763 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusMonoPS-Italic.otf', name='Nimbus Mono PS', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,764 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/C059-Bold.otf', name='C059', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,764 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf', name='FreeMono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,764 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/C059-Italic.otf', name='C059', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,764 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSans-Italic.ttf', name='Liberation Sans', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,765 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWBookman-Light.otf', name='URW Bookman', style='normal', variant='normal', weight=300, stretch='normal', size='scalable')) = 10.145
+2024-11-27 11:02:09,765 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSerifBoldItalic.ttf', name='FreeSerif', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,765 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSansNarrow-Oblique.otf', name='Nimbus Sans Narrow', style='oblique', variant='normal', weight=400, stretch='condensed', size='scalable')) = 11.25
+2024-11-27 11:02:09,766 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/quicksand/Quicksand-Medium.ttf', name='Quicksand Medium', style='normal', variant='normal', weight=500, stretch='normal', size='scalable')) = 10.145
+2024-11-27 11:02:09,766 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/cantarell/Cantarell-Thin.otf', name='Cantarell', style='normal', variant='normal', weight=100, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,766 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/StandardSymbolsPS.otf', name='Standard Symbols PS', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,766 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/P052-Bold.otf', name='P052', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,767 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/P052-BoldItalic.otf', name='P052', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,767 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/Piboto-Thin.ttf', name='Piboto', style='normal', variant='normal', weight=100, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,767 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSerif.ttf', name='FreeSerif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,767 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 0.33499999999999996
+2024-11-27 11:02:09,768 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSansNarrow-Regular.otf', name='Nimbus Sans Narrow', style='normal', variant='normal', weight=400, stretch='condensed', size='scalable')) = 10.25
+2024-11-27 11:02:09,768 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWGothic-Book.otf', name='URW Gothic', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,768 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSansBoldOblique.ttf', name='FreeSans', style='oblique', variant='normal', weight=600, stretch='normal', size='scalable')) = 11.24
+2024-11-27 11:02:09,768 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/C059-BdIta.otf', name='C059', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,769 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/PibotoCondensed-BoldItalic.ttf', name='Piboto Condensed', style='italic', variant='normal', weight=700, stretch='condensed', size='scalable')) = 11.535
+2024-11-27 11:02:09,769 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/D050000L.otf', name='D050000L', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,769 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/C059-Roman.otf', name='C059', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,769 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWGothic-Demi.otf', name='URW Gothic', style='normal', variant='normal', weight=600, stretch='normal', size='scalable')) = 10.24
+2024-11-27 11:02:09,770 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/P052-Roman.otf', name='P052', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,770 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf', name='Droid Sans Fallback', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,770 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf', name='FreeSerif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,770 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationMono-Bold.ttf', name='Liberation Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,771 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSerif-Bold.ttf', name='Liberation Serif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,771 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,771 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/Piboto-Light.ttf', name='Piboto', style='normal', variant='normal', weight=300, stretch='normal', size='scalable')) = 10.145
+2024-11-27 11:02:09,771 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSans-Italic.otf', name='Nimbus Sans', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,772 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSerif-Italic.ttf', name='Liberation Serif', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,772 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSans-BoldItalic.ttf', name='Liberation Sans', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,772 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/PibotoCondensed-Italic.ttf', name='Piboto Condensed', style='italic', variant='normal', weight=400, stretch='condensed', size='scalable')) = 11.25
+2024-11-27 11:02:09,772 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusMonoPS-BoldItalic.otf', name='Nimbus Mono PS', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,772 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/cantarell/Cantarell-Light.otf', name='Cantarell', style='normal', variant='normal', weight=300, stretch='normal', size='scalable')) = 10.145
+2024-11-27 11:02:09,773 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSans-Regular.otf', name='Nimbus Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,773 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf', name='Liberation Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,773 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf', name='Noto Sans Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,773 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf', name='Liberation Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,774 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationMono-Italic.ttf', name='Liberation Mono', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,774 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,774 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/PibotoLt-Regular.ttf', name='PibotoLt', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,774 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/quicksand/Quicksand-Bold.ttf', name='Quicksand', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,775 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeMono.ttf', name='FreeMono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,775 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSerif-Regular.ttf', name='Liberation Serif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,775 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/Piboto-BoldItalic.ttf', name='Piboto', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,775 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/noto/NotoSansMono-Bold.ttf', name='Noto Sans Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,776 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWBookman-DemiItalic.otf', name='URW Bookman', style='italic', variant='normal', weight=600, stretch='normal', size='scalable')) = 11.24
+2024-11-27 11:02:09,776 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/Piboto-ThinItalic.ttf', name='Piboto', style='italic', variant='normal', weight=100, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,776 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSansNarrow-BoldOblique.otf', name='Nimbus Sans Narrow', style='oblique', variant='normal', weight=700, stretch='condensed', size='scalable')) = 11.535
+2024-11-27 11:02:09,776 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeMonoBoldOblique.ttf', name='FreeMono', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,777 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusRoman-Regular.otf', name='Nimbus Roman', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,777 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSans-BoldItalic.otf', name='Nimbus Sans', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,777 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/Piboto-LightItalic.ttf', name='Piboto', style='italic', variant='normal', weight=300, stretch='normal', size='scalable')) = 11.145
+2024-11-27 11:02:09,777 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusSansNarrow-Bold.otf', name='Nimbus Sans Narrow', style='normal', variant='normal', weight=700, stretch='condensed', size='scalable')) = 10.535
+2024-11-27 11:02:09,778 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 0.05
+2024-11-27 11:02:09,778 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWGothic-DemiOblique.otf', name='URW Gothic', style='oblique', variant='normal', weight=600, stretch='normal', size='scalable')) = 11.24
+2024-11-27 11:02:09,778 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/cantarell/Cantarell-Bold.otf', name='Cantarell', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,778 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusRoman-BoldItalic.otf', name='Nimbus Roman', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,779 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/cantarell/Cantarell-ExtraBold.otf', name='Cantarell', style='normal', variant='normal', weight=800, stretch='normal', size='scalable')) = 10.43
+2024-11-27 11:02:09,779 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/Z003-MediumItalic.otf', name='Z003', style='italic', variant='normal', weight=500, stretch='normal', size='scalable')) = 11.145
+2024-11-27 11:02:09,779 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/PibotoLtItalic.ttf', name='PibotoLt', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,779 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationMono-Regular.ttf', name='Liberation Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,779 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusRoman-Italic.otf', name='Nimbus Roman', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,780 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/Piboto-Bold.ttf', name='Piboto', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,780 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationSerif-BoldItalic.ttf', name='Liberation Serif', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,780 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/quicksand/Quicksand-Light.ttf', name='Quicksand Light', style='normal', variant='normal', weight=300, stretch='normal', size='scalable')) = 10.145
+2024-11-27 11:02:09,780 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,781 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/PibotoLtBoldItalic.ttf', name='PibotoLt', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,781 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/URWBookman-Demi.otf', name='URW Bookman', style='normal', variant='normal', weight=600, stretch='normal', size='scalable')) = 10.24
+2024-11-27 11:02:09,781 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusMonoPS-Bold.otf', name='Nimbus Mono PS', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,781 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/Piboto-Italic.ttf', name='Piboto', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,782 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/liberation2/LiberationMono-BoldItalic.ttf', name='Liberation Mono', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
+2024-11-27 11:02:09,782 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/Piboto-Regular.ttf', name='Piboto', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,782 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/cantarell/Cantarell-Regular.otf', name='Cantarell', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,782 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,782 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSansBold.ttf', name='FreeSans', style='normal', variant='normal', weight=600, stretch='normal', size='scalable')) = 10.24
+2024-11-27 11:02:09,783 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeSans.ttf', name='FreeSans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,783 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/opentype/urw-base35/NimbusRoman-Bold.otf', name='Nimbus Roman', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,783 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/piboto/PibotoLtBold.ttf', name='PibotoLt', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
+2024-11-27 11:02:09,783 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/freefont/FreeMonoOblique.ttf', name='FreeMono', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
+2024-11-27 11:02:09,784 - DEBUG - matplotlib.font_manager - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/quicksand/Quicksand-Regular.ttf', name='Quicksand', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
+2024-11-27 11:02:09,784 - DEBUG - matplotlib.font_manager - findfont: Matching sans\-serif:style=normal:variant=normal:weight=normal:stretch=normal:size=12.0 to DejaVu Sans ('/home/pi/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans.ttf') with score of 0.050000.
+2024-11-27 11:02:09,828 - INFO - root - Plot initialized, setting ready event...
+2024-11-27 11:02:09,830 - INFO - root - Starting plot update loop...
+2024-11-27 11:02:09,830 - INFO - root - Plot initialization complete
+2024-11-27 11:02:09,830 - DEBUG - root - Waiting for data...
+2024-11-27 11:02:09,837 - DEBUG - urllib3.connectionpool - Starting new HTTP connection (1): 10.126.50.50:5000
+2024-11-27 11:02:09,937 - DEBUG - urllib3.connectionpool - http://10.126.50.50:5000 "POST /sync HTTP/11" 200 20
+2024-11-27 11:02:09,941 - INFO - root - Beginning main simulation loop...
+2024-11-27 11:02:09,942 - DEBUG - root - Processing timestamp: 2012-10-24 00:00:00
+2024-11-27 11:02:09,964 - DEBUG - urllib3.connectionpool - Resetting dropped connection: 10.126.50.50
+2024-11-27 11:02:09,980 - DEBUG - urllib3.connectionpool - http://10.126.50.50:5000 "POST /update_peer_data HTTP/11" 200 21
+2024-11-27 11:02:09,988 - DEBUG - urllib3.connectionpool - Starting new HTTP connection (1): 10.126.50.50:5000
+2024-11-27 11:02:10,008 - DEBUG - urllib3.connectionpool - http://10.126.50.50:5000 "POST /update_peer_data HTTP/11" 200 21
+2024-11-27 11:02:10,016 - DEBUG - urllib3.connectionpool - Starting new HTTP connection (1): 10.126.50.50:5000
+2024-11-27 11:02:10,033 - DEBUG - urllib3.connectionpool - http://10.126.50.50:5000 "GET /get_peer_data HTTP/11" 200 86
+2024-11-27 11:02:10,039 - INFO - root - Buying 0.000 kWh at £0.050/kWh (Total: £0.000)
+2024-11-27 11:02:10,041 - DEBUG - urllib3.connectionpool - Starting new HTTP connection (1): 10.126.50.50:5000
+2024-11-27 11:02:10,057 - DEBUG - urllib3.connectionpool - http://10.126.50.50:5000 "POST /update_trade_data HTTP/11" 200 21
+2024-11-27 11:02:10,063 - INFO - root - Trade completed at 2012-10-24 00:00:00 - Amount: 0.000 kWh, Price: £0.050/kWh
+2024-11-27 11:02:10,832 - DEBUG - root - No data received in the last second, continuing...
+2024-11-27 11:02:11,030 - DEBUG - root - Waiting for data...
+2024-11-27 11:02:12,031 - DEBUG - root - No data received in the last second, continuing...
+2024-11-27 11:02:12,042 - DEBUG - root - Waiting for data...
+2024-11-27 11:02:13,044 - DEBUG - root - No data received in the last second, continuing...
+2024-11-27 11:02:13,055 - DEBUG - root - Waiting for data...
+2024-11-27 11:02:14,057 - DEBUG - root - No data received in the last second, continuing...
+2024-11-27 11:02:14,068 - DEBUG - root - Waiting for data...
+2024-11-27 11:02:15,070 - DEBUG - root - No data received in the last second, continuing...
+2024-11-27 11:02:15,081 - DEBUG - root - Waiting for data...
+2024-11-27 11:02:15,116 - DEBUG - urllib3.connectionpool - Resetting dropped connection: 10.126.50.50
+2024-11-27 11:02:15,154 - DEBUG - urllib3.connectionpool - http://10.126.50.50:5000 "POST /update_trade_data HTTP/11" 200 21
+2024-11-27 11:02:16,083 - DEBUG - root - No data received in the last second, continuing...
+2024-11-27 11:02:16,094 - DEBUG - root - Waiting for data...
+2024-11-27 11:02:17,096 - DEBUG - root - No data received in the last second, continuing...
+2024-11-27 11:02:17,107 - DEBUG - root - Waiting for data...
+2024-11-27 11:02:18,109 - DEBUG - root - No data received in the last second, continuing...
+2024-11-27 11:02:18,120 - DEBUG - root - Waiting for data...
+2024-11-27 11:02:19,121 - DEBUG - root - No data received in the last second, continuing...
+2024-11-27 11:02:19,132 - DEBUG - root - Waiting for data...
+2024-11-27 11:02:20,134 - DEBUG - root - No data received in the last second, continuing...
+2024-11-27 11:02:20,145 - DEBUG - root - Waiting for data...
+2024-11-27 11:02:20,206 - DEBUG - root - Updated plot with new data point at 2012-10-24 00:00:00
+2024-11-27 11:02:20,212 - DEBUG - urllib3.connectionpool - Resetting dropped connection: 10.126.50.50
+2024-11-27 11:02:20,234 - DEBUG - urllib3.connectionpool - http://10.126.50.50:5000 "POST /sync HTTP/11" 200 20
+2024-11-27 11:02:20,239 - DEBUG - root - Sleep calculation: target=0.00s, elapsed=10.41s, sleep=0.00s
+2024-11-27 11:02:20,240 - DEBUG - root - Processing timestamp: 2012-10-24 00:30:00
+2024-11-27 11:02:20,248 - DEBUG - urllib3.connectionpool - Resetting dropped connection: 10.126.50.50
+2024-11-27 11:02:20,266 - DEBUG - urllib3.connectionpool - http://10.126.50.50:5000 "POST /update_peer_data HTTP/11" 200 21
+2024-11-27 11:02:20,274 - DEBUG - urllib3.connectionpool - Starting new HTTP connection (1): 10.126.50.50:5000
+2024-11-27 11:02:20,288 - DEBUG - urllib3.connectionpool - http://10.126.50.50:5000 "POST /update_peer_data HTTP/11" 200 21
+2024-11-27 11:02:20,297 - DEBUG - urllib3.connectionpool - Starting new HTTP connection (1): 10.126.50.50:5000
+2024-11-27 11:02:20,315 - DEBUG - urllib3.connectionpool - http://10.126.50.50:5000 "GET /get_peer_data HTTP/11" 200 161
+2024-11-27 11:02:20,321 - INFO - root - Buying 0.000 kWh at £0.050/kWh (Total: £0.000)
+2024-11-27 11:02:20,324 - DEBUG - urllib3.connectionpool - Starting new HTTP connection (1): 10.126.50.50:5000
+2024-11-27 11:02:20,335 - DEBUG - urllib3.connectionpool - http://10.126.50.50:5000 "POST /update_trade_data HTTP/11" 200 21
+2024-11-27 11:02:20,342 - INFO - root - Trade completed at 2012-10-24 00:30:00 - Amount: 0.000 kWh, Price: £0.050/kWh
+2024-11-27 11:02:20,409 - DEBUG - root - Updated plot with data at 2012-10-24 00:00:00
+2024-11-27 11:02:20,409 - DEBUG - root - Waiting for data...
+2024-11-27 11:02:21,411 - DEBUG - root - No data received in the last second, continuing...
+2024-11-27 11:02:21,421 - DEBUG - root - Waiting for data...
+2024-11-27 11:02:22,423 - DEBUG - root - No data received in the last second, continuing...
+2024-11-27 11:02:22,433 - DEBUG - root - Waiting for data...
+2024-11-27 11:02:23,434 - DEBUG - root - No data received in the last second, continuing...
+2024-11-27 11:02:23,445 - DEBUG - root - Waiting for data...
+2024-11-27 11:02:23,474 - INFO - root - Closing plot
+2024-11-27 11:02:23,474 - INFO - root - Simulation interrupted by user
+2024-11-27 11:02:23,479 - INFO - root - Stopping visualization...
+2024-11-27 11:02:23,493 - INFO - root - Visualization process stopped successfully
+2024-11-27 11:02:23,494 - INFO - root - Simulation ended
+2024-11-27 11:02:23,495 - INFO - root - Prosumer simulation ended
+2024-11-27 11:02:23,495 - INFO - root - Full logs available in: logs/solarville_prosumer_20241127_110205.log
