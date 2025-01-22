@@ -6,8 +6,8 @@ import netifaces # type: ignore
 import logging
 
 # Network Configuration
-PI_1_IP = '10.126.46.162'  # IP of Pi 1 (prosumer)
-PI_2_IP = '10.126.50.50'   # IP of Pi 2 (consumer)
+PI_1_IP = '10.126.56.181'  # IP of Pi 1 (prosumer)
+PI_2_IP = '10.126.167.128'   # IP of Pi 2 (consumer)
 
 # Simulation Configuration
 SIMULATION_SPEEDUP = 300    # Factor to speed up simulation (300 = 15min data every 3s)
