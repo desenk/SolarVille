@@ -3,3 +3,4 @@ venv-mac/
 __pycache__/
 *.py[cod]
 .DS_Store
+requirements-mac.txt
