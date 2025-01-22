@@ -242,7 +242,8 @@ def setup_plot_formatting(ax, interval: str):
     plt.tight_layout()
 
 def update_plot_same(df: pd.DataFrame, start_date: str, end_date: str, 
-                    interval: str, queue: Queue, ready_event: MPEvent) -> None:
+                    interval: str, queue: Queue, ready_event: MPEvent,
+                    error_queue: Queue) -> None:
     """
     Create and update real-time plot with combined lines.
     
@@ -253,6 +254,7 @@ def update_plot_same(df: pd.DataFrame, start_date: str, end_date: str,
         interval: Time interval for the x-axis
         queue: Multiprocessing queue for data transfer
         ready_event: Multiprocessing event for synchronization
+        error_queue: Queue for error propagation
     """
     try:
         logging.info("Initializing plot...")
@@ -272,16 +274,14 @@ def update_plot_same(df: pd.DataFrame, start_date: str, end_date: str,
         ax.set_title(f'Real-Time Energy Data for {start_date[:10]}')
         
         setup_plot_formatting(ax, interval)
-        logging.info("Plot initialized, setting ready event...")
         ready_event.set()  # Signal plot is initialized
+        logging.info("Plot initialized successfully")
 
         times, demands, generations, nets = [], [], [], []
         
-        logging.info("Starting plot update loop...")
         while True:
             try:
-                logging.debug("Waiting for data...")
-                data = queue.get(timeout=1)  # Add 1 second timeout
+                data = queue.get(timeout=1)
                 if data == "done":
                     logging.info("Received done signal, ending plot updates")
                     break
@@ -305,15 +305,18 @@ def update_plot_same(df: pd.DataFrame, start_date: str, end_date: str,
                 ax.autoscale_view()
                 plt.draw()
                 plt.pause(0.01)
-                logging.debug(f"Updated plot with data at {timestamp}")
-
+                
             except Empty:
-                logging.debug("No data received in the last second, continuing...")
                 plt.pause(0.01)  # Keep the plot responsive
                 continue
-                
+            except Exception as e:
+                logging.error(f"Error in plot update loop: {e}")
+                error_queue.put(str(e))
+                break
+
     except Exception as e:
-        logging.error(f"Error in plot update loop: {e}", exc_info=True)
+        logging.error(f"Error in plot initialization: {e}")
+        error_queue.put(str(e))
     finally:
         logging.info("Closing plot")
-        plt.close()  # Ensure plot is closed when done
+        plt.close()
