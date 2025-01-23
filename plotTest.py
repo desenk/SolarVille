@@ -68,7 +68,7 @@ def load_solar_output_data(solar_output_file_path):
         df = pd.read_csv(solar_output_file_path, encoding='utf-8', skiprows=3)
         df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.replace(r'[^\w]', '', regex=True)
         df['time'] = pd.to_datetime(df['time'], errors='coerce')
-        df = df[(df['time'].dt.year == 2013) & (df['time'].dt.month == 6) & (df['time'].dt.day <= 10)]
+        df = df[(df['time'].dt.year == 2019) & (df['time'].dt.month == 6) & (df['time'].dt.day <= 10)]
         df = df.set_index('time')
         return df
     except Exception as e:
