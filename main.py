@@ -1,10 +1,11 @@
-import argparse
+import sys
 import time
-import pandas as pd  # type: ignore
-import matplotlib.pyplot as plt  # type: ignore
+import board  # type: ignore
+import busio  # type: ignore
+import adafruit_ina219  # type: ignore
+import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from datetime import datetime, timedelta
-from solarMonitor import get_current_readings
+from datetime import datetime
 
 # Global variables for real-time plotting
 SOC_history = []
@@ -38,55 +39,124 @@ ax3.set_title("Total Generation Over Time")
 ax3.grid(True)
 ax3.legend()
 
+def setup_ina219(address, i2c):
+    """Setup an INA219 sensor with a specific I2C address."""
+    sensor = adafruit_ina219.INA219(i2c, addr=address)
+    sensor.set_calibration_16V_400mA()
+    sensor.bus_adc_resolution = adafruit_ina219.ADCResolution.ADCRES_12BIT_32S
+    sensor.shunt_adc_resolution = adafruit_ina219.ADCResolution.ADCRES_12BIT_32S
+    return sensor
+
+def read_ina219(sensor):
+    """Read values from an INA219 sensor."""
+    bus_voltage = sensor.bus_voltage
+    shunt_voltage = sensor.shunt_voltage
+    current = sensor.current / 1000  # Convert to A
+    power = bus_voltage * current * 1000  # Calculate power in mW
+    return bus_voltage, shunt_voltage, current, power
+
+def collect_data(mode, i2c):
+    """Collect data based on the specified mode (prosumer or consumer)."""
+    if mode == "prosumer":
+        # Setup sensors
+        ina219_solar = setup_ina219(0x45, i2c)
+        ina219_battery = setup_ina219(0x41, i2c)
+        ina219_demand = setup_ina219(0x40, i2c)
+
+        # Collect data
+        solar_voltage, _, solar_current, solar_power = read_ina219(ina219_solar)
+        battery_voltage, _, _, _ = read_ina219(ina219_battery)
+        _, _, _, demand_power = read_ina219(ina219_demand)
+
+        return {
+            "solar_power": solar_power,
+            "battery_voltage": battery_voltage,
+            "demand_power": demand_power,
+        }
+
+    elif mode == "consumer":
+        # Setup sensor
+        ina219_demand = setup_ina219(0x44, i2c)
+
+        # Collect data
+        _, _, _, demand_power = read_ina219(ina219_demand)
+
+        return {
+            "demand_power": demand_power,
+        }
+
+    else:
+        raise ValueError("Invalid mode. Use 'prosumer' or 'consumer'.")
+
 def update_plot(frame):
     """Update the plot with the latest data."""
     global SOC_history, prosumer_power_history, consumer_power_history, time_history
 
-    # Read sensor data
-    readings = get_current_readings()
-    bus_voltage_battery = readings['battery_voltage']
-    power_prosumer_demand = readings['power_prosumer_damand']
-    power_consumer_demand = readings['power_consumer_damand']
-    power_battery = readings['power_battery']
+    # I2C setup
+    i2c = busio.I2C(board.SCL, board.SDA)
 
-    # Calculate SoC and generation
-    battery_soc = bus_voltage_battery / 5  # SoC calculation
-    generation = power_battery + power_prosumer_demand + power_consumer_demand
+    # Detect mode from command-line arguments
+    mode = sys.argv[1].lower()
 
-    # Append data to history
-    current_time = datetime(2025, 1, 1) + timedelta(seconds=frame)
-    SOC_history.append(battery_soc * 100)  # Convert to percentage
-    prosumer_power_history.append(power_prosumer_demand)
-    consumer_power_history.append(power_consumer_demand)
+    try:
+        data = collect_data(mode, i2c)
+    except Exception as e:
+        print(f"Error collecting data: {e}")
+        return
+
+    # Process data based on mode
+    current_time = datetime.now()
     time_history.append(current_time)
 
-    # Update lines
-    line1.set_data(time_history, SOC_history)
-    line2.set_data(time_history, prosumer_power_history)
-    line3.set_data(time_history, consumer_power_history)
-    line4.set_data(time_history, [p_bat + p_pros + p_cons for p_bat, p_pros, p_cons in zip(SOC_history, prosumer_power_history, consumer_power_history)])
+    if mode == "prosumer":
+        solar_power = data["solar_power"]
+        battery_soc = data["battery_voltage"] / 5.5 * 100  # Calculate SoC (%)
+        demand_power = data["demand_power"]
+
+        # Append data to history
+        SOC_history.append(battery_soc)
+        prosumer_power_history.append(demand_power)
+        consumer_power_history.append(0)  # No consumer power in prosumer mode
+
+        # Update lines
+        line1.set_data(time_history, SOC_history)
+        line2.set_data(time_history, prosumer_power_history)
+        line3.set_data(time_history, consumer_power_history)
+        line4.set_data(time_history, [solar_power])
+
+    elif mode == "consumer":
+        demand_power = data["demand_power"]
+
+        # Append data to history
+        consumer_power_history.append(demand_power)
+        SOC_history.append(0)  # No battery SoC in consumer mode
+        prosumer_power_history.append(0)  # No prosumer power in consumer mode
+
+        # Update lines
+        line3.set_data(time_history, consumer_power_history)
 
     # Adjust axis limits
     ax1.set_xlim(time_history[0], time_history[-1])
     ax1.set_ylim(0, 100)
 
     ax2.set_xlim(time_history[0], time_history[-1])
-    ax2.set_ylim(0, max(max(prosumer_power_history, default=0), max(consumer_power_history, default=0)) * 1.1)
+    ax2.set_ylim(0, max(prosumer_power_history + consumer_power_history) * 1.1)
 
     ax3.set_xlim(time_history[0], time_history[-1])
-    ax3.set_ylim(0, max([p_bat + p_pros + p_cons for p_bat, p_pros, p_cons in zip(SOC_history, prosumer_power_history, consumer_power_history)], default=0) * 1.1)
+    ax3.set_ylim(0, max(SOC_history + prosumer_power_history + consumer_power_history) * 1.1)
 
     return line1, line2, line3, line4
 
-def start_simulation_local(args):
-    """Start the simulation and real-time plotting."""
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python main.py <mode>")
+        print("Modes: prosumer or consumer")
+        sys.exit(1)
+
+    # Start real-time plot
     ani = FuncAnimation(fig, update_plot, interval=1000)  # Update every second
     plt.tight_layout()
     plt.show()
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Energy Simulation")
-    args = parser.parse_args()
-
-    # Start simulation
-    start_simulation_local(args)
+    main()
