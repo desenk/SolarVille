@@ -1,5 +1,5 @@
 import pandas as pd
- import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
  # List of specified household IDs
  household_ids = [
