@@ -301,9 +301,9 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
 
             # 能量平衡约束
             m.constraints.add(
-                Base_Load[household_index_map[h]][t] + m.ev_load[h, t] + m.charge_battery[h, t] +
+                float(Base_Load[household_index_map[h]][t]) + m.ev_load[h, t] + m.charge_battery[h, t] +
                 m.export_energy[h, t] + sum(m.trade[h, h2, t] for h2 in m.H if h2 != h) ==
-                Gen[household_index_map[h]][t] + m.discharge_battery[h, t] + m.import_energy[h, t] +
+                float(Gen[household_index_map[h]][t]) + m.discharge_battery[h, t] + m.import_energy[h, t] +
                 sum(m.trade[h2, h, t] for h2 in m.H if h2 != h)
             )
 
