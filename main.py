@@ -232,6 +232,10 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     soc_min = {h: 0.2 * battery_capacity[h] for h in battery_capacity}
     soc_max = {h: 0.8 * battery_capacity[h] for h in battery_capacity}
 
+    # 创建家庭索引到 ID 的映射
+    household_ids = list(Base_Load.keys())
+    household_index_map = {i + 1: household_ids[i] for i in range(len(household_ids))}
+    
     # 创建优化模型
     m = pyo.ConcreteModel()
 
@@ -242,9 +246,9 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     # 决策变量
     m.import_energy = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals)
     m.export_energy = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals)
-    m.charge_battery = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=lambda m, h, t: (0, charge_power_limit[h]))
-    m.discharge_battery = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=lambda m, h, t: (0, discharge_power_limit[h]))
-    m.soc = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=lambda m, h, t: (soc_min[h], soc_max[h]))
+    m.charge_battery = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=lambda m, h, t: (0, charge_power_limit[household_index_map[h]]))
+    m.discharge_battery = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=lambda m, h, t: (0, discharge_power_limit[household_index_map[h]]))
+    m.soc = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=lambda m, h, t: (soc_min[household_index_map[h]], soc_max[household_index_map[h]]))
     m.ev_charge = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=(0, 1))  # EV 每小时充电速率最多 1kWh
     m.ev_load = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals)
     m.ev_soc = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals)
