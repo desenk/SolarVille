@@ -50,14 +50,21 @@ def load_solar_output_data(file_path, start_date, end_date):
     try:
         df = pd.read_csv(file_path, encoding='utf-8', skiprows=3)
         df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.replace(r'[^\w]', '', regex=True)
-
+        
+        if 'time' not in df.columns:
+            raise ValueError("Missing required 'time' column in the solar output data.")
         # 过滤时间范围
         df['time'] = pd.to_datetime(df['time'], errors='coerce')
+        if df['time'].isnull().any():
+            print("Warning: Some time values could not be converted to datetime.")
+                    
         df = df[(df['time'] >= start_date) & (df['time'] <= end_date)]
         df = df.set_index('time')
+        if df.empty:
+            raise ValueError("No data available in the specified time range.")
 
         # 调整为每半小时间隔
-        solar_half_hour = df.resample('30min').pad()  # 使用整点值填充半小时数据
+        solar_half_hour = df.resample('30min').fillna(method='ffill')  # 使用整点值填充半小时数据
         return solar_half_hour
     except Exception as e:
         print(f"Error loading solar output data from {file_path}: {e}")
