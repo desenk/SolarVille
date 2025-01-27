@@ -263,7 +263,7 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
             peer_buy_price[t] * m.trade[h2, h, t] - peer_sell_price[t] * m.trade[h, h2, t]
             for h in m.H for t in m.T for h2 in m.H if h2 != h
         ) + sum(
-            penalty * (ev_max_soc[h] - m.ev_soc[h, T]) for h in m.H
+            penalty * (ev_max_soc[household_index_map[h]] - m.ev_soc[h, T]) for h in m.H
         ),
         sense=pyo.minimize
     )
@@ -286,8 +286,8 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
 
             # 电池动态约束
             if t == 1:
-                m.constraints.add(m.soc[h, t] == soc_min[h])
-                m.constraints.add(m.ev_soc[h, t] == ev_initial_soc[h])
+                m.constraints.add(m.soc[h, t] == soc_min[household_index_map[h]])
+                m.constraints.add(m.ev_soc[h, t] == ev_initial_soc[household_index_map[h]])
             else:
                 m.constraints.add(
                     m.soc[h, t] == m.soc[h, t - 1] + m.charge_battery[h, t] - m.discharge_battery[h, t]
@@ -301,9 +301,9 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
 
             # 能量平衡约束
             m.constraints.add(
-                Base_Load[h][t] + m.ev_load[h, t] + m.charge_battery[h, t] +
+                Base_Load[household_index_map[h]][t] + m.ev_load[h, t] + m.charge_battery[h, t] +
                 m.export_energy[h, t] + sum(m.trade[h, h2, t] for h2 in m.H if h2 != h) ==
-                Gen[h][t] + m.discharge_battery[h, t] + m.import_energy[h, t] +
+                Gen[household_index_map[h]][t] + m.discharge_battery[h, t] + m.import_energy[h, t] +
                 sum(m.trade[h2, h, t] for h2 in m.H if h2 != h)
             )
 
@@ -325,7 +325,7 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     export_energy_h = {h: {t: m.export_energy[h, t].value for t in m.T} for h in m.H}
     battery_charge_h = {h: {t: m.charge_battery[h, t].value for t in m.T} for h in m.H}
     battery_discharge_h = {h: {t: m.discharge_battery[h, t].value for t in m.T} for h in m.H}
-    total_load = {h: {t: Base_Load[h][t] + m.ev_load[h, t].value for t in m.T} for h in m.H}
+    total_load = {h: {t: Base_Load[household_index_map[h]][t] + m.ev_load[h, t].value for t in m.T} for h in m.H}
     trades = {
     h: {h2: {t: m.trade[h, h2, t].value for t in m.T} for h2 in m.H if h2 != h} for h in m.H
 }
