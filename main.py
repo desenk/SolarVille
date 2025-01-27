@@ -57,7 +57,7 @@ def load_solar_output_data(file_path, start_date, end_date):
         df = df.set_index('time')
 
         # 调整为每半小时间隔
-        solar_half_hour = df.resample('30T').pad()  # 使用整点值填充半小时数据
+        solar_half_hour = df.resample('30min').pad()  # 使用整点值填充半小时数据
         return solar_half_hour
     except Exception as e:
         print(f"Error loading solar output data from {file_path}: {e}")
@@ -95,7 +95,7 @@ def map_data_to_model(household_df, solar_half_hour, config, T):
     for household in households:
         # 获取该家庭的数据
         household_data = household_df[household_df['lclid'] == household]
-        household_half_hour = household_data['energykwhhh'].resample('30T').sum()
+        household_half_hour = household_data['energykwhhh'].resample('30min').sum()
 
         # 配置 Base_Load
         for t, energy in enumerate(household_half_hour.values[:T], start=1):
@@ -356,7 +356,7 @@ if __name__ == "__main__":
 
     # 映射数据
     Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_soc, ev_initial_soc = map_data_to_model(
-        household_df, solar_half_hour, household_config
+        household_df, solar_half_hour, household_config, total_steps
     )
 
     # 打印检查数据
