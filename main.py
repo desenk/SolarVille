@@ -140,6 +140,8 @@ def update_plot(frame):
     # Adjust axis limits
     ax1.set_xlim(time_history[0], time_history[-1])
     ax1.set_ylim(0, 100)
+    ax2.set_xlim(time_history[0], time_history[-1])
+    ax3.set_xlim(time_history[0], time_history[-1])
        
     return line1, line2, line3, line4
 
