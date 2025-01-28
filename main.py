@@ -141,7 +141,9 @@ def update_plot(frame):
     ax1.set_xlim(time_history[0], time_history[-1])
     ax1.set_ylim(0, 100)
     ax2.set_xlim(time_history[0], time_history[-1])
+    ax2.set_ylim(0, max(prosumer_power_history + consumer_power_history) * 1.5)
     ax3.set_xlim(time_history[0], time_history[-1])
+    ax3.set_ylim(0, max(generation_history) * 1.5)
        
     return line1, line2, line3, line4
 
