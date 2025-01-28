@@ -118,13 +118,13 @@ def update_plot(frame):
         SOC_history.append(battery_soc)
         prosumer_power_history.append(demand_power)
         consumer_power_history.append(0)  # No consumer power in prosumer mode
-        generation_power_history.append(solar_power)
+        generation_history.append(solar_power)
 
         # Update lines
         line1.set_data(time_history, SOC_history)
         line2.set_data(time_history, prosumer_power_history)
         line3.set_data(time_history, consumer_power_history)
-        line4.set_data(time_history, generation_power_history)
+        line4.set_data(time_history, generation_history)
 
     elif mode == "consumer":
         demand_power = data["demand_power"]
@@ -141,12 +141,23 @@ def update_plot(frame):
     ax1.set_xlim(time_history[0], time_history[-1])
     ax1.set_ylim(0, 100)
 
-    ax2.set_xlim(time_history[0], time_history[-1])
-    ax2.set_ylim(0, max(prosumer_power_history + consumer_power_history) * 1.1)
+    if mode == "prosumer":
+        max_soc = max(SOC_history[-x_window_size:]) if SOC_history else 100
+        ax1.set_ylim(0, max_soc * 1.1)  
 
-    ax3.set_xlim(time_history[0], time_history[-1])
-    ax3.set_ylim(0, max(SOC_history + prosumer_power_history + consumer_power_history) * 1.1)
+        max_generation = max(generation_history[-x_window_size:]) if generation_history else 1
+        ax2.set_xlim(time_window[0], time_window[-1])
+        ax2.set_ylim(0, max_generation * 1.1) 
 
+        max_power = max(prosumer_power_history[-x_window_size:] + consumer_power_history[-x_window_size:]) if prosumer_power_history else 1
+        ax3.set_xlim(time_window[0], time_window[-1])
+        ax3.set_ylim(0, max_power * 1.1)  
+
+    elif mode == "consumer":
+        max_consumer_power = max(consumer_power_history[-x_window_size:]) if consumer_power_history else 1
+        ax3.set_xlim(time_window[0], time_window[-1])
+        ax3.set_ylim(0, max_consumer_power * 1.1)
+        
     return line1, line2, line3, line4
 
 def main():
