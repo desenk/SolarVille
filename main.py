@@ -11,6 +11,7 @@ from datetime import datetime
 SOC_history = []
 prosumer_power_history = []
 consumer_power_history = []
+generation_history = []
 time_history = []
 
 # Initialize the plot
@@ -35,7 +36,7 @@ ax2.legend()
 
 ax3.set_xlabel("Time")
 ax3.set_ylabel("Generation (mW)")
-ax3.set_title("Total Generation Over Time")
+ax3.set_title("Generation Over Time")
 ax3.grid(True)
 ax3.legend()
 
@@ -117,12 +118,13 @@ def update_plot(frame):
         SOC_history.append(battery_soc)
         prosumer_power_history.append(demand_power)
         consumer_power_history.append(0)  # No consumer power in prosumer mode
+        generation_power_history.append(solar_power)
 
         # Update lines
         line1.set_data(time_history, SOC_history)
         line2.set_data(time_history, prosumer_power_history)
         line3.set_data(time_history, consumer_power_history)
-        line4.set_data(time_history, [solar_power])
+        line4.set_data(time_history, generation_power_history)
 
     elif mode == "consumer":
         demand_power = data["demand_power"]
