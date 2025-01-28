@@ -146,20 +146,20 @@ def update_plot(frame):
 
     if mode == "prosumer":
         max_soc = max(SOC_history[-x_window_size:]) if SOC_history else 100
-        ax1.set_ylim(0, max_soc * 1.1)  
+        ax1.set_ylim(0, max_soc * 1.5)  
 
         max_generation = max(generation_history[-x_window_size:]) if generation_history else 1
         ax2.set_xlim(time_window[0], time_window[-1])
-        ax2.set_ylim(0, max_generation * 1.1) 
+        ax2.set_ylim(0, max_generation * 1.5) 
 
         max_power = max(prosumer_power_history[-x_window_size:] + consumer_power_history[-x_window_size:]) if prosumer_power_history else 1
         ax3.set_xlim(time_window[0], time_window[-1])
-        ax3.set_ylim(0, max_power * 1.1)  
+        ax3.set_ylim(0, max_power * 1.5)  
 
     elif mode == "consumer":
         max_consumer_power = max(consumer_power_history[-x_window_size:]) if consumer_power_history else 1
         ax3.set_xlim(time_window[0], time_window[-1])
-        ax3.set_ylim(0, max_consumer_power * 1.1)
+        ax3.set_ylim(0, max_consumer_power * 1.5)
         
     return line1, line2, line3, line4
 
