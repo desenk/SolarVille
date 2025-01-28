@@ -138,6 +138,9 @@ def update_plot(frame):
         line3.set_data(time_history, consumer_power_history)
 
     # Adjust axis limits
+    x_window_size = 15 
+    x_start_index = max(0, len(time_history) - x_window_size) 
+    time_window = time_history[x_start_index:]
     ax1.set_xlim(time_history[0], time_history[-1])
     ax1.set_ylim(0, 100)
 
