@@ -101,8 +101,8 @@ def map_data_to_model(household_df, solar_half_hour, config, T):
 
     for household in households:
         # 获取该家庭的数据
-        household_data = household_df[household_df['lclid'] == household]
-        household_half_hour = household_data['energykwhhh'].resample('30min').sum()
+        household_data = household_df[household_df['lclid'] == household].copy()
+        household_half_hour = household_data['energykwhhh'].resample('30min').sum().asfreq("30min")
 
         # 配置 Base_Load
         for t, energy in enumerate(household_half_hour.values[:T], start=1):
@@ -325,7 +325,7 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     export_energy_h = {h: {t: m.export_energy[h, t].value for t in m.T} for h in m.H}
     battery_charge_h = {h: {t: m.charge_battery[h, t].value for t in m.T} for h in m.H}
     battery_discharge_h = {h: {t: m.discharge_battery[h, t].value for t in m.T} for h in m.H}
-    total_load = {h: {t: Base_Load[household_index_map[h]][t] + m.ev_load[h, t].value for t in m.T} for h in m.H}
+    total_load = {h: {t: float(Base_Load[household_index_map[h]][t]) + m.ev_load[h, t].value for t in m.T} for h in m.H}
     trades = {
     h: {h2: {t: m.trade[h, h2, t].value for t in m.T} for h2 in m.H if h2 != h} for h in m.H
 }
