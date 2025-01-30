@@ -102,6 +102,11 @@ def map_data_to_model(household_df, solar_half_hour, config, T):
     for household in households:
         # 获取该家庭的数据
         household_data = household_df[household_df['lclid'] == household].copy()
+
+        # Ensure energykwhhh column contains valid numeric data
+        household_data["energykwhhh"] = pd.to_numeric(household_data["energykwhhh"], errors="coerce")
+        household_data = household_data.dropna(subset=["energykwhhh"])
+        household_data = household_data.set_index(household_data.index)  # Ensure proper index
         household_half_hour = household_data['energykwhhh'].resample('30min').sum().asfreq("30min")
 
         # 配置 Base_Load
