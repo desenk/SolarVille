@@ -143,14 +143,11 @@ def map_data_to_model(household_df, solar_half_hour, config, T):
     return Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_soc, ev_initial_soc
 
 # 绘图函数
-import matplotlib.dates as mdates  # 用于格式化 x 轴的时间
-import pandas as pd
-
 def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy, 
                  battery_charge, battery_discharge, trades, m, price, export_price, 
                  peer_buy_price, peer_sell_price, net_energy=None, cost_h=None, cost_penalty_h1=None):
     # 生成时间索引（确保从 06-01 开始，每 30 分钟一个点）
-    time_index = pd.date_range(start=load_start_date, end=load_end_date, freq="30min", closed="left")[:T]
+    time_index = pd.date_range(start=load_start_date, end=load_end_date, freq="30min", inclusive="left")[:T]
     
     households = list(Base_Load.keys())
 
