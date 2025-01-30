@@ -133,6 +133,7 @@ def update_plot(frame):
         consumer_power_history.append(demand_power)
         SOC_history.append(0)  # No battery SoC in consumer mode
         prosumer_power_history.append(0)  # No prosumer power in consumer mode
+        generation_history.append(0) # No generation in consumer mode
 
         # Update lines
         line3.set_data(time_history, consumer_power_history)
