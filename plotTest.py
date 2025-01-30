@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 # List of specified household IDs
 household_ids = [
-    "MAC000450", "MAC003252", "MAC003281", "MAC003305",
+    "MAC003223", "MAC003252", "MAC003281", "MAC003305",
     "MAC003348", "MAC003394", "MAC003428", "MAC003553",
     "MAC003874", "MAC003863"
 ]
