@@ -11,7 +11,7 @@ household_config = {
     "MAC003394": {"solar": True, "battery": True, "ev": True, "demand": True},
     "MAC003428": {"solar": True, "battery": True, "ev": True, "demand": True},
     "MAC003863": {"solar": True, "battery": True, "ev": False, "demand": True},
-    "MAC000450": {"solar": False, "battery": False, "ev": True, "demand": True},
+    "MAC003223": {"solar": False, "battery": False, "ev": True, "demand": True},
     "MAC003281": {"solar": False, "battery": False, "ev": True, "demand": True},
     "MAC003348": {"solar": False, "battery": False, "ev": False, "demand": True},
     "MAC003553": {"solar": False, "battery": False, "ev": False, "demand": True},
