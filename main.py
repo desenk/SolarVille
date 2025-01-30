@@ -336,8 +336,8 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     plot_results(
         T, Base_Load, total_load, Gen, import_energy_h, export_energy_h,
         battery_charge_h, battery_discharge_h, trades, m, price, export_price,
-        peer_buy_price, peer_sell_price, None, None, None
-    )
+        peer_buy_price, peer_sell_price
+    ) # currently we do not plot net_energy, cost_h, cost_penalty_h1
 
 # 主函数
 if __name__ == "__main__":
