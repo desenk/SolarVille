@@ -142,15 +142,20 @@ def map_data_to_model(household_df, solar_half_hour, config, T):
     return Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_soc, ev_initial_soc
 
 # 绘图函数
+import matplotlib.dates as mdates  # 用于格式化 x 轴的时间
+import pandas as pd
+
 def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy, 
                  battery_charge, battery_discharge, trades, m, price, export_price, 
                  peer_buy_price, peer_sell_price, net_energy=None, cost_h=None, cost_penalty_h1=None):
-    time = list(range(1, T + 1))
+    # 生成时间索引（每 30 分钟一个点）
+    time_index = pd.date_range(start=load_start_date, end=load_end_date, freq="30min")[:T]  # 只取 T 个点
+    
     households = list(Base_Load.keys())
 
     # 每 2 户家庭一张图
     for i in range(0, len(households), 2):
-        fig, axes = plt.subplots(3, 1, figsize=(12, 12), sharex=True)  # 三个子图，底部用来放价格图和成本图
+        fig, axes = plt.subplots(3, 1, figsize=(12, 12), sharex=True)
 
         for j, ax in enumerate(axes[:2]):  # 只画前两个子图
             if i + j >= len(households):  # 防止索引超出范围
@@ -160,72 +165,75 @@ def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy,
             h = households[i + j]  # 获取家庭 ID
             h_index = i + j + 1  # 计算家庭索引（1-based）
 
-            base_load_values = [float(Base_Load[h][t]) for t in time]
-            total_load_values = [float(pyo.value(m.ev_load[h_index, t])) + float(Base_Load[h][t]) for t in time]
-            ev_load_values = [float(pyo.value(m.ev_load[h_index, t])) for t in time]
-            ev_soc_values = [float(pyo.value(m.ev_soc[h_index, t])) for t in time]
-            soc_values = [float(pyo.value(m.soc[h_index, t])) for t in time]
+            base_load_values = [float(Base_Load[h][t]) for t in range(1, T + 1)]
+            total_load_values = [float(pyo.value(m.ev_load[h_index, t])) + float(Base_Load[h][t]) for t in range(1, T + 1)]
+            ev_load_values = [float(pyo.value(m.ev_load[h_index, t])) for t in range(1, T + 1)]
+            ev_soc_values = [float(pyo.value(m.ev_soc[h_index, t])) for t in range(1, T + 1)]
+            soc_values = [float(pyo.value(m.soc[h_index, t])) for t in range(1, T + 1)]
 
             # 画曲线
-            ax.plot(time, base_load_values, label=f"Base Load {h}", linestyle="--")
-            ax.fill_between(time, base_load_values, total_load_values, color="purple", alpha=0.6, label="EV Load (Added)")
-            ax.plot(time, ev_load_values, label="EV Load", linestyle="-.", color="black")
-            ax.plot(time, ev_soc_values, label="EV SOC", linestyle="-", color="green")
-            ax.plot(time, soc_values, label="Battery SOC", linestyle=":", color="blue")
+            ax.plot(time_index, base_load_values, label=f"Base Load {h}", linestyle="--")
+            ax.fill_between(time_index, base_load_values, total_load_values, color="purple", alpha=0.6, label="EV Load (Added)")
+            ax.plot(time_index, ev_load_values, label="EV Load", linestyle="-.", color="black")
+            ax.plot(time_index, ev_soc_values, label="EV SOC", linestyle="-", color="green")
+            ax.plot(time_index, soc_values, label="Battery SOC", linestyle=":", color="blue")
 
-            # 如果有光伏发电，画出发电曲线
+            # 画光伏发电
             if household_config[h]["solar"]:
-                ax.plot(time, [Gen[h][t] for t in time], label=f"Generation {h}", color="orange")
+                ax.plot(time_index, [Gen[h][t] for t in range(1, T + 1)], label=f"Generation {h}", color="orange")
 
             # 画电网买卖电量
-            ax.bar(time, [import_energy[h_index][t] for t in time], label="Import Energy", alpha=0.5)
-            ax.bar(time, [-export_energy[h_index][t] for t in time], label="Export Energy", alpha=0.5)
+            ax.bar(time_index, [import_energy[h_index][t] for t in range(1, T + 1)], label="Import Energy", alpha=0.5)
+            ax.bar(time_index, [-export_energy[h_index][t] for t in range(1, T + 1)], label="Export Energy", alpha=0.5)
 
             # 画电池充放电
-            ax.bar(time, [battery_charge[h_index][t] for t in time], label=f"Battery Charge {h}", alpha=0.3)
-            ax.bar(time, [-battery_discharge[h_index][t] for t in time], label=f"Battery Discharge {h}", alpha=0.3)
+            ax.bar(time_index, [battery_charge[h_index][t] for t in range(1, T + 1)], label=f"Battery Charge {h}", alpha=0.3)
+            ax.bar(time_index, [-battery_discharge[h_index][t] for t in range(1, T + 1)], label=f"Battery Discharge {h}", alpha=0.3)
 
             # 画交易
             if trades:
                 for h2 in trades[h_index]:
-                    ax.plot(time, [trades[h_index][h2][t] for t in time], label=f"Trade with {h2}")
+                    ax.plot(time_index, [trades[h_index][h2][t] for t in range(1, T + 1)], label=f"Trade with {h2}")
 
             ax.set_title(f"Household {h} Power Flow")
             ax.legend(loc="upper right", fontsize=7)
             ax.grid(True)
 
-        # 统一 x 轴
-        time_labels = [f"{hour:02}:{minute:02}" for hour in range(24) for minute in [0, 30]][:T]
-        plt.xticks(ticks=range(1, len(time_labels) + 1), labels=time_labels, rotation=45, fontsize=8)
+        # 统一 x 轴格式
+        for ax in axes:
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M"))  # 设置 x 轴格式
+            ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))  # 每 6 小时标一个刻度
+            ax.tick_params(axis="x", rotation=45)  # 旋转时间标签，避免重叠
 
-        # 绘制价格比较图（在第三个子图上）
+        # 价格比较和社区成本图
         ax = axes[2]
         price_values = [price[t] for t in range(1, T + 1)]
         export_price_values = [export_price[t] for t in range(1, T + 1)]
         peer_buy_price_values = [peer_buy_price[t] for t in range(1, T + 1)]
         peer_sell_price_values = [peer_sell_price[t] for t in range(1, T + 1)]
 
-        ax.plot(time, price_values, label="Electricity Price (Buy)", color="blue", linewidth=2)
-        ax.plot(time, export_price_values, label="Export Price (Sell to Grid)", color="orange", linestyle="--")
-        ax.plot(time, peer_buy_price_values, label="Peer Buy Price", color="green", linestyle=":")
-        ax.plot(time, peer_sell_price_values, label="Peer Sell Price", color="red", linestyle="-.")
+        ax.plot(time_index, price_values, label="Electricity Price (Buy)", color="blue", linewidth=2)
+        ax.plot(time_index, export_price_values, label="Export Price (Sell to Grid)", color="orange", linestyle="--")
+        ax.plot(time_index, peer_buy_price_values, label="Peer Buy Price", color="green", linestyle=":")
+        ax.plot(time_index, peer_sell_price_values, label="Peer Sell Price", color="red", linestyle="-.")
         ax.set_title("Price Comparison")
-        ax.legend(bbox_to_anchor=(1.1, 1), loc="upper right", fontsize=7)
+        ax.legend(loc="upper right", fontsize=7)
         ax.grid(True)
 
         # 绘制社区总净能量和成本图
         if net_energy and cost_h and cost_penalty_h1 is not None:
             ax = axes[2]
-            ax.plot(time, [net_energy[t] for t in time], label="Net Energy", color="purple", linestyle="--")
-            for h in range(1, len(cost_h) + 1):  # 假设 cost_h 的键是家庭的索引 (1, 2, ...)
-                ax.plot(time, cost_h[h], label=f"Household {h} Cost", color=f"C{h+1}")  # 使用 f-string 动态生成标签和颜色
-            ax.plot(time, cost_penalty_h1, label="Household 1 Penalty", color="red", linestyle=":")
+            ax.plot(time_index, [net_energy[t] for t in range(1, T + 1)], label="Net Energy", color="purple", linestyle="--")
+            for h in range(1, len(cost_h) + 1):  
+                ax.plot(time_index, cost_h[h], label=f"Household {h} Cost", color=f"C{h+1}")
+            ax.plot(time_index, cost_penalty_h1, label="Household 1 Penalty", color="red", linestyle=":")
             ax.set_title("Community Net Energy and Cost Analysis")
-            ax.legend(bbox_to_anchor=(1.1, 1), loc="upper right", fontsize=7)
+            ax.legend(loc="upper right", fontsize=7)
             ax.grid(True)
 
         plt.tight_layout()
         plt.show()
+
 
 
 # 优化模型和绘图
