@@ -177,6 +177,7 @@ net_energy, cost_h, cost_penalty_h1):
                 ax.plot(time, [trades[h][h2][t] for t in time], label=f"Trade with {h2} (to H{h})")
 
         ax.set_title(f"Household {h} Power Flow")
+        time_labels = [f"{hour:02}:{minute:02}" for hour in range(24) for minute in [0, 30]]
         time_labels = time_labels[:T]
         plt.xticks(ticks=range(1, len(time_labels) + 1), labels=time_labels, rotation=45, fontsize=8)
         ax.legend(bbox_to_anchor=(1.1, 1), loc="upper right", fontsize=7)
