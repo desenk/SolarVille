@@ -139,7 +139,7 @@ def map_data_to_model(household_df, solar_half_hour, config, T):
 # 绘图函数
 def plot_results(T, Base_Load, total_load,  Gen, import_energy, export_energy, 
 battery_charge, battery_discharge, trades, m, price, export_price, peer_buy_price, peer_sell_price, 
-net_energy, cost_h, cost_penalty_h1):
+net_energy = None, cost_h = None, cost_penalty_h1 = None):
     time = list(range(1, T + 1))
 
     fig, axes = plt.subplots(len(Base_Load) + 2, 1,  sharex=True)
