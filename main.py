@@ -147,13 +147,13 @@ net_energy, cost_h, cost_penalty_h1):
 
     for h, ax in enumerate(axes[:-2], start=1):
         # 确保 Base_Load 和 total_load 是数值类型
-        base_load_values = [float(Base_Load[h][t]) for t in time]
-        total_load_values = [float(pyo.value(m.ev_load[h, t])) + float(Base_Load[h][t]) for t in time]  # 使用 pyo.value() 获取 ev_load 的值
+        base_load_values = [float(Base_Load[household_index_map[h][t]) for t in time]
+        total_load_values = [float(pyo.value(m.ev_load[h, t])) + float(Base_Load[household_index_map[h][t]) for t in time]  # 使用 pyo.value() 获取 ev_load 的值
         ev_load_values = [float(pyo.value(m.ev_load[h, t])) for t in time]
         ev_soc_values = [float(pyo.value(m.ev_soc[h, t])) for t in time]
         soc_values = [float(pyo.value(m.soc[h, t])) for t in time]
 
-        ax.plot(time, [Base_Load[h][t] for t in time], label=f"Base Load {h}", linestyle="--")
+        ax.plot(time, [Base_Load[household_index_map[h][t] for t in time], label=f"Base Load {h}", linestyle="--")
         ax.fill_between(time, base_load_values, total_load_values, color="purple", alpha=0.6, label="EV Load (Added)")
         ax.plot(time, ev_load_values, label="EV Load", linestyle="-.", color="black")
         ax.plot(time, ev_soc_values, label="EV SOC", linestyle="-", color="green")
@@ -161,7 +161,7 @@ net_energy, cost_h, cost_penalty_h1):
 
         # 如果家庭有太阳能生产，则绘制太阳能生产
         if h != 2:
-            ax.plot(time, [Gen[h][t] for t in time], label=f"Generation {h}", color="orange")
+            ax.plot(time, [Gen[household_index_map[h][t] for t in time], label=f"Generation {h}", color="orange")
 
         # 绘制电网买卖电量
         ax.bar(time, [import_energy[h][t] for t in time], label="Import Energy", alpha=0.5)
