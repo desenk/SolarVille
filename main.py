@@ -201,15 +201,15 @@ net_energy = None, cost_h = None, cost_penalty_h1 = None):
     plt.grid(True)
 
     # 绘制社区总净能量和成本图
-    ax = axes[-1]
-    ax.plot(time, [net_energy[t] for t in time], label="Net Energy", color="purple", linestyle="--")
-    for h in range(1, len(cost_h) + 1):  # 假设 cost_h 的键是家庭的索引 (1, 2, ...)
-        ax.plot(time, cost_h[h], label=f"Household {h} Cost", color=f"C{h+1}")  # 使用 f-string 动态生成标签和颜色
-
-    ax.plot(time, cost_penalty_h1, label="Household 1 Penalty", color="red", linestyle=":")
-    ax.set_title("Community Net Energy and Cost Analysis")
-    ax.legend(bbox_to_anchor=(1.1, 1), loc="upper right", fontsize=7)
-    plt.grid(True)
+    if net_energy and cost_h and cost_penelty_h1 is not None:
+        ax = axes[-1]
+        ax.plot(time, [net_energy[t] for t in time], label="Net Energy", color="purple", linestyle="--")
+        for h in range(1, len(cost_h) + 1):  # 假设 cost_h 的键是家庭的索引 (1, 2, ...)
+            ax.plot(time, cost_h[h], label=f"Household {h} Cost", color=f"C{h+1}")  # 使用 f-string 动态生成标签和颜色
+        ax.plot(time, cost_penalty_h1, label="Household 1 Penalty", color="red", linestyle=":")
+        ax.set_title("Community Net Energy and Cost Analysis")
+        ax.legend(bbox_to_anchor=(1.1, 1), loc="upper right", fontsize=7)
+        plt.grid(True)
     
     plt.show()
 
