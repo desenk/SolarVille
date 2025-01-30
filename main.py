@@ -221,6 +221,7 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     H = len(Base_Load)  # 家庭数量
     time_step = 0.5  # 每个时间步的小时数
     penalty = 2000
+    global household_index_map
 
     # 设置价格
     price = {t: 10 if (11 * 2 <= t < 13 * 2) or (17 * 2 <= t < 20 * 2) else 5 for t in range(1, T + 1)}
