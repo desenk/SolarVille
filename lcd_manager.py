@@ -6,9 +6,9 @@ from typing import Optional
 import time
 
 try:
-    import board
-    import digitalio
-    import adafruit_character_lcd.character_lcd as characterlcd
+    import board # type: ignore
+    import digitalio # type: ignore
+    import adafruit_character_lcd.character_lcd as characterlcd # type: ignore
     MOCK_LCD = False
 except (ImportError, NotImplementedError):
     MOCK_LCD = True
