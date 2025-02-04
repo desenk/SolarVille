@@ -134,8 +134,8 @@ def map_data_to_model(household_df, solar_half_hour, config, T):
 
         # 配置电动车
         if config[household]["ev"]:
-            ev_max_soc[household] = 5
-            ev_initial_soc[household] = 2.5  # 假设初始电量为 50%
+            ev_max_soc[household] = 75 # Tesla Model Y about 75 kWh
+            ev_initial_soc[household] = 63.75  # Assume coming back home with 85%
         else:
             ev_max_soc[household] = 0
             ev_initial_soc[household] = 0
@@ -270,7 +270,7 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     m.charge_battery = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=lambda m, h, t: (0, charge_power_limit[household_index_map[h]]))
     m.discharge_battery = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=lambda m, h, t: (0, discharge_power_limit[household_index_map[h]]))
     m.soc = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=lambda m, h, t: (soc_min[household_index_map[h]], soc_max[household_index_map[h]]))
-    m.ev_charge = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=(0, 1))  # EV 每小时充电速率最多 1kWh
+    m.ev_charge = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=(0, 7))  # EV 每小时充电速率最多 7kWh
     m.ev_load = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals)
     m.ev_soc = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals)
     m.trade = pyo.Var(m.H, m.H, m.T, domain=pyo.NonNegativeReals)
@@ -284,7 +284,8 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
             peer_buy_price[t] * m.trade[h2, h, t] - peer_sell_price[t] * m.trade[h, h2, t]
             for h in m.H for t in m.T for h2 in m.H if h2 != h
         ) + sum(
-            penalty * (ev_max_soc[household_index_map[h]] - m.ev_soc[h, T]) for h in m.H
+            penalty * (ev_max_soc[household_index_map[h]] - m.ev_soc[h, T]) 
+            for h in m.H for t in ev_departure  # everyday 8:30
         ),
         sense=pyo.minimize
     )
@@ -292,14 +293,25 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     # 约束
     m.constraints = pyo.ConstraintList()
     M = 1000  # 较大的常数用于启发式约束
+    m.z_grid = pyo.Var(m.H, m.T, domain=pyo.Binary)  # 0-1 二进制变量
+    m.z_battery = pyo.Var(m.H, m.T, domain=pyo.Binary)  # 0-1 二进制变量
+    m.z_trade = pyo.Var(m.H, m.H, m.T, domain=pyo.Binary)  # 0-1 二进制变量
 
     # 添加约束
-    for t in m.T:
-        for h in m.H:
+    for h in m.H:
+        for t in m.T:
             # 电动汽车充电约束
-            if t in ev_arrival:
-                m.constraints.add(m.ev_charge[h, t] <= 5)
-            elif t in ev_departure:
+            for d in range(len(ev_arrival)):
+                if d == 0: 
+                    # 第一天下午 arrival 到 00:00 不存在，允许 00:00 - departure 充电
+                    if 1 <= t < ev_departure[d]:
+                        m.constraints.add(m.ev_charge[h, t] <= 7)
+                else:
+                    # 从 arrival 到第二天 departure 允许充电
+                    if ev_arrival[d - 1] <= t < ev_departure[d]:
+                        m.constraints.add(m.ev_charge[h, t] <= 7)
+            
+            if t in ev_departure:
                 m.constraints.add(m.ev_charge[h, t] == 0)
 
             # EV 负载与充电关系
@@ -319,6 +331,20 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
 
             # 禁止家庭与自己交易
             m.constraints.add(m.trade[h, h, t] == 0) 
+
+            # 约束：家庭间交易平衡 
+            for t in m.T:
+                for h1, h2 in itertools.combinations(m.H, 2):  # 生成所有家庭对的组合
+                    m.constraints.add(m.trade[h1, h2, t] <= M * m.z_trade[h1, h2, t])
+                    m.constraints.add(m.trade[h2, h1, t] <= M * (1 - m.z_trade[h1, h2, t]))
+
+            for h in m.H:
+                for t in m.T:       
+                    # 不能同时买卖电,充放电 if z[t]=1, M>buy>0, sell=0; if z[t]=0, M>sell>0, buy=0
+                    m.constraints.add(m.import_energy[h, t] <= M * m.z_grid[h, t])
+                    m.constraints.add(m.export_energy[h, t] <= M * (1 - m.z_grid[h, t]))
+                    m.constraints.add(m.charge_battery[h, t] <= M * m.z_battery[h, t])
+                    m.constraints.add(m.discharge_battery[h, t] <= M * (1 - m.z_battery[h, t]))
 
             # 能量平衡约束
             m.constraints.add(
