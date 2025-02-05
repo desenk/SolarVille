@@ -144,9 +144,10 @@ def map_data_to_model(household_df, solar_half_hour, config, T):
 
 def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy, 
                  battery_charge, battery_discharge, trades, m, import_price, 
-                 export_price, ev_soc, soc,  peer_buy_price, peer_sell_price, households):
+                 export_price, ev_soc, soc,  peer_buy_price, peer_sell_price):
 
     time_index = pd.date_range(start=load_start_date, end=load_end_date, freq="30min", inclusive="left")[:T]
+    households = list(Base_Load.keys())
 
     for h_index, h in enumerate(households):  # 每个 household 画一张图
         fig, axes = plt.subplots(5, 1, figsize=(12, 20), sharex=True)
@@ -384,7 +385,7 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     plot_results(
         T, Base_Load, total_load, Gen, import_energy_h, export_energy_h,
         battery_charge_h, battery_discharge_h, trades, m, import_price, export_price,
-        peer_buy_price, peer_sell_price, households
+        peer_buy_price, peer_sell_price
     ) 
 
 # 主函数
