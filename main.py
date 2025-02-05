@@ -219,39 +219,6 @@ def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy,
         plt.tight_layout()
         plt.show()
 
-def calculate_price(m, t, buy_grid_price=0.5, sell_grid_price=0.1):
-    """
-    使用 Piecewise 模型计算买入和卖出价格
-    """
-    # 通过总需求和总供应计算 SDR
-    SDR = m.total_demand[t] / m.total_supply[t] if m.total_supply[t] != 0 else 0
-
-    # 定义 Piecewise 变量
-    m.peer_sell_price = pyo.Var(m.T, domain=pyo.NonNegativeReals)
-    m.peer_buy_price = pyo.Var(m.T, domain=pyo.NonNegativeReals)
-
-    # 定义 Piecewise 分段模型（卖出价格）
-    m.piecewise_sell = pyo.Piecewise(
-        m.T,  # 时间集
-        m.peer_sell_price,  # 目标变量
-        wrt=SDR,  # 依据的变量是 SDR
-        bounds=[(0, SDR)],  # SDR 区间
-        ybounds=[sell_grid_price, (sell_grid_price * buy_grid_price) / ((buy_grid_price - sell_grid_price) * SDR + sell_grid_price)],
-        f_rule=lambda m, t: SDR,  # SDR 作为分段规则的依据
-    )
-
-    # 定义 Piecewise 分段模型（买入价格）
-    m.piecewise_buy = pyo.Piecewise(
-        m.T,  # 时间集
-        m.peer_buy_price,  # 目标变量
-        wrt=SDR,  # 依据的变量是 SDR
-        bounds=[(0, SDR)],  # SDR 区间
-        ybounds=[sell_grid_price, sell_grid_price * SDR + buy_grid_price * (1 - SDR)],
-        f_rule=lambda m, t: SDR,  # SDR 作为分段规则的依据
-    )
-
-    return m.peer_buy_price[t], m.peer_sell_price[t]
-
 
 
 # 优化模型和绘图
@@ -358,13 +325,34 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
                 float(Gen[household_index_map[h]][t]) + m.discharge_battery[h, t] + m.import_energy[h, t] +
                 sum(m.trade[h2, h, t] for h2 in m.H if h2 != h)
             )
-    # 设置价格
+    
     # 计算每个时间步的价格
     price = {}
     for t in range(1, T + 1):
         # 计算总需求和总供应
         m.constraints.add(m.total_demand[t] == sum(Base_Load[h][t] + m.ev_load[h_index + 1, t] for h_index, h in enumerate(households)))
         m.constraints.add(m.total_supply[t] == sum(Gen[h][t] for h in households))
+        SDR = m.total_demand[t] / m.total_supply[t] if m.total_supply[t] != 0 else 0
+        
+        # 定义 Piecewise 分段模型（卖出价格）
+        m.piecewise_sell = pyo.Piecewise(
+            m.T,  # 时间集
+            m.peer_sell_price,  # 目标变量
+            wrt=SDR,  # 依据的变量是 SDR
+            bounds=[(0, SDR)],  # SDR 区间
+            ybounds=[sell_grid_price, (sell_grid_price * buy_grid_price) / ((buy_grid_price - sell_grid_price) * SDR + sell_grid_price)],
+            f_rule=lambda m, t: SDR,  # SDR 作为分段规则的依据
+        )
+ 
+        # 定义 Piecewise 分段模型（买入价格）
+        m.piecewise_buy = pyo.Piecewise(
+            m.T,  # 时间集
+            m.peer_buy_price,  # 目标变量
+            wrt=SDR,  # 依据的变量是 SDR
+            bounds=[(0, SDR)],  # SDR 区间
+            ybounds=[sell_grid_price, sell_grid_price * SDR + buy_grid_price * (1 - SDR)],
+            f_rule=lambda m, t: SDR,  # SDR 作为分段规则的依据
+        )
         
         buy_price, sell_price = calculate_price(m.total_demand[t], m.total_supply[t])
 
