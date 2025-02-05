@@ -333,12 +333,12 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
         # 计算总需求和总供应
         m.constraints.add(m.total_demand[t] == sum(Base_Load[h][t] + m.ev_load[h_index + 1, t] for h_index, h in enumerate(households)))
         m.constraints.add(m.total_supply[t] == sum(Gen[h][t] for h in households))
-        m.constraints.add(m.total_supply >= 1e-6 * m.z_SDR)  # 当 z_SDR = 1 时，total_supply[t] > 0
-        m.constraints.add(m.total_supply <= 1000 * (1 - m.z_SDR))  # 当 z_SDR = 0 时，total_supply[t] 可以为 0
+        m.constraints.add(m.total_supply[t] >= epsilon * m.z_SDR[t])  # 当 z_SDR = 1 时，total_supply[t] > 0
+        m.constraints.add(m.total_supply[t] <= M * (1 - m.z_SDR[t]))  # 当 z_SDR = 0 时，total_supply[t] 可以为 0
 
         #SDR = m.total_demand[t] / m.total_supply[t] if m.total_supply[t] != 0 else 0
-        m.constraints.add(m.SDR == m.total_demand / m.total_supply)  # 计算 SDR
-        m.constraints.add(m.SDR <= 1000 * m.z_SDR)  # 当 z_SDR = 0 时，SDR = 0
+        m.constraints.add(m.SDR[t] == m.total_demand[t] / m.total_supply[t])  # 计算 SDR
+        m.constraints.add(m.SDR[t] <= 1000 * m.z_SDR[t])  # 当 z_SDR = 0 时，SDR = 0
         
         # 定义 Piecewise 分段模型（卖出价格）
         m.piecewise_sell = pyo.Piecewise(
