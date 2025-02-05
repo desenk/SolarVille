@@ -14,6 +14,9 @@ prosumer_power_history = []
 consumer_power_history = []
 generation_history = []
 time_history = []
+smooth_SOC_history = []
+smooth_prosumer_power_history = []
+smooth_generation_history = []
 
 # Initialize the plot
 fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 8))
