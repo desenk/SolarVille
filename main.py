@@ -121,16 +121,20 @@ def update_plot(frame):
         demand_power = data["demand_power"]
 
         # Append data to history
-        SOC_history.append(smooth_data(battery_soc))
-        prosumer_power_history.append(smooth_data(demand_power))
+        SOC_history.append(battery_soc)
+        prosumer_power_history.append(demand_power)
         consumer_power_history.append(0)  # No consumer power in prosumer mode
-        generation_history.append(smooth_data(solar_power))
+        generation_history.append(solar_power)
+
+        smooth_SOC_history.append(smooth_data(SOC_history))
+        smooth_prosumer_power_history.append(smooth_data(prosumer_power_history))
+        smooth_generation_history.append(smooth_data(generation_history))
 
         # Update lines
-        line1.set_data(time_history, SOC_history)
-        line2.set_data(time_history, prosumer_power_history)
+        line1.set_data(time_history, smooth_SOC_history)
+        line2.set_data(time_history, smooth_prosumer_power_history)
         line3.set_data(time_history, consumer_power_history)
-        line4.set_data(time_history, generation_history)
+        line4.set_data(time_history, smooth_generation_history)
 
     elif mode == "consumer":
         demand_power = data["demand_power"]
