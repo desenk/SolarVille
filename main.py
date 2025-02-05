@@ -270,6 +270,11 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     m.ev_load = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals)
     m.ev_soc = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals)
     m.trade = pyo.Var(m.H, m.H, m.T, domain=pyo.NonNegativeReals)
+    m.total_demand = pyo.Var(m.T, domain=pyo.NonNegativeReals)
+    m.total_supply = pyo.Var(m.T, domain=pyo.NonNegativeReals)
+    m.peer_buy_price = pyo.Var(m.T, domain=pyo.NonNegativeReals)
+    m.peer_sell_price = pyo.Var(m.T, domain=pyo.NonNegativeReals)
+
 
     # 约束
     m.constraints = pyo.ConstraintList()
@@ -335,13 +340,14 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     # 计算每个时间步的价格
     price = {}
     for t in range(1, T + 1):
-        total_demand_list = [
-            Base_Load[h][t] + pyo.value(m.ev_load[h_index + 1, t]) 
-            for h_index, h in enumerate(households)
-        ]
-        total_demand = sum(total_demand_list)
-        total_supply = sum(Gen[h][t] for h in households)
-        peer_buy_price[t], peer_sell_price[t] = calculate_price(total_demand, total_supply)
+        # 计算总需求和总供应
+        m.constraints.add(m.total_demand[t] == sum(Base_Load[h][t] + m.ev_load[h_index + 1, t] for h_index, h in enumerate(households)))
+        m.constraints.add(m.total_supply[t] == sum(Gen[h][t] for h in households))
+        
+        buy_price, sell_price = calculate_price(m.total_demand[t], m.total_supply[t])
+
+        m.constraints.add(m.peer_buy_price[t] == buy_price)
+        m.constraints.add(m.peer_sell_price[t] == sell_price)
 
     import_price = {t: 0.5 for t in range(1, T + 1)}
     export_price = {t: 0.1 for t in price}
