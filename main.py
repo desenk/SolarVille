@@ -220,17 +220,24 @@ def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy,
         plt.show()
 
 def calculate_price(total_demand, total_supply, buy_grid_price=0.5, sell_grid_price=0.1): 
-    SDR = total_demand / total_supply if total_supply != 0 else 0
-    if SDR >= 1:
-        peer_sell_price = sell_grid_price 
-    else:
-        peer_sell_price = (sell_grid_price * buy_grid_price) / ((buy_grid_price - sell_grid_price) * SDR + sell_grid_price)
+    # 避免直接的 if 语句，改为用 Pyomo 的表达式
+    SDR = pyo.ConditionalExpression(
+        total_supply != 0, total_demand / total_supply, 0
+    )  # Pyomo的条件表达式
 
-    if SDR > 1:
-        peer_buy_price = sell_grid_price
-    else:
-        peer_buy_price = peer_sell_price * SDR + buy_grid_price * (1 - SDR)
-    return peer_buy_price
+    # 使用 Pyomo 的表达式代替原来的 if 判断
+    peer_sell_price = pyo.ConditionalExpression(
+        SDR >= 1, sell_grid_price, 
+        (sell_grid_price * buy_grid_price) / ((buy_grid_price - sell_grid_price) * SDR + sell_grid_price)
+    )
+
+    peer_buy_price = pyo.ConditionalExpression(
+        SDR > 1, sell_grid_price, 
+        peer_sell_price * SDR + buy_grid_price * (1 - SDR)
+    )
+
+    return peer_buy_price, peer_sell_price
+
 
 # 优化模型和绘图
 def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_soc, ev_initial_soc):
@@ -351,6 +358,14 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
 
     import_price = {t: 0.5 for t in range(1, T + 1)}
     export_price = {t: 0.1 for t in price}
+
+    # 设置价格范围约束
+    for t in m.T:
+        m.constraints.add(m.peer_buy_price[t] >= 0.1)  # 设置买入价格的下限
+        m.constraints.add(m.peer_sell_price[t] >= 0.1)  # 设置卖出价格的下限
+        m.constraints.add(m.peer_buy_price[t] <= 0.5)  # 设置买入价格的上限
+        m.constraints.add(m.peer_sell_price[t] <= 0.5)  # 设置卖出价格的上限
+
 
     # 目标函数：最小化电费和负载转移成本
     m.cost = pyo.Objective(
