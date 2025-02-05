@@ -221,7 +221,7 @@ def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy,
 
 def calculate_price(total_demand, total_supply, buy_grid_price=0.5, sell_grid_price=0.1): 
     # 避免直接的 if 语句，改为用 Pyomo 的表达式
-    SDR = pyo.ConditionalExpression(
+    SDR = pyo.ifelse(
         total_supply != 0, total_demand / total_supply, 0
     )  # Pyomo的条件表达式
 
