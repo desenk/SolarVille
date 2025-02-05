@@ -226,12 +226,12 @@ def calculate_price(total_demand, total_supply, buy_grid_price=0.5, sell_grid_pr
     )  # Pyomo的条件表达式
 
     # 使用 Pyomo 的表达式代替原来的 if 判断
-    peer_sell_price = pyo.ConditionalExpression(
+    peer_sell_price = pyo.ifelse(
         SDR >= 1, sell_grid_price, 
         (sell_grid_price * buy_grid_price) / ((buy_grid_price - sell_grid_price) * SDR + sell_grid_price)
     )
 
-    peer_buy_price = pyo.ConditionalExpression(
+    peer_buy_price = pyo.ifelse(
         SDR > 1, sell_grid_price, 
         peer_sell_price * SDR + buy_grid_price * (1 - SDR)
     )
