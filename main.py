@@ -4,6 +4,7 @@ import board  # type: ignore
 import busio  # type: ignore
 import adafruit_ina219  # type: ignore
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.animation import FuncAnimation
 from datetime import datetime
 
@@ -89,6 +90,11 @@ def collect_data(mode, i2c):
     else:
         raise ValueError("Invalid mode. Use 'prosumer' or 'consumer'.")
 
+def smooth_data(data, window_size=5):
+    if len(data) < window_size:
+        return np.mean(data)  # 若数据点不足，返回均值
+    return np.convolve(data, np.ones(window_size) / window_size, mode='valid')[-1]
+    
 def update_plot(frame):
     """Update the plot with the latest data."""
     global SOC_history, prosumer_power_history, consumer_power_history, time_history
@@ -115,10 +121,10 @@ def update_plot(frame):
         demand_power = data["demand_power"]
 
         # Append data to history
-        SOC_history.append(battery_soc)
-        prosumer_power_history.append(demand_power)
+        SOC_history.append(smooth_data(battery_soc))
+        prosumer_power_history.append(smooth_data(demand_power))
         consumer_power_history.append(0)  # No consumer power in prosumer mode
-        generation_history.append(solar_power)
+        generation_history.append(smooth_data(solar_power))
 
         # Update lines
         line1.set_data(time_history, SOC_history)
@@ -130,7 +136,7 @@ def update_plot(frame):
         demand_power = data["demand_power"]
 
         # Append data to history
-        consumer_power_history.append(demand_power)
+        consumer_power_history.append(smooth_data(demand_power))
         SOC_history.append(0)  # No battery SoC in consumer mode
         prosumer_power_history.append(0)  # No prosumer power in consumer mode
         generation_history.append(0) # No generation in consumer mode
