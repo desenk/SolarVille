@@ -241,6 +241,7 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     time_step = 0.5  # 每个时间步的小时数
     penalty = 2000
     global household_index_map
+    households = list(Base_Load.keys())
 
     # 设置价格
     # 计算每个时间步的价格
