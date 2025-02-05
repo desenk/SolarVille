@@ -243,16 +243,6 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     global household_index_map
     households = list(Base_Load.keys())
 
-    # 设置价格
-    # 计算每个时间步的价格
-    price = {}
-    for t in range(1, T + 1):
-        total_demand = sum(Base_Load[h][t] + pyo.value(m.ev_load[h_index + 1, t]) for h_index, h in enumerate(households))
-        total_supply = sum(Gen[h][t] for h in households)
-        peer_buy_price[t], peer_sell_price[t] = calculate_price(total_demand, total_supply)
-
-    import_price = {t: 0.5 for t in range(1, T + 1)}
-    export_price = {t: 0.1 for t in price}
 
     # 设置电池的上下限
     soc_min = {h: 0.2 * battery_capacity[h] for h in battery_capacity}
@@ -279,21 +269,6 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     m.ev_load = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals)
     m.ev_soc = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals)
     m.trade = pyo.Var(m.H, m.H, m.T, domain=pyo.NonNegativeReals)
-
-    # 目标函数：最小化电费和负载转移成本
-    m.cost = pyo.Objective(
-        expr=sum(
-            import_price[t] * m.import_energy[h, t] - export_price[t] * m.export_energy[h, t]
-            for h in m.H for t in m.T
-        ) + sum(
-            peer_buy_price[t] * m.trade[h2, h, t] - peer_sell_price[t] * m.trade[h, h2, t]
-            for h in m.H for t in m.T for h2 in m.H if h2 != h
-        ) + sum(
-            penalty * (ev_max_soc[household_index_map[h]] - m.ev_soc[h, T]) 
-            for h in m.H for t in ev_departure  # everyday 8:30
-        ),
-        sense=pyo.minimize
-    )
 
     # 约束
     m.constraints = pyo.ConstraintList()
@@ -358,6 +333,35 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
                 float(Gen[household_index_map[h]][t]) + m.discharge_battery[h, t] + m.import_energy[h, t] +
                 sum(m.trade[h2, h, t] for h2 in m.H if h2 != h)
             )
+    # 设置价格
+    # 计算每个时间步的价格
+    price = {}
+    for t in range(1, T + 1):
+        total_demand_list = [
+            Base_Load[h][t] + pyo.value(m.ev_load[h_index + 1, t]) 
+            for h_index, h in enumerate(households)
+        ]
+        total_demand = sum(total_demand_list)
+        total_supply = sum(Gen[h][t] for h in households)
+        peer_buy_price[t], peer_sell_price[t] = calculate_price(total_demand, total_supply)
+
+    import_price = {t: 0.5 for t in range(1, T + 1)}
+    export_price = {t: 0.1 for t in price}
+
+    # 目标函数：最小化电费和负载转移成本
+    m.cost = pyo.Objective(
+        expr=sum(
+            import_price[t] * m.import_energy[h, t] - export_price[t] * m.export_energy[h, t]
+            for h in m.H for t in m.T
+        ) + sum(
+            peer_buy_price[t] * m.trade[h2, h, t] - peer_sell_price[t] * m.trade[h, h2, t]
+            for h in m.H for t in m.T for h2 in m.H if h2 != h
+        ) + sum(
+            penalty * (ev_max_soc[household_index_map[h]] - m.ev_soc[h, T]) 
+            for h in m.H for t in ev_departure  # everyday 8:30
+        ),
+        sense=pyo.minimize
+    )
 
     # 求解
     solver = pyo.SolverFactory('cbc')
