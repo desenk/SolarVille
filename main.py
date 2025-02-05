@@ -263,7 +263,7 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     m.total_supply = pyo.Var(m.T, domain=pyo.NonNegativeReals)
     m.peer_buy_price = pyo.Var(m.T, domain=pyo.NonNegativeReals)
     m.peer_sell_price = pyo.Var(m.T, domain=pyo.NonNegativeReals)
-    m.SDR = pyo.Var(m.T, within=NonNegativeReals)
+    m.SDR = pyo.Var(m.T, domain=pyo.NonNegativeReals)
 
     # 约束
     m.constraints = pyo.ConstraintList()
