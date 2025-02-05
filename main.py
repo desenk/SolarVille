@@ -4,6 +4,7 @@ import pyomo.environ as pyo
 import matplotlib.pyplot as plt
 from datetime import datetime
 import matplotlib.dates as mdates
+import itertools
 
 # 家庭资产配置表
 household_config = {
