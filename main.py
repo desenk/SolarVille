@@ -268,6 +268,7 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     # 约束
     m.constraints = pyo.ConstraintList()
     M = 1000  # 较大的常数用于启发式约束
+    epsilon = 1e-6
     m.z_grid = pyo.Var(m.H, m.T, domain=pyo.Binary)  # 0-1 二进制变量
     m.z_battery = pyo.Var(m.H, m.T, domain=pyo.Binary)  # 0-1 二进制变量
     m.z_trade = pyo.Var(m.H, m.H, m.T, domain=pyo.Binary)  # 0-1 二进制变量
