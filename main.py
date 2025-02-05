@@ -330,6 +330,8 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     
     # 计算每个时间步的价格
     price = {}
+    import_price = {t: 0.5 for t in range(1, T + 1)}
+    export_price = {t: 0.1 for t in price}
     for t in range(1, T + 1):
         # 计算总需求和总供应
         m.constraints.add(m.total_demand[t] == sum(Base_Load[h][t] + m.ev_load[h_index + 1, t] for h_index, h in enumerate(households)))
@@ -347,8 +349,8 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
             m.peer_sell_price,  # 目标变量
             wrt= m.SDR,  # 依据的变量是 SDR
             bounds=[(0, 1)],  # SDR 区间
-            ybounds=[buy_grid_price, sell_grid_price],
-            f_rule=lambda m, t: (sell_grid_price * buy_grid_price) / ((buy_grid_price - sell_grid_price) * m.SDR + sell_grid_price),  # SDR 作为分段规则的依据
+            ybounds=[import_price, export_price],
+            f_rule=lambda m, t: (import_price * export_price) / ((import_price - export_price) * m.SDR + export_price),  # SDR 作为分段规则的依据
         )
  
         # 定义 Piecewise 分段模型（买入价格）
@@ -357,8 +359,8 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
             m.peer_buy_price,  # 目标变量
             wrt= m.SDR,  # 依据的变量是 SDR
             bounds=[(0, 1)],  # SDR 区间
-            ybounds=[buy_grid_price, sell_grid_price], 
-            f_rule=lambda m, t: sell_grid_price * m.SDR + buy_grid_price * (1 - m.SDR),  # SDR 作为分段规则的依据
+            ybounds=[import_price, export_price], 
+            f_rule=lambda m, t: export_price * m.SDR + import_price * (1 - m.SDR),  # SDR 作为分段规则的依据
         )
         
         buy_price, sell_price = calculate_price(m.total_demand[t], m.total_supply[t])
@@ -366,8 +368,7 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
         m.constraints.add(m.peer_buy_price[t] == buy_price)
         m.constraints.add(m.peer_sell_price[t] == sell_price)
 
-    import_price = {t: 0.5 for t in range(1, T + 1)}
-    export_price = {t: 0.1 for t in price}
+
 
     # 设置价格范围约束
     for t in m.T:
