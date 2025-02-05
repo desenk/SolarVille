@@ -314,18 +314,15 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
             m.constraints.add(m.trade[h, h, t] == 0) 
 
             # 约束：家庭间交易平衡 
-            for t in m.T:
-                for h1, h2 in itertools.combinations(m.H, 2):  # 生成所有家庭对的组合
-                    m.constraints.add(m.trade[h1, h2, t] <= M * m.z_trade[h1, h2, t])
-                    m.constraints.add(m.trade[h2, h1, t] <= M * (1 - m.z_trade[h1, h2, t]))
-
-            for h in m.H:
-                for t in m.T:       
-                    # 不能同时买卖电,充放电 if z[t]=1, M>buy>0, sell=0; if z[t]=0, M>sell>0, buy=0
-                    m.constraints.add(m.import_energy[h, t] <= M * m.z_grid[h, t])
-                    m.constraints.add(m.export_energy[h, t] <= M * (1 - m.z_grid[h, t]))
-                    m.constraints.add(m.charge_battery[h, t] <= M * m.z_battery[h, t])
-                    m.constraints.add(m.discharge_battery[h, t] <= M * (1 - m.z_battery[h, t]))
+            for h1, h2 in itertools.combinations(m.H, 2):  # 生成所有家庭对的组合
+                m.constraints.add(m.trade[h1, h2, t] <= M * m.z_trade[h1, h2, t])
+                m.constraints.add(m.trade[h2, h1, t] <= M * (1 - m.z_trade[h1, h2, t]))
+      
+            # 不能同时买卖电,充放电 if z[t]=1, M>buy>0, sell=0; if z[t]=0, M>sell>0, buy=0
+            m.constraints.add(m.import_energy[h, t] <= M * m.z_grid[h, t])
+            m.constraints.add(m.export_energy[h, t] <= M * (1 - m.z_grid[h, t]))
+            m.constraints.add(m.charge_battery[h, t] <= M * m.z_battery[h, t])
+            m.constraints.add(m.discharge_battery[h, t] <= M * (1 - m.z_battery[h, t]))
 
             # 能量平衡约束
             m.constraints.add(
