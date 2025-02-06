@@ -350,35 +350,33 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
         m.constraints.add(m.SDR[t] <= 1000 * m.z_SDR[t])  # 当 z_SDR = 0 时，SDR = 0
         
         # 定义 Piecewise 分段模型（卖出价格）
-        m.piecewise_sell = pyo.Piecewise(
-            m.peer_sell_price,  # 目标变量
-            m.SDR,  # 依据的变量是 SDR
-            pw_pts=[0, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 1, 1.001],  # SDR 区间
-            f_rule= [0.1, f_rule_PEER_sell(0.01), f_rule_PEER_sell(0.1), f_rule_PEER_sell(0.2), f_rule_PEER_sell(0.3), 
+        def piecewise_sell(m,t):
+            return pyo.Piecewise(
+                m.peer_sell_price[t],  # 目标变量
+                m.SDR[t],  # 依据的变量是 SDR
+                pw_pts=[0, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 1, 1.001],  # SDR 区间
+                f_rule= [0.1, f_rule_PEER_sell(0.01), f_rule_PEER_sell(0.1), f_rule_PEER_sell(0.2), f_rule_PEER_sell(0.3), 
                         f_rule_PEER_sell(0.4), f_rule_PEER_sell(0.5), f_rule_PEER_sell(0.6), f_rule_PEER_sell(0.7), 
                         f_rule_PEER_sell(0.8), f_rule_PEER_sell(0.9), f_rule_PEER_sell(0.99), 0.5, 0.5],
-            pw_constr_type='EQ',  # 约束类型：等式
-            pw_repn='DCC'
-        )
+                pw_constr_type='EQ',  # 约束类型：等式
+                pw_repn='DCC'
+            )
  
         # 定义 Piecewise 分段模型（买入价格）
-        m.piecewise_buy = pyo.Piecewise(
-            m.peer_buy_price,  # 目标变量
-            m.SDR,  # 依据的变量是 SDR
-            pw_pts=[0, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 1, 1.001],  # SDR 区间
-            f_rule= [0.1, f_rule_PEER_buy(0.01), f_rule_PEER_buy(0.1), f_rule_PEER_buy(0.2), f_rule_PEER_buy(0.3), 
+        def piecewise_buy(m,t):
+            return pyo.Piecewise(
+                m.peer_buy_price[t],  # 目标变量
+                m.SDR[t],  # 依据的变量是 SDR
+                pw_pts=[0, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 1, 1.001],  # SDR 区间
+                f_rule= [0.1, f_rule_PEER_buy(0.01), f_rule_PEER_buy(0.1), f_rule_PEER_buy(0.2), f_rule_PEER_buy(0.3), 
                         f_rule_PEER_buy(0.4), f_rule_PEER_buy(0.5), f_rule_PEER_buy(0.6), f_rule_PEER_buy(0.7), 
                         f_rule_PEER_buy(0.8), f_rule_PEER_buy(0.9), f_rule_PEER_buy(0.99), 0.5, 0.5],
-            pw_constr_type='EQ',  # 约束类型：等式
-            pw_repn='DCC'
-        )
-        
-        buy_price, sell_price = calculate_price(m.total_demand[t], m.total_supply[t])
+                pw_constr_type='EQ',  # 约束类型：等式
+                pw_repn='DCC'
+            )
 
-        m.constraints.add(m.peer_buy_price[t] == buy_price)
-        m.constraints.add(m.peer_sell_price[t] == sell_price)
-
-
+        m.peer_buy_price = pyo.Constraint(m.T, rule = piecewise_buy)
+        m.peer_sell_price = pyo.Constraint(m.T, rule = piecewise_sell)
 
     # 设置价格范围约束
     for t in m.T:
