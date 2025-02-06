@@ -350,8 +350,7 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
         m.constraints.add(m.SDR[t] <= 1000 * m.z_SDR[t])  # 当 z_SDR = 0 时，SDR = 0
         
         # 定义 Piecewise 分段模型（卖出价格）
-        def piecewise_sell(m,t):
-            return pyo.Piecewise(
+        m.piecewise_sell = pyo.Piecewise(
                 m.peer_sell_price[t],  # 目标变量
                 m.SDR[t],  # 依据的变量是 SDR
                 pw_pts=[0, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 1, 1.001],  # SDR 区间
@@ -363,8 +362,7 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
             )
  
         # 定义 Piecewise 分段模型（买入价格）
-        def piecewise_buy(m,t):
-            return pyo.Piecewise(
+        m.piecewise_buy = pyo.Piecewise(
                 m.peer_buy_price[t],  # 目标变量
                 m.SDR[t],  # 依据的变量是 SDR
                 pw_pts=[0, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 1, 1.001],  # SDR 区间
