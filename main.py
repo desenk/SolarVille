@@ -261,9 +261,9 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     m.trade = pyo.Var(m.H, m.H, m.T, domain=pyo.NonNegativeReals)
     m.total_demand = pyo.Var(m.T, domain=pyo.NonNegativeReals)
     m.total_supply = pyo.Var(m.T, domain=pyo.NonNegativeReals)
-    m.peer_buy_price = pyo.Var(m.T, domain=pyo.NonNegativeReals)
-    m.peer_sell_price = pyo.Var(m.T, domain=pyo.NonNegativeReals)
-    m.SDR = pyo.Var(m.T, domain=pyo.NonNegativeReals)
+    m.peer_buy_price = pyo.Var(m.T, domain=pyo.NonNegativeReals, bounds=(0, 0.5))
+    m.peer_sell_price = pyo.Var(m.T, domain=pyo.NonNegativeReals, bounds=(0, 0.5))
+    m.SDR = pyo.Var(m.T, domain=pyo.NonNegativeReals, bounds=(0, 1))
 
     # 约束
     m.constraints = pyo.ConstraintList()
