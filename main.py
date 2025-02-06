@@ -373,8 +373,6 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
                 pw_repn='DCC'
             )
 
-        m.peer_buy_price = pyo.Constraint(m.T, rule = m.piecewise_buy)
-        m.peer_sell_price = pyo.Constraint(m.T, rule = m.piecewise_sell)
 
     # 设置价格范围约束
     for t in m.T:
