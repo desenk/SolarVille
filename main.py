@@ -331,7 +331,13 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     # 计算每个时间步的价格
     price = {}
     import_price = {t: 0.5 for t in range(1, T + 1)}
-    export_price = {t: 0.1 for t in price}
+    export_price = {t: 0.1 for t in range(1, T + 1)}
+
+    def f_rule_PEER_sell(SDR):
+        return (import_price * export_price) / ((import_price - export_price) * SDR + export_price)
+    def f_rule_PEER_buy(SDR):
+        return export_price * SDR + import_price * (1 - SDR)
+        
     for t in range(1, T + 1):
         # 计算总需求和总供应
         m.constraints.add(m.total_demand[t] == sum(Base_Load[h][t] + m.ev_load[h_index + 1, t] for h_index, h in enumerate(households)))
@@ -345,22 +351,26 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
         
         # 定义 Piecewise 分段模型（卖出价格）
         m.piecewise_sell = pyo.Piecewise(
-            m.T,  # 时间集
             m.peer_sell_price,  # 目标变量
-            wrt= m.SDR,  # 依据的变量是 SDR
-            bounds=[(0, 1)],  # SDR 区间
-            ybounds=[import_price, export_price],
-            f_rule=lambda m, t: (import_price * export_price) / ((import_price - export_price) * m.SDR + export_price),  # SDR 作为分段规则的依据
+            m.SDR,  # 依据的变量是 SDR
+            pw_pts=[0, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 1, 1.001],  # SDR 区间
+            pw_values= [0.1, f_rule_PEER_sell(0.01), f_rule_PEER_sell(0.1), f_rule_PEER_sell(0.2), f_rule_PEER_sell(0.3), 
+                        f_rule_PEER_sell(0.4), f_rule_PEER_sell(0.5), f_rule_PEER_sell(0.6), f_rule_PEER_sell(0.7), 
+                        f_rule_PEER_sell(0.8), f_rule_PEER_sell(0.9), f_rule_PEER_sell(0.99), 0.5, 0.5],
+            pw_constr_type='EQ',  # 约束类型：等式
+            pw_repn='DCC'
         )
  
         # 定义 Piecewise 分段模型（买入价格）
         m.piecewise_buy = pyo.Piecewise(
-            m.T,  # 时间集
             m.peer_buy_price,  # 目标变量
-            wrt= m.SDR,  # 依据的变量是 SDR
-            bounds=[(0, 1)],  # SDR 区间
-            ybounds=[import_price, export_price], 
-            f_rule=lambda m, t: export_price * m.SDR + import_price * (1 - m.SDR),  # SDR 作为分段规则的依据
+            m.SDR,  # 依据的变量是 SDR
+            pw_pts=[0, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 1, 1.001],  # SDR 区间
+            pw_values= [0.1, f_rule_PEER_buy(0.01), f_rule_PEER_buy(0.1), f_rule_PEER_buy(0.2), f_rule_PEER_buy(0.3), 
+                        f_rule_PEER_buy(0.4), f_rule_PEER_buy(0.5), f_rule_PEER_buy(0.6), f_rule_PEER_buy(0.7), 
+                        f_rule_PEER_buy(0.8), f_rule_PEER_buy(0.9), f_rule_PEER_buy(0.99), 0.5, 0.5],
+            pw_constr_type='EQ',  # 约束类型：等式
+            pw_repn='DCC'
         )
         
         buy_price, sell_price = calculate_price(m.total_demand[t], m.total_supply[t])
