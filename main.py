@@ -97,6 +97,7 @@ def calculate_total_time_steps_and_prices(
         
         for t in range(0, 24 * 60, time_step_minutes):  # 每天从 00:00 到 23:30
             # 计算当前时间
+            global current_time
             current_time = current_day + timedelta(minutes=t)
 
             # 根据时间区间设置价格
@@ -251,10 +252,8 @@ def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy,
         plt.tight_layout()
         plt.show()
 
-
-
 # 优化模型和绘图
-def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_soc, ev_initial_soc):
+def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_soc, ev_initial_soc, daily_prices):
     """
     优化模型并绘制结果。
     """
