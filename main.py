@@ -330,8 +330,8 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     
     # 计算每个时间步的价格
     price = {}
-    import_price = {t: 0.5 for t in range(1, T + 1)}
-    export_price = {t: 0.1 for t in range(1, T + 1)}
+    import_price = 0.5
+    export_price = 0.1
 
     def f_rule_PEER_sell(SDR):
         return (import_price * export_price) / ((import_price - export_price) * SDR + export_price)
