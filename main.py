@@ -388,7 +388,7 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
             import_price * m.import_energy[h, t] - export_price * m.export_energy[h, t]
             for h in m.H for t in m.T
         ) + sum(
-            peer_buy_price[t] * m.trade[h2, h, t] - peer_sell_price[t] * m.trade[h, h2, t]
+            m.peer_buy_price[t] * m.trade[h2, h, t] - m.peer_sell_price[t] * m.trade[h, h2, t]
             for h in m.H for t in m.T for h2 in m.H if h2 != h
         ) + sum(
             penalty * (ev_max_soc[household_index_map[h]] - m.ev_soc[h, T]) 
