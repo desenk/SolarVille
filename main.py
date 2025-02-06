@@ -354,7 +354,7 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
             m.peer_sell_price,  # 目标变量
             m.SDR,  # 依据的变量是 SDR
             pw_pts=[0, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 1, 1.001],  # SDR 区间
-            pw_values= [0.1, f_rule_PEER_sell(0.01), f_rule_PEER_sell(0.1), f_rule_PEER_sell(0.2), f_rule_PEER_sell(0.3), 
+            f_rule= [0.1, f_rule_PEER_sell(0.01), f_rule_PEER_sell(0.1), f_rule_PEER_sell(0.2), f_rule_PEER_sell(0.3), 
                         f_rule_PEER_sell(0.4), f_rule_PEER_sell(0.5), f_rule_PEER_sell(0.6), f_rule_PEER_sell(0.7), 
                         f_rule_PEER_sell(0.8), f_rule_PEER_sell(0.9), f_rule_PEER_sell(0.99), 0.5, 0.5],
             pw_constr_type='EQ',  # 约束类型：等式
@@ -366,7 +366,7 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
             m.peer_buy_price,  # 目标变量
             m.SDR,  # 依据的变量是 SDR
             pw_pts=[0, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 1, 1.001],  # SDR 区间
-            pw_values= [0.1, f_rule_PEER_buy(0.01), f_rule_PEER_buy(0.1), f_rule_PEER_buy(0.2), f_rule_PEER_buy(0.3), 
+            f_rule= [0.1, f_rule_PEER_buy(0.01), f_rule_PEER_buy(0.1), f_rule_PEER_buy(0.2), f_rule_PEER_buy(0.3), 
                         f_rule_PEER_buy(0.4), f_rule_PEER_buy(0.5), f_rule_PEER_buy(0.6), f_rule_PEER_buy(0.7), 
                         f_rule_PEER_buy(0.8), f_rule_PEER_buy(0.9), f_rule_PEER_buy(0.99), 0.5, 0.5],
             pw_constr_type='EQ',  # 约束类型：等式
