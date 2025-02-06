@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import pyomo.environ as pyo
 import matplotlib.pyplot as plt
-from datetime import datetime
+from datetime import datetime, timedelta
 import matplotlib.dates as mdates
 import itertools
 
@@ -25,11 +25,6 @@ load_start_date = "2013-06-01"
 load_end_date = "2013-06-05"
 gen_start_date = "2019-06-01"
 gen_end_date = "2019-06-05"
-
-import_price = {t: 10 if (11 * 2 <= t < 13 * 2) or (17 * 2 <= t < 20 * 2) else 5 for t in range(1, T + 1)}
-peer_buy_price = {t: 0.8 * price[t] for t in price}  # 家庭间买电价格
-peer_sell_price = {t: 0.7 * price[t] for t in price}  # 家庭间卖电价格
-export_price = {t: 0 * price[t] for t in price}  # 卖电给电网价格
 
 # 加载家庭负载数据
 def load_household_data(file_path, household_ids, start_date, end_date):
@@ -78,21 +73,53 @@ def load_solar_output_data(file_path, start_date, end_date):
         return None
 
 
-# 动态计算时间步数函数
-def calculate_total_time_steps_and_ev_schedule(
+def calculate_total_time_steps_and_prices(
     start_date, end_date, time_step_minutes=30, steps_per_day=48, arrival_step=38, departure_step=18
 ):
-    # 计算总时间步数
+    # 计算日期范围
     start = datetime.strptime(start_date, "%Y-%m-%d")
     end = datetime.strptime(end_date, "%Y-%m-%d")
-    num_days = (end - start).days + 1  # 包含结束日期
+    num_days = (end - start).days + 1  # 包括结束日期
+
+    # 计算总时间步数
     total_time_steps = (num_days * 24 * 60) // time_step_minutes  # 总时间步数
+
+    # 初始化字典存储价格
+    daily_prices = {}
 
     # 生成 EV 的到达和离开时间步
     ev_arrival = [arrival_step + i * steps_per_day for i in range(num_days)]
     ev_departure = [departure_step + i * steps_per_day for i in range(num_days)]
 
-    return total_time_steps, ev_arrival, ev_departure
+    # 设置每一天的时间步
+    for day_offset in range(num_days):
+        current_day = start + timedelta(days=day_offset)
+        
+        for t in range(0, 24 * 60, time_step_minutes):  # 每天从 00:00 到 23:30
+            # 计算当前时间
+            current_time = current_day + timedelta(minutes=t)
+
+            # 根据时间区间设置价格
+            if (11 * 60 <= current_time.hour * 60 + current_time.minute < 13 * 60) or \
+               (17 * 60 <= current_time.hour * 60 + current_time.minute < 20 * 60):
+                import_price = 10
+            else:
+                import_price = 5
+
+            # 计算其他价格
+            peer_buy_price = 0.8 * import_price
+            peer_sell_price = 0.7 * import_price
+            export_price = 0.4 * import_price
+
+            # 将每个时间步的价格存储到字典中
+            daily_prices[(current_day, t)] = {
+                'import_price': import_price,
+                'peer_buy_price': peer_buy_price,
+                'peer_sell_price': peer_sell_price,
+                'export_price': export_price
+            }
+
+    return total_time_steps, ev_arrival, ev_departure, daily_prices
 
 
 # 数据映射到模型, T is from calculate_total_time_steps
@@ -333,14 +360,11 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     # 目标函数：最小化电费和负载转移成本
     m.cost = pyo.Objective(
         expr=sum(
-            import_price[t] * m.import_energy[h, t] - export_price[t] * m.export_energy[h, t]
-            for h in m.H for t in m.T
+            daily_prices[(current_day, t)]['import_price'] * m.import_energy[h, t] - daily_prices[(current_day, t)]['export_price'] * m.export_energy[h, t]
+            for h in m.H for t in m.T for current_day in daily_prices  # current_day 是日期
         ) + sum(
-            peer_buy_price[t] * m.trade[h2, h, t] - peer_sell_price[t] * m.trade[h, h2, t]
-            for h in m.H for t in m.T for h2 in m.H if h2 != h
-        ) + sum(
-            penalty * (ev_max_soc[household_index_map[h]] - m.ev_soc[h, T]) 
-            for h in m.H for t in ev_departure  # everyday 8:30
+            daily_prices[(current_day, t)]['peer_buy_price'] * m.trade[h2, h, t] - daily_prices[(current_day, t)]['peer_sell_price'] * m.trade[h, h2, t]
+            for h in m.H for t in m.T for h2 in m.H if h2 != h for current_day in daily_prices  # current_day 是日期
         ),
         sense=pyo.minimize
     )
@@ -399,9 +423,9 @@ if __name__ == "__main__":
 
 
     # 调用函数
-    total_steps, ev_arrival, ev_departure = calculate_total_time_steps_and_ev_schedule(
-        start_date, end_date, time_step_minutes, steps_per_day, arrival_step, departure_step
-    )
+    total_time_steps, ev_arrival, ev_departure, daily_prices = calculate_total_time_steps_and_prices(
+    start_date, end_date, time_step_minutes, steps_per_day, arrival_step, departure_step
+)
 
     # 映射数据
     Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_soc, ev_initial_soc = map_data_to_model(
@@ -415,4 +439,4 @@ if __name__ == "__main__":
     print("EV Max SOC:", ev_max_soc)
 
     # 优化与绘图
-    optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_soc, ev_initial_soc)
+    optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_soc, ev_initial_soc, daily_prices)
