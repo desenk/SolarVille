@@ -423,7 +423,7 @@ if __name__ == "__main__":
 
 
     # 调用函数
-    total_time_steps, ev_arrival, ev_departure, daily_prices = calculate_total_time_steps_and_prices(
+    total_steps, ev_arrival, ev_departure, daily_prices = calculate_total_time_steps_and_prices(
     start_date, end_date, time_step_minutes, steps_per_day, arrival_step, departure_step
 )
 
