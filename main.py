@@ -177,11 +177,11 @@ def map_data_to_model(household_df, solar_half_hour, config, T):
 
     return Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_capacity, ev_initial_soc
 
-def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy, 
+def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_energy, export_energy, 
                  battery_charge, battery_discharge, trades, m, import_price, 
                  export_price,  peer_buy_price, peer_sell_price, ev_soc, battery_soc):
     print("T is :", T)
-    time_index = pd.date_range(start=load_start_date, end=load_end_date, freq="30min", inclusive="left")[:T]
+    time_index = pd.date_range(start=start_date, end=end_date, freq="30min", inclusive="left")[:T]
     households = list(Base_Load.keys())
 
     for h_index, h in enumerate(households):  # 每个 household 画一张图
@@ -254,7 +254,8 @@ def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy,
         plt.show()
 
 # 优化模型和绘图
-def optimize_and_plot(time_step, Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_capacity, ev_initial_soc, daily_prices):
+def optimize_and_plot(time_step, start_date, end_date, Base_Load, Gen, battery_capacity, 
+                      charge_power_limit, discharge_power_limit, ev_max_capacity, ev_initial_soc, daily_prices):
     """
     优化模型并绘制结果。
     """
@@ -402,7 +403,7 @@ def optimize_and_plot(time_step, Base_Load, Gen, battery_capacity, charge_power_
     
     # 调用绘图函数
     plot_results(
-        T, Base_Load, total_load, Gen, import_energy_h, export_energy_h,
+        T, start_date, end_date, Base_Load, total_load, Gen, import_energy_h, export_energy_h,
         battery_charge_h, battery_discharge_h, trades, m, [daily_prices[t]['import_price'] for t in range(1, T + 1)],  
         [daily_prices[t]['export_price'] for t in range(1, T + 1)],
         [daily_prices[t]['peer_buy_price'] for t in range(1, T + 1)],  
@@ -449,4 +450,5 @@ if __name__ == "__main__":
     print("EV Max capacity:", ev_max_capacity)
 
     # 优化与绘图
-    optimize_and_plot(total_steps, Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_capacity, ev_initial_soc, daily_prices)
+    optimize_and_plot(total_steps, start_date, end_date, Base_Load, Gen, battery_capacity, charge_power_limit, 
+                      discharge_power_limit, ev_max_capacity, ev_initial_soc, daily_prices)
