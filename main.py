@@ -100,9 +100,9 @@ def calculate_total_time_steps_and_prices(
         # 价格计算逻辑
         if (11 * 60 <= current_time.hour * 60 + current_time.minute < 13 * 60) or \
            (17 * 60 <= current_time.hour * 60 + current_time.minute < 20 * 60):
-            import_price = 10
+            import_price = 0.5
         else:
-            import_price = 5
+            import_price = 0.1
 
         # 计算其他价格
         peer_buy_price = 0.8 * import_price
@@ -180,13 +180,13 @@ def map_data_to_model(household_df, solar_half_hour, config, T):
 
 def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_energy, export_energy, 
                  battery_charge, battery_discharge, trades, m, import_price, 
-                 export_price,  peer_buy_price, peer_sell_price, ev_soc, battery_soc):
+                 export_price,  peer_buy_price, peer_sell_price, ev_soc, battery_soc, penalty_h):
     print("T is :", T)
     time_index = pd.date_range(start=start_date, end=end_date, freq="30min", inclusive="left")[:T]
     households = list(Base_Load.keys())
 
     for h_index, h in enumerate(households):  # 每个 household 画一张图
-        fig, axes = plt.subplots(5, 1, figsize=(12, 20), sharex=True)
+        fig, axes = plt.subplots(3, 2, figsize=(15, 15), sharex=True)
 
         # **1. Base Load & EV Load**
         base_load_values = [float(Base_Load[h][t]) for t in range(1, T + 1)]
@@ -236,9 +236,14 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
         axes[4].plot(time_index, import_price, label="Electricity Price", color="blue", linewidth=2)
         axes[4].plot(time_index, peer_buy_price, label="Peer Buy Price", linestyle=":", color="green")
         axes[4].plot(time_index, peer_sell_price, label="Peer Sell Price", linestyle="-.", color="red")
-        axes[4].set_title(f"{h} - Price (£)")
+        axes[4].set_title(f"{h} - Price (£/kWh)")
         axes[4].legend()
         axes[4].grid(True)
+
+        axes[5].plot(time_index, penalty_h, label="Penalty", color="blue", linewidth=2)
+        axes[5].set_title(f"{h} - Penalty (£)")
+        axes[5].legend()
+        axes[5].grid(True)
 
         # 格式化 X 轴
         for ax in axes:
@@ -367,6 +372,9 @@ def optimize_and_plot(time_step, start_date, end_date, Base_Load, Gen, battery_c
         ) + sum(
             daily_prices[t]['peer_buy_price'] * m.trade[h2, h, t] - daily_prices[t]['peer_sell_price'] * m.trade[h, h2, t]
             for h in m.H for t in m.T for h2 in m.H if h2 != h
+        ),  + sum(
+            penalty * (ev_max_capacity[household_index_map[h]] * ( 1 - m.ev_soc[h, T] )) 
+            for h in m.H for t in ev_departure  # everyday 8:30
         ),
         sense=pyo.minimize
     )
@@ -393,6 +401,7 @@ def optimize_and_plot(time_step, start_date, end_date, Base_Load, Gen, battery_c
     trades = {
     h: {h2: {t: m.trade[h, h2, t].value for t in m.T} for h2 in m.H if h2 != h} for h in m.H
 }
+    penalty_h = {h: {t: penalty * (ev_max_capacity[household_index_map[h]] * ( 1 - m.ev_soc[h, T].value )) for t in m.T} for h in m.H}
     ev_soc_h = {h: {t: m.ev_soc[h, t].value for t in m.T} for h in m.H}
     battery_soc_h = {h: {t: m.battery_soc[h, t].value for t in m.T} for h in m.H}
 
@@ -403,7 +412,7 @@ def optimize_and_plot(time_step, start_date, end_date, Base_Load, Gen, battery_c
         battery_charge_h, battery_discharge_h, trades, m, [daily_prices[t]['import_price'] for t in range(1, T + 1)],  
         [daily_prices[t]['export_price'] for t in range(1, T + 1)],
         [daily_prices[t]['peer_buy_price'] for t in range(1, T + 1)],  
-        [daily_prices[t]['peer_sell_price'] for t in range(1, T + 1)],  ev_soc_h, battery_soc_h
+        [daily_prices[t]['peer_sell_price'] for t in range(1, T + 1)],  ev_soc_h, battery_soc_h, penalty_h
     ) 
 
 # 主函数
