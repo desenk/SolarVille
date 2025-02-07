@@ -390,8 +390,10 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     # 调用绘图函数
     plot_results(
         T, Base_Load, total_load, Gen, import_energy_h, export_energy_h,
-        battery_charge_h, battery_discharge_h, trades, m, import_price, export_price,
-        peer_buy_price, peer_sell_price
+        battery_charge_h, battery_discharge_h, trades, m, [daily_prices[t]['import_price'] for t in range(1, T + 1)],  
+        [daily_prices[t]['export_price'] for t in range(1, T + 1)],  
+        [daily_prices[t]['peer_buy_price'] for t in range(1, T + 1)],  
+        [daily_prices[t]['peer_sell_price'] for t in range(1, T + 1)]
     ) 
 
 # 主函数
