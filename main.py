@@ -82,7 +82,7 @@ def calculate_total_time_steps_and_prices(
     num_days = (end - start).days + 1  # 包括结束日期
 
     # 计算总时间步数
-    total_time_steps = (num_days * 24 * 60) // time_step_minutes  # 总时间步数
+    total_time_steps = num_days * steps_per_day  # 例如 3 天就是 3 * 48 = 144 个时间步
 
     # 初始化字典存储价格
     daily_prices = {}
@@ -91,34 +91,29 @@ def calculate_total_time_steps_and_prices(
     ev_arrival = [arrival_step + i * steps_per_day for i in range(num_days)]
     ev_departure = [departure_step + i * steps_per_day for i in range(num_days)]
 
-    # 设置每一天的时间步
-    for day_offset in range(num_days):
-        current_day = start + timedelta(days=day_offset)
-        
-        for t in range(1, steps_per_day + 1):  # 每天从 1 到 48（每半小时一个时间步）
-            # 计算当前时间
-            global current_time
-            current_time = current_day + timedelta(minutes=(t - 1) * time_step_minutes)
+    for t in range(1, total_time_steps + 1):  # 直接用 1 到 T 作为 key
+        # 计算当前时间
+        current_time = start + timedelta(minutes=(t - 1) * time_step_minutes)
 
-            # 根据时间区间设置价格
-            if (11 * 60 <= current_time.hour * 60 + current_time.minute < 13 * 60) or \
-               (17 * 60 <= current_time.hour * 60 + current_time.minute < 20 * 60):
-                import_price = 10
-            else:
-                import_price = 5
+        # 价格计算逻辑
+        if (11 * 60 <= current_time.hour * 60 + current_time.minute < 13 * 60) or \
+           (17 * 60 <= current_time.hour * 60 + current_time.minute < 20 * 60):
+            import_price = 10
+        else:
+            import_price = 5
 
-            # 计算其他价格
-            peer_buy_price = 0.8 * import_price
-            peer_sell_price = 0.7 * import_price
-            export_price = 0.4 * import_price
+    # 计算其他价格
+    peer_buy_price = 0.8 * import_price
+    peer_sell_price = 0.7 * import_price
+    export_price = 0.4 * import_price
 
-            # 将每个时间步的价格存储到字典中
-            daily_prices[t] = {
-                'import_price': import_price,
-                'peer_buy_price': peer_buy_price,
-                'peer_sell_price': peer_sell_price,
-                'export_price': export_price
-            }
+    # 将每个时间步的价格存储到字典中
+    daily_prices[t] = {
+        'import_price': import_price,
+         'peer_buy_price': peer_buy_price,
+         'peer_sell_price': peer_sell_price,
+         'export_price': export_price
+       }
 
     return total_time_steps, ev_arrival, ev_departure, daily_prices
 
