@@ -117,6 +117,7 @@ def calculate_total_time_steps_and_prices(
              'export_price': export_price
            }
     print("daily_prices keys:", list(daily_prices.keys())[:10])  # 只打印前10个键看看是否从 1 开始
+    print("daily_prices Range:", daily_prices.index.min(), "->", daily_prices.index.max())
     print("total_time_steps:", total_time_steps)
     return total_time_steps, ev_arrival, ev_departure, daily_prices
 
@@ -233,9 +234,9 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
         axes[3].grid(True)
 
         # **5. Price**
-        import_price = [import_price[t] for t in range(1, T + 1)]
-        peer_buy_price_values = [peer_buy_price[t] for t in range(1, T + 1)]
-        peer_sell_price_values = [peer_sell_price[t] for t in range(1, T + 1)]
+        import_price = [import_price[t] for t in range(1, T )]
+        peer_buy_price_values = [peer_buy_price[t] for t in range(1, T )]
+        peer_sell_price_values = [peer_sell_price[t] for t in range(1, T )]
 
         axes[4].plot(time_index, import_price, label="Electricity Price", color="blue", linewidth=2)
         axes[4].plot(time_index, peer_buy_price_values, label="Peer Buy Price", linestyle=":", color="green")
