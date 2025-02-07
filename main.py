@@ -164,17 +164,17 @@ def map_data_to_model(household_df, solar_half_hour, config, T):
 
         # 配置电动车
         if config[household]["ev"]:
-            ev_max_soc[household] = 75 # Tesla Model Y about 75 kWh
-            ev_initial_soc[household] = 63.75  # Assume coming back home with 85%
+            ev_max_capacity[household] = 75 # Tesla Model Y about 75 kWh
+            ev_initial_soc[household] = 85  # Assume coming back home with 85%
         else:
-            ev_max_soc[household] = 0
+            ev_max_capacity[household] = 0
             ev_initial_soc[household] = 0
 
-    return Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_soc, ev_initial_soc
+    return Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_capacity, ev_initial_soc
 
 def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy, 
                  battery_charge, battery_discharge, trades, m, import_price, 
-                 export_price, ev_soc, soc,  peer_buy_price, peer_sell_price):
+                 export_price,  peer_buy_price, peer_sell_price, ev_soc, battery_soc):
 
     time_index = pd.date_range(start=load_start_date, end=load_end_date, freq="30min", inclusive="left")[:T]
     households = list(Base_Load.keys())
@@ -219,10 +219,10 @@ def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy,
         axes[2].grid(True)
 
         # **4. Battery SOC & EV SOC**
-        ev_soc_values = [float(pyo.value(ev_soc[h_index + 1, t])) for t in range(1, T + 1)]
-        battery_soc_values = [float(pyo.value(soc[h_index + 1, t])) for t in range(1, T + 1)]
-        axes[3].plot(time_index, ev_soc_values, label="EV SOC", linestyle="-", color="blue")
-        axes[3].plot(time_index, battery_soc_values, label="Battery SOC", linestyle=":", color="orange")
+        ev_soc_values = [ev_soc[h][t] for t in range(1, T + 1)) for t in range(1, T + 1)]
+        battery_soc_values = [battery_soc[h][t] for t in range(1, T + 1)) for t in range(1, T + 1)]
+        axes[3].plot(time_index, ev_soc_values, label="EV SOC (%)", linestyle="-", color="blue")
+        axes[3].plot(time_index, battery_soc_values, label="Battery SOC (%)", linestyle=":", color="orange")
         axes[3].set_title(f"{h} - Battery & EV SOC")
         axes[3].legend()
         axes[3].grid(True)
@@ -235,7 +235,7 @@ def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy,
         axes[4].plot(time_index, import_price, label="Electricity Price", color="blue", linewidth=2)
         axes[4].plot(time_index, peer_buy_price_values, label="Peer Buy Price", linestyle=":", color="green")
         axes[4].plot(time_index, peer_sell_price_values, label="Peer Sell Price", linestyle="-.", color="red")
-        axes[4].set_title(f"{h} - Price Trends")
+        axes[4].set_title(f"{h} - Price (£)")
         axes[4].legend()
         axes[4].grid(True)
 
@@ -249,21 +249,21 @@ def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy,
         plt.show()
 
 # 优化模型和绘图
-def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_soc, ev_initial_soc, daily_prices):
+def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_capacity, ev_initial_soc, daily_prices):
     """
     优化模型并绘制结果。
     """
     T = len(next(iter(Base_Load.values())))  # 时间步数
     H = len(Base_Load)  # 家庭数量
     time_step = 0.5  # 每个时间步的小时数
-    penalty = 2000
+    penalty = 200
     global household_index_map
     households = list(Base_Load.keys())
 
 
     # 设置电池的上下限
-    soc_min = {h: 0.2 * battery_capacity[h] for h in battery_capacity}
-    soc_max = {h: 0.8 * battery_capacity[h] for h in battery_capacity}
+    battery_soc_min = {h: 20 if battery_capacity[h] > 0 else 0 for h in battery_capacity}
+    battery_soc_max = {h: 80 if battery_capacity[h] > 0 else 0 for h in battery_capacity}
 
     # 创建家庭索引到 ID 的映射
     household_ids = list(Base_Load.keys())
@@ -281,7 +281,7 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     m.export_energy = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals)
     m.charge_battery = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=lambda m, h, t: (0, charge_power_limit[household_index_map[h]]))
     m.discharge_battery = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=lambda m, h, t: (0, discharge_power_limit[household_index_map[h]]))
-    m.soc = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=lambda m, h, t: (soc_min[household_index_map[h]], soc_max[household_index_map[h]]))
+    m.battery_soc = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=lambda m, h, t: (battery_soc_min[household_index_map[h]], battery_soc_max[household_index_map[h]]))
     m.ev_charge = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=(0, 7))  # EV 每小时充电速率最多 7kWh
     m.ev_load = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals)
     m.ev_soc = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals)
@@ -309,23 +309,22 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
                     # 从 arrival 到第二天 departure 允许充电
                     if ev_arrival[d - 1] <= t < ev_departure[d]:
                         m.constraints.add(m.ev_charge[h, t] <= 7)
-            
-            if t in ev_departure:
-                m.constraints.add(m.ev_charge[h, t] == 0)
+                if ev_departure[d] <= t < ev_arrival[d]:
+                    m.constraints.add(m.ev_charge[h, t] == 0)
 
             # EV 负载与充电关系
             m.constraints.add(m.ev_load[h, t] == m.ev_charge[h, t] * time_step)
 
             # 电池动态约束
             if t == 1:
-                m.constraints.add(m.soc[h, t] == soc_min[household_index_map[h]])
+                m.constraints.add(m.battery_soc[h, t] == battery_soc_min[household_index_map[h]])
                 m.constraints.add(m.ev_soc[h, t] == ev_initial_soc[household_index_map[h]])
             else:
                 m.constraints.add(
-                    m.soc[h, t] == m.soc[h, t - 1] + m.charge_battery[h, t] - m.discharge_battery[h, t]
+                    m.battery_soc[h, t] == m.battery_soc[h, t - 1] + (( m.charge_battery[h, t] - m.discharge_battery[h, t] ) / battery_capacity[household_index_map[h]])
                 )
                 m.constraints.add(
-                    m.ev_soc[h, t] == m.ev_soc[h, t - 1] + m.ev_load[h, t]
+                    m.ev_soc[h, t] == m.ev_soc[h, t - 1] + (m.ev_load[h, t] / ev_max_capacity[household_index_map[h]])
                 )
 
             # 禁止家庭与自己交易
@@ -386,14 +385,17 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     trades = {
     h: {h2: {t: m.trade[h, h2, t].value for t in m.T} for h2 in m.H if h2 != h} for h in m.H
 }
+    ev_soc_h = {h: {t: m.ev_soc[h, t].value for t in m.T} for h in m.H}
+    battery_soc_h = {h: {t: m.battery_soc[h, t].value for t in m.T} for h in m.H}
+
     
     # 调用绘图函数
     plot_results(
         T, Base_Load, total_load, Gen, import_energy_h, export_energy_h,
         battery_charge_h, battery_discharge_h, trades, m, [daily_prices[t]['import_price'] for t in range(1, T + 1)],  
-        [daily_prices[t]['export_price'] for t in range(1, T + 1)],  
+        [daily_prices[t]['export_price'] for t in range(1, T + 1)],
         [daily_prices[t]['peer_buy_price'] for t in range(1, T + 1)],  
-        [daily_prices[t]['peer_sell_price'] for t in range(1, T + 1)]
+        [daily_prices[t]['peer_sell_price'] for t in range(1, T + 1)],  ev_soc_h, battery_soc_h
     ) 
 
 # 主函数
@@ -425,7 +427,7 @@ if __name__ == "__main__":
 )
 
     # 映射数据
-    Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_soc, ev_initial_soc = map_data_to_model(
+    Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_capacity, ev_initial_soc = map_data_to_model(
         household_df, solar_half_hour, household_config, total_steps
     )
 
@@ -433,7 +435,7 @@ if __name__ == "__main__":
     print("Base_Load:", Base_Load)
     print("Gen:", Gen)
     print("Battery Capacity:", battery_capacity)
-    print("EV Max SOC:", ev_max_soc)
+    print("EV Max capacity:", ev_max_capacity)
 
     # 优化与绘图
     optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_soc, ev_initial_soc, daily_prices)
