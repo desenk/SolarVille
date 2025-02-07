@@ -228,9 +228,9 @@ def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy,
         axes[3].grid(True)
 
         # **5. Price**
-        import_price = [import_price[t-1] for t in range(1, T + 1)]
-        peer_buy_price_values = [peer_buy_price[t-1] for t in range(1, T + 1)]
-        peer_sell_price_values = [peer_sell_price[t-1] for t in range(1, T + 1)]
+        import_price = [import_price[t] for t in range(1, T + 1)]
+        peer_buy_price_values = [peer_buy_price[t] for t in range(1, T + 1)]
+        peer_sell_price_values = [peer_sell_price[t] for t in range(1, T + 1)]
 
         axes[4].plot(time_index, import_price, label="Electricity Price", color="blue", linewidth=2)
         axes[4].plot(time_index, peer_buy_price_values, label="Peer Buy Price", linestyle=":", color="green")
@@ -249,11 +249,11 @@ def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy,
         plt.show()
 
 # 优化模型和绘图
-def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_capacity, ev_initial_soc, daily_prices):
+def optimize_and_plot(time_step, Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_capacity, ev_initial_soc, daily_prices):
     """
     优化模型并绘制结果。
     """
-    T = len(next(iter(Base_Load.values())))  # 时间步数
+    T = time_step #len(next(iter(Base_Load.values())))  # 时间步数
     H = len(Base_Load)  # 家庭数量
     time_step = 0.5  # 每个时间步的小时数
     penalty = 200
@@ -444,4 +444,4 @@ if __name__ == "__main__":
     print("EV Max capacity:", ev_max_capacity)
 
     # 优化与绘图
-    optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_capacity, ev_initial_soc, daily_prices)
+    optimize_and_plot(total_steps, Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_capacity, ev_initial_soc, daily_prices)
