@@ -127,7 +127,7 @@ def map_data_to_model(household_df, solar_half_hour, config, T):
     battery_capacity = {}
     charge_power_limit = {}
     discharge_power_limit = {}
-    ev_max_soc = {}
+    ev_max_capacity = {}
     ev_initial_soc = {}
 
     for household in households:
