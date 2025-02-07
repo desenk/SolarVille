@@ -81,7 +81,7 @@ def calculate_total_time_steps_and_prices(
     # 计算日期范围
     start = datetime.strptime(start_date, "%Y-%m-%d")
     end = datetime.strptime(end_date, "%Y-%m-%d")
-    num_days = (end - start).days + 1  # 包括结束日期
+    num_days = (end - start).days
 
     # 计算总时间步数
     total_time_steps = num_days * steps_per_day  # 例如 3 天就是 3 * 48 = 144 个时间步
