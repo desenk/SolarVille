@@ -95,10 +95,10 @@ def calculate_total_time_steps_and_prices(
     for day_offset in range(num_days):
         current_day = start + timedelta(days=day_offset)
         
-        for t in range(0, 24 * 60, time_step_minutes):  # 每天从 00:00 到 23:30
+        for t in range(1, steps_per_day + 1):  # 每天从 1 到 48（每半小时一个时间步）
             # 计算当前时间
             global current_time
-            current_time = current_day + timedelta(minutes=t)
+            current_time = current_day + timedelta(minutes=(t - 1) * time_step_minutes)
 
             # 根据时间区间设置价格
             if (11 * 60 <= current_time.hour * 60 + current_time.minute < 13 * 60) or \
@@ -113,7 +113,7 @@ def calculate_total_time_steps_and_prices(
             export_price = 0.4 * import_price
 
             # 将每个时间步的价格存储到字典中
-            daily_prices[(current_day, t)] = {
+            daily_prices[t] = {
                 'import_price': import_price,
                 'peer_buy_price': peer_buy_price,
                 'peer_sell_price': peer_sell_price,
@@ -359,11 +359,11 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
     # 目标函数：最小化电费和负载转移成本
     m.cost = pyo.Objective(
         expr=sum(
-            daily_prices[(current_day, t)]['import_price'] * m.import_energy[h, t] - daily_prices[(current_day, t)]['export_price'] * m.export_energy[h, t]
-            for h in m.H for t in m.T for current_day in daily_prices  # current_day 是日期
+            daily_prices[t]['import_price'] * m.import_energy[h, t] - daily_prices[t]['export_price'] * m.export_energy[h, t]
+            for h in m.H for t in m.T 
         ) + sum(
-            daily_prices[(current_day, t)]['peer_buy_price'] * m.trade[h2, h, t] - daily_prices[(current_day, t)]['peer_sell_price'] * m.trade[h, h2, t]
-            for h in m.H for t in m.T for h2 in m.H if h2 != h for current_day in daily_prices  # current_day 是日期
+            daily_prices[t]['peer_buy_price'] * m.trade[h2, h, t] - daily_prices[t]['peer_sell_price'] * m.trade[h, h2, t]
+            for h in m.H for t in m.T for h2 in m.H if h2 != h
         ),
         sense=pyo.minimize
     )
