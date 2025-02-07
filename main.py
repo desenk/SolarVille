@@ -102,18 +102,19 @@ def calculate_total_time_steps_and_prices(
         else:
             import_price = 5
 
-    # 计算其他价格
-    peer_buy_price = 0.8 * import_price
-    peer_sell_price = 0.7 * import_price
-    export_price = 0.4 * import_price
+        # 计算其他价格
+        peer_buy_price = 0.8 * import_price
+        peer_sell_price = 0.7 * import_price
+        export_price = 0.4 * import_price
 
-    # 将每个时间步的价格存储到字典中
-    daily_prices[t] = {
-        'import_price': import_price,
-         'peer_buy_price': peer_buy_price,
-         'peer_sell_price': peer_sell_price,
-         'export_price': export_price
-       }
+        # 将每个时间步的价格存储到字典中
+        daily_prices[t] = {
+            'import_price': import_price,
+             'peer_buy_price': peer_buy_price,
+             'peer_sell_price': peer_sell_price,
+             'export_price': export_price
+           }
+    print("daily_prices keys:", list(daily_prices.keys())[:10])  # 只打印前10个键看看是否从 1 开始
 
     return total_time_steps, ev_arrival, ev_departure, daily_prices
 
