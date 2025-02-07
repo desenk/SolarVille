@@ -320,12 +320,18 @@ def optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, disc
                 m.constraints.add(m.battery_soc[h, t] == battery_soc_min[household_index_map[h]])
                 m.constraints.add(m.ev_soc[h, t] == ev_initial_soc[household_index_map[h]])
             else:
-                m.constraints.add(
+                if battery_capacity[household_index_map[h]] > 0:
+                    m.constraints.add(
                     m.battery_soc[h, t] == m.battery_soc[h, t - 1] + (( m.charge_battery[h, t] - m.discharge_battery[h, t] ) / battery_capacity[household_index_map[h]])
                 )
-                m.constraints.add(
-                    m.ev_soc[h, t] == m.ev_soc[h, t - 1] + (m.ev_load[h, t] / ev_max_capacity[household_index_map[h]])
+                else:
+                    m.constraints.add( m.battery_soc[h, t] == 0)
+                if ev_max_capacity[household_index_map[h]] > 0:
+                    m.constraints.add(
+                        m.ev_soc[h, t] == m.ev_soc[h, t - 1] + (m.ev_load[h, t] / ev_max_capacity[household_index_map[h]])
                 )
+                else:
+                    m.constraints.add(m.ev_soc[h, t] == 0)
 
             # 禁止家庭与自己交易
             m.constraints.add(m.trade[h, h, t] == 0) 
