@@ -438,4 +438,4 @@ if __name__ == "__main__":
     print("EV Max capacity:", ev_max_capacity)
 
     # 优化与绘图
-    optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_soc, ev_initial_soc, daily_prices)
+    optimize_and_plot(Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_capacity, ev_initial_soc, daily_prices)
