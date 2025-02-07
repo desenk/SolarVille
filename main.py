@@ -188,7 +188,7 @@ def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy,
         total_load_values = [float(pyo.value(m.ev_load[h_index + 1, t])) + float(Base_Load[h][t])for t in range(1, T + 1)]
         
         axes[0].plot(time_index, base_load_values, label="Base Load", linestyle="--", color="blue")
-        ax.fill_between(time_index, base_load_values, total_load_values, color="purple", alpha=0.6, label="EV Load")
+        axes[0].fill_between(time_index, base_load_values, total_load_values, color="purple", alpha=0.6, label="EV Load")
         axes[0].set_title(f"{h} - Base Load & EV Load")
         axes[0].legend()
         axes[0].grid(True)
