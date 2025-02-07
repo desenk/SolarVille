@@ -233,11 +233,6 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
         axes[3].legend()
         axes[3].grid(True)
 
-        # **5. Price**
-        import_price = [import_price[t] for t in range(1, T + 1 )]
-        peer_buy_price_values = [peer_buy_price[t] for t in range(1, T + 1 )]
-        peer_sell_price_values = [peer_sell_price[t] for t in range(1, T + 1)]
-
         axes[4].plot(time_index, import_price, label="Electricity Price", color="blue", linewidth=2)
         axes[4].plot(time_index, peer_buy_price_values, label="Peer Buy Price", linestyle=":", color="green")
         axes[4].plot(time_index, peer_sell_price_values, label="Peer Sell Price", linestyle="-.", color="red")
