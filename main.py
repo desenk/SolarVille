@@ -20,12 +20,6 @@ household_config = {
     "MAC003874": {"solar": False, "battery": False, "ev": False, "demand": True},
 }
 
-# 时间范围设置
-load_start_date = "2013-06-01"
-load_end_date = "2013-06-05"
-gen_start_date = "2019-06-01"
-gen_end_date = "2019-06-05"
-
 # 加载家庭负载数据
 def load_household_data(file_path, household_ids, start_date, end_date):
     try:
@@ -186,7 +180,7 @@ def map_data_to_model(household_df, solar_half_hour, config, T):
 def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy, 
                  battery_charge, battery_discharge, trades, m, import_price, 
                  export_price,  peer_buy_price, peer_sell_price, ev_soc, battery_soc):
-
+    print("T is :", T)
     time_index = pd.date_range(start=load_start_date, end=load_end_date, freq="30min", inclusive="left")[:T]
     households = list(Base_Load.keys())
 
@@ -425,9 +419,9 @@ if __name__ == "__main__":
     solar_file = "/home/pi/SolarOutput.csv"
 
     start_date = "2013-06-01"
-    end_date = "2013-06-03"
+    end_date = "2013-06-04"
     gen_start_date = "2019-06-01"
-    gen_end_date = "2019-06-03"
+    gen_end_date = "2019-06-04"
     time_step_minutes = 30  # 每个时间步 30 分钟
     steps_per_day = 48      # 每天 48 个时间步
     arrival_step = 38       # 每天的到达时间步（18:30）
