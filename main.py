@@ -42,6 +42,11 @@ def load_household_data(file_path, household_ids, start_date, end_date):
         df['tstp'] = pd.to_datetime(df['tstp'], errors='coerce')
         df = df[(df['tstp'] >= start_date) & (df['tstp'] <= end_date)]
         df = df.set_index('tstp')
+
+        for h in household_ids:
+            household_data = df[df['lclid'] == h]
+            print(f"Household {h} data range:", household_data.index.min(), "->", household_data.index.max(), "Total:", len(household_data))
+
         return df
     except Exception as e:
         print(f"Error loading household data from {file_path}: {e}")
@@ -67,6 +72,9 @@ def load_solar_output_data(file_path, start_date, end_date):
 
         # 调整为每半小时间隔
         solar_half_hour = df.resample('30min').fillna(method='ffill')  # 使用整点值填充半小时数据
+        print("Solar Data Time Steps:", len(solar_half_hour))
+        print(solar_half_hour.index[:10])  # 打印前 10 个时间步
+        print(solar_half_hour.index[-10:]) # 打印最后 10 个时间步
         return solar_half_hour
     except Exception as e:
         print(f"Error loading solar output data from {file_path}: {e}")
@@ -169,6 +177,9 @@ def map_data_to_model(household_df, solar_half_hour, config, T):
         else:
             ev_max_capacity[household] = 0
             ev_initial_soc[household] = 0
+    print("Household Data Time Range:", household_df.index.min(), "->", household_df.index.max())
+    print("Solar Data Time Range:", solar_half_hour.index.min(), "->", solar_half_hour.index.max())
+
 
     return Base_Load, Gen, battery_capacity, charge_power_limit, discharge_power_limit, ev_max_capacity, ev_initial_soc
 
