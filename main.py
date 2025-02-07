@@ -234,8 +234,8 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
         axes[3].grid(True)
 
         axes[4].plot(time_index, import_price, label="Electricity Price", color="blue", linewidth=2)
-        axes[4].plot(time_index, peer_buy_price_values, label="Peer Buy Price", linestyle=":", color="green")
-        axes[4].plot(time_index, peer_sell_price_values, label="Peer Sell Price", linestyle="-.", color="red")
+        axes[4].plot(time_index, peer_buy_price, label="Peer Buy Price", linestyle=":", color="green")
+        axes[4].plot(time_index, peer_sell_price, label="Peer Sell Price", linestyle="-.", color="red")
         axes[4].set_title(f"{h} - Price (£)")
         axes[4].legend()
         axes[4].grid(True)
