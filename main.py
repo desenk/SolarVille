@@ -185,7 +185,7 @@ def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy,
         # **1. Base Load & EV Load**
         base_load_values = [float(Base_Load[h][t]) for t in range(1, T + 1)]
         ev_load_values = [float(pyo.value(m.ev_load[h_index + 1, t])) for t in range(1, T + 1)]
-        total_load_values = [float(pyo.value(m.ev_load[h_index, t])) + float(Base_Load[h][t])for t in range(1, T + 1)]
+        total_load_values = [float(pyo.value(m.ev_load[h_index + 1, t])) + float(Base_Load[h][t])for t in range(1, T + 1)]
         
         axes[0].plot(time_index, base_load_values, label="Base Load", linestyle="--", color="blue")
         ax.fill_between(time_index, base_load_values, total_load_values, color="purple", alpha=0.6, label="EV Load")
@@ -219,8 +219,8 @@ def plot_results(T, Base_Load, total_load, Gen, import_energy, export_energy,
         axes[2].grid(True)
 
         # **4. Battery SOC & EV SOC**
-        ev_soc_values = [ev_soc[h][t] for t in range(1, T + 1)) for t in range(1, T + 1)]
-        battery_soc_values = [battery_soc[h][t] for t in range(1, T + 1)) for t in range(1, T + 1)]
+        ev_soc_values = [ev_soc[h_index + 1][t] for t in range(1, T + 1)]
+        battery_soc_values = [battery_soc[h_index + 1][t] for t in range(1, T + 1)]
         axes[3].plot(time_index, ev_soc_values, label="EV SOC (%)", linestyle="-", color="blue")
         axes[3].plot(time_index, battery_soc_values, label="Battery SOC (%)", linestyle=":", color="orange")
         axes[3].set_title(f"{h} - Battery & EV SOC")
