@@ -250,7 +250,7 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
         for ax in axes.ravel():
             ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M"))
             ax.xaxis.set_major_locator(mdates.HourLocator(interval=6))
-            ax.tick_params(axis="x", rotation=45)
+            ax.tick_params(axis="x", rotation=15)
 
         plt.tight_layout()
         plt.show()
@@ -272,6 +272,7 @@ def optimize_and_plot(time_step, start_date, end_date, Base_Load, Gen, battery_c
     # 设置电池的上下限
     battery_soc_min = {h: 20 if battery_capacity[h] > 0 else 0 for h in battery_capacity}
     battery_soc_max = {h: 80 if battery_capacity[h] > 0 else 0 for h in battery_capacity}
+    battery_soc_initial = {h: 40 if battery_capacity[h] > 0 else 0 for h in battery_capacity}
 
     # 创建家庭索引到 ID 的映射
     household_ids = list(Base_Load.keys())
@@ -307,7 +308,7 @@ def optimize_and_plot(time_step, start_date, end_date, Base_Load, Gen, battery_c
     # 添加约束
     for h in m.H:
         for t in m.T:
-            # 电动汽车充电约束
+            # 电动汽车充电时间段的约束
             for d in range(len(ev_arrival)):
                 if d == 0: 
                     # 第一天下午 arrival 到 00:00 不存在，允许 00:00 - departure 充电
@@ -325,18 +326,18 @@ def optimize_and_plot(time_step, start_date, end_date, Base_Load, Gen, battery_c
 
             # 电池动态约束
             if t == 1:
-                m.constraints.add(m.battery_soc[h, t] == battery_soc_min[household_index_map[h]])
+                m.constraints.add(m.battery_soc[h, t] == battery_soc_initial[household_index_map[h]])
                 m.constraints.add(m.ev_soc[h, t] == ev_initial_soc[household_index_map[h]])
             else:
                 if battery_capacity[household_index_map[h]] > 0:
                     m.constraints.add(
-                    m.battery_soc[h, t] == m.battery_soc[h, t - 1] + (( m.charge_battery[h, t] - m.discharge_battery[h, t] ) / battery_capacity[household_index_map[h]])
+                    m.battery_soc[h, t] == m.battery_soc[h, t - 1] + (( m.charge_battery[h, t] - m.discharge_battery[h, t] ) / battery_capacity[household_index_map[h]]) * 100
                 )
                 else:
                     m.constraints.add( m.battery_soc[h, t] == 0)
                 if ev_max_capacity[household_index_map[h]] > 0:
                     m.constraints.add(
-                        m.ev_soc[h, t] == m.ev_soc[h, t - 1] + (m.ev_load[h, t] / ev_max_capacity[household_index_map[h]])
+                        m.ev_soc[h, t] == m.ev_soc[h, t - 1] + (m.ev_load[h, t] / ev_max_capacity[household_index_map[h]]) * 100
                 )
                 else:
                     m.constraints.add(m.ev_soc[h, t] == 0)
