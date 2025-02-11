@@ -416,7 +416,7 @@ def optimize_and_plot(time_step, start_date, end_date, ev_arrival, ev_departure,
     trades = {
     h: {h2: {t: m.trade[h, h2, t].value for t in m.T} for h2 in m.H if h2 != h} for h in m.H
 }
-    penalty_h = {h: {t: penalty * (ev_max_capacity[household_index_map[h]] * ( 1 - m.ev_soc[h, T].value )) for t in m.T} for h in m.H}
+    penalty_h = {h: {t: penalty * (ev_max_capacity[household_index_map[h]] * ( 1 - m.ev_soc[h, t].value )) for t in m.T} for h in m.H}
     ev_soc_h = {h: {t: m.ev_soc[h, t].value for t in m.T} for h in m.H}
     battery_soc_h = {h: {t: m.battery_soc[h, t].value for t in m.T} for h in m.H}
 
