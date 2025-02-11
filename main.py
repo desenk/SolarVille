@@ -180,7 +180,7 @@ def map_data_to_model(household_df, solar_half_hour, config, T):
 
 def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_energy, export_energy, 
                  battery_charge, battery_discharge, trades, m, import_price, 
-                 export_price,  peer_buy_price, peer_sell_price, ev_soc, battery_soc, penalty_h):
+                 export_price,  peer_buy_price, peer_sell_price, ev_soc, battery_soc, penalty):
     print("T is :", T)
     time_index = pd.date_range(start=start_date, end=end_date, freq="30min", inclusive="left")[:T]
     households = list(Base_Load.keys())
@@ -240,7 +240,8 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
         axes[1, 1].legend()
         axes[1, 1].grid(True)
 
-        axes[2, 1].plot(time_index, penalty_h, label="Penalty", color="blue", linewidth=2)
+        penalty_values = [penalty[h_index + 1][t] for t in range(1, T + 1)]
+        axes[2, 1].plot(time_index, penalty_values, label="Penalty", color="blue", linewidth=2)
         axes[2, 1].set_title(f"{h} - Penalty (£)")
         axes[2, 1].legend()
         axes[2, 1].grid(True)
