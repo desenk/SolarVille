@@ -183,6 +183,7 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
                  export_price,  peer_buy_price, peer_sell_price, ev_soc, battery_soc, penalty):
     print("T is :", T)
     time_index = pd.date_range(start=start_date, end=end_date, freq="30min", inclusive="left")[:T]
+    print(time_index[:10])
     households = list(Base_Load.keys())
 
     for h_index, h in enumerate(households):  # 每个 household 画一张图
@@ -195,7 +196,7 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
         
         axes[0, 0].plot(time_index, base_load_values, label="Base Load", linestyle="--", color="blue")
         axes[0, 0].fill_between(time_index, base_load_values, total_load_values, color="purple", alpha=0.6, label="EV Load")
-        axes[0, 0].set_title(f"{h} - Base Load & EV Load")
+        axes[0, 0].set_title(f"{h} - Base Load & EV Load (kWh)")
         axes[0, 0].legend()
         axes[0, 0].grid(True)
 
@@ -212,15 +213,9 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
         # **3. Import, Export, Trading**
         import_values = [import_energy[h_index + 1][t] for t in range(1, T + 1)]
         export_values = [-export_energy[h_index + 1][t] for t in range(1, T + 1)]
-        axes[2, 0].bar(time_index, import_values, label="Import Energy", alpha=0.5, color="red")
-        axes[2, 0].bar(time_index, export_values, label="Export Energy", alpha=0.5, color="green")
-
-        if trades:
-            for h2 in trades[h_index + 1]:
-                trade_values = [trades[h_index + 1][h2][t] for t in range(1, T + 1)]
-                axes[2, 0].plot(time_index, trade_values, label=f"Trade with {household_index_map[h2]}", linestyle=":")
-
-        axes[2, 0].set_title(f"{h} - Import, Export, Trading Energy")
+        axes[2, 0].plot(time_index, import_values, label="Import Energy", alpha=0.5, color="red")
+        axes[2, 0].plot(time_index, export_values, label="Export Energy", alpha=0.5, color="green")
+        axes[2, 0].set_title(f"{h} - Import, Export Energy (kWh) ")
         axes[2, 0].legend()
         axes[2, 0].grid(True)
 
@@ -242,10 +237,15 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
 
         penalty_values = [penalty[h_index + 1][t] for t in range(1, T + 1)]
         axes[2, 1].plot(time_index, penalty_values, label="Penalty", color="blue", linewidth=2)
-        axes[2, 1].set_title(f"{h} - Penalty (£)")
+        if trades:
+            for h2 in trades[h_index + 1]:
+                trade_values = [trades[h_index + 1][h2][t] for t in range(1, T + 1)]
+                axes[2, 1].plot(time_index, trade_values, label=f"Trade with {household_index_map[h2]}", linestyle=":")
+
+        axes[2, 1].set_title(f"{h} - Trading Energy (kWh) & Penalty (£)")
         axes[2, 1].legend()
         axes[2, 1].grid(True)
-
+        
         # 格式化 X 轴
         for ax in axes.ravel():
             ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M"))
