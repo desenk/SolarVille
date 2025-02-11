@@ -240,7 +240,12 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
         if trades:
             for h2 in trades[h_index + 1]:
                 trade_values = [trades[h_index + 1][h2][t] for t in range(1, T + 1)]
-                axes[2, 1].plot(time_index, trade_values, label=f"Trade with {household_index_map[h2]}", linestyle=":")
+                axes[2, 1].plot(time_index, trade_values, label=f"Sold to {household_index_map[h2]}", linestyle=":")
+
+           for h2 in trades:  # h2 卖给 h_index + 1
+                if (h_index + 1) in trades[h2]:  
+                    trade_values = -[trades[h2][h_index + 1][t] for t in range(1, T + 1)]
+                    axes[2, 1].plot(time_index, trade_values, label=f"Bought from {household_index_map[h2]}", linestyle="--")
 
         axes[2, 1].set_title(f"{h} - Trading Energy (kWh) & Penalty (£)")
         axes[2, 1].legend()
@@ -335,10 +340,14 @@ def optimize_and_plot(time_step, start_date, end_date, Base_Load, Gen, battery_c
                 )
                 else:
                     m.constraints.add( m.battery_soc[h, t] == 0)
+                
                 if ev_max_capacity[household_index_map[h]] > 0:
-                    m.constraints.add(
+                    if t in ev_arrival:
+                        m.constraints.add(m.ev_soc[h, t] == 85)
+                    else:
+                        m.constraints.add(
                         m.ev_soc[h, t] == m.ev_soc[h, t - 1] + (m.ev_load[h, t] / ev_max_capacity[household_index_map[h]]) * 100
-                )
+                        )
                 else:
                     m.constraints.add(m.ev_soc[h, t] == 0)
 
