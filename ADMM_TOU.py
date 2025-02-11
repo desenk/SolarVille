@@ -137,8 +137,8 @@ class HouseholdADMM_CVXPY:
         problem.solve(solver=cvx.ECOS)
 
         # **更新 ADMM 变量**
-        self.trade_out = trade_out.value
-        self.trade_in = trade_in.value
+        self.trade_out = {key: trade_out[key].value for key in trade_out}
+        self.trade_in = {key: trade_in[key].value for key in trade_in}
         self.import_energy = import_energy.value
 
     def update_admm_variables(self, neighbor_trade):
