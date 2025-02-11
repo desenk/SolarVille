@@ -60,11 +60,11 @@ class HouseholdADMM_CVXPY:
 
         # **目标函数：最小化购电成本**
         objective = cvx.Minimize(
-            cvx.sum(import_energy[t] * np.array([self.daily_prices[t]['import_price'] ]) for t in range(self.T)) +
-            cvx.sum(trade_in[(self.h, h2)][t] * self.lambda_trade for h2 in range(self.H) for t in range(self.T)) -  # 购买交易电的成本
-            cvx.sum(export_energy[t] * np.array([self.daily_prices[t]['export_price'] ]) for t in range(self.T)) -
-            cvx.sum(trade_out[(self.h, h2)][t] * self.lambda_trade for h2 in range(self.H) for t in range(self.T)) +  # 卖电的收益
-            cvx.sum(self.penalty * ev_max_capacity[self.h] * (1 - ev_soc[t]))
+            cvx.sum(import_energy[t] * np.array([self.daily_prices[t]['import_price'] ]) for t in range(self.T)).value +
+            cvx.sum(trade_in[(self.h, h2)][t] * self.lambda_trade for h2 in range(self.H) for t in range(self.T)).value -  # 购买交易电的成本
+            cvx.sum(export_energy[t] * np.array([self.daily_prices[t]['export_price'] ]) for t in range(self.T)).value -
+            cvx.sum(trade_out[(self.h, h2)][t] * self.lambda_trade for h2 in range(self.H) for t in range(self.T)).value +  # 卖电的收益
+            cvx.sum(self.penalty * ev_max_capacity[self.h] * (1 - ev_soc[t])).value
         )
 
         # **能量平衡约束**
@@ -161,7 +161,9 @@ class HouseholdADMM_CVXPY:
                 # **拉格朗日乘子（对偶变量）更新**
                 self.lambda_trade[(self.h, h2, t)] += self.rho * (self.trade_out[(self.h, h2, t)] - neighbor_trade[(h2, self.h, t)])
 def solve_optimization(h):
-    return h.solve_local_optimization()
+    h.solve_local_optimization()
+    print(f"Household {h.h} results: trade_out={h.trade_out}, trade_in={h.trade_in}")
+    return h.trade_out, h.trade_in, h.import_energy
     
 def run_admm(households, num_iterations=20):
     with Pool(processes=10) as pool:  # 使用10个进程并行处理
