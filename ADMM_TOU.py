@@ -167,7 +167,7 @@ def run_admm(households, num_iterations=20):
     with Pool(processes=10) as pool:  # 使用10个进程并行处理
         for i in range(num_iterations):
             # **1. 每个家庭独立优化**
-            pool.map(solve_local_optimization, households.values())
+            pool.map(solve_optimization, households.values())
 
             # **2. 交换交易信息**
             neighbor_trades = {h: households[h].trade_out for h in households}
