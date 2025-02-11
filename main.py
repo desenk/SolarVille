@@ -244,7 +244,7 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
 
             for h2 in trades:  # h2 卖给 h_index + 1
                 if (h_index + 1) in trades[h2]:  
-                    trade_values = -[trades[h2][h_index + 1][t] for t in range(1, T + 1)]
+                    trade_values = [-trades[h2][h_index + 1][t] for t in range(1, T + 1)]
                     axes[2, 1].plot(time_index, trade_values, label=f"Bought from {household_index_map[h2]}", linestyle="--")
 
         axes[2, 1].set_title(f"{h} - Trading Energy (kWh) & Penalty (£)")
