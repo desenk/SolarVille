@@ -119,6 +119,8 @@ def calculate_total_time_steps_and_prices(
     print("daily_prices keys:", list(daily_prices.keys())[:10])  # 只打印前10个键看看是否从 1 开始
     print("daily_prices Range:", min(daily_prices.keys()), "->", max(daily_prices.keys()))
     print("total_time_steps:", total_time_steps)
+    print("ev_arrival:", ev_arrival)
+    print("ev_departure:", ev_departure)
     return total_time_steps, ev_arrival, ev_departure, daily_prices
 
 
