@@ -60,11 +60,11 @@ class HouseholdADMM_CVXPY:
 
         # **目标函数：最小化购电成本**
         objective = cvx.Minimize(
-            cvx.sum(import_energy[t] * cvx.Constant(self.daily_prices[t]['import_price']) for t in range(self.T)) +
-            cvx.sum(trade_in[(self.h, h2)][t] * self.lambda_trade for h2 in range(self.H) for t in range(self.T)) -  # 购买交易电的成本
-            cvx.sum(export_energy[t] * cvx.Constant(self.daily_prices[t]['export_price']) for t in range(self.T)) - 
-            cvx.sum(trade_out[(self.h, h2)][t] * self.lambda_trade for h2 in range(self.H) for t in range(self.T)) +  # 卖电的收益
-            cvx.sum(self.penalty * self.ev_max_capacity * (1 - ev_soc[t]))  # 确保常量部分使用 cvx.Constant
+            cvx.sum([import_energy[t] * cvx.Constant(self.daily_prices[t]['import_price']) for t in range(self.T)]) +
+            cvx.sum([trade_in[(self.h, h2)][t] * self.lambda_trade for h2 in range(self.H) for t in range(self.T)]) -  # 购买交易电的成本
+            cvx.sum([export_energy[t] * cvx.Constant(self.daily_prices[t]['export_price']) for t in range(self.T)]) - 
+            cvx.sum([trade_out[(self.h, h2)][t] * self.lambda_trade for h2 in range(self.H) for t in range(self.T)]) +  # 卖电的收益
+            cvx.sum([self.penalty * self.ev_max_capacity * (1 - ev_soc[t]) for t in range(self.T)])  # 确保常量部分使用 cvx.Constant
             )
 
         # **能量平衡约束**
