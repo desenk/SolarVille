@@ -346,8 +346,8 @@ def optimize_and_plot(time_step, start_date, end_date, ev_arrival, ev_departure,
                 if ev_max_capacity[household_index_map[h]] > 0:
                     if t in ev_arrival:
                         m.constraints.add(m.ev_soc[h, t] == 85)
-                    elif t in ev_departure:
-                        m.constraints.add(m.ev_soc[h, t] == 100)
+                    #elif t in ev_departure:
+                        #m.constraints.add(m.ev_soc[h, t] == 100)
                     else:
                         m.constraints.add(
                         m.ev_soc[h, t] == m.ev_soc[h, t - 1] + (m.ev_load[h, t] / ev_max_capacity[household_index_map[h]]) * 100
@@ -388,7 +388,7 @@ def optimize_and_plot(time_step, start_date, end_date, ev_arrival, ev_departure,
             daily_prices[t]['peer_buy_price'] * m.trade[h2, h, t] - daily_prices[t]['peer_sell_price'] * m.trade[h, h2, t]
             for h in m.H for t in m.T for h2 in m.H if h2 != h
         )  + sum(
-            penalty * (ev_max_capacity[household_index_map[h]] * ( 1 - m.ev_soc[h, T] )) 
+            penalty * (ev_max_capacity[household_index_map[h]] * ( 1 - m.ev_soc[h, t] )) 
             for h in m.H for t in ev_departure  # everyday 8:30
         ),
         sense=pyo.minimize
