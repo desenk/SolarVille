@@ -193,57 +193,57 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
         ev_load_values = [float(pyo.value(m.ev_load[h_index + 1, t])) for t in range(1, T + 1)]
         total_load_values = [float(pyo.value(m.ev_load[h_index + 1, t])) + float(Base_Load[h][t])for t in range(1, T + 1)]
         
-        axes[0].plot(time_index, base_load_values, label="Base Load", linestyle="--", color="blue")
-        axes[0].fill_between(time_index, base_load_values, total_load_values, color="purple", alpha=0.6, label="EV Load")
-        axes[0].set_title(f"{h} - Base Load & EV Load")
-        axes[0].legend()
-        axes[0].grid(True)
+        axes[0, 0].plot(time_index, base_load_values, label="Base Load", linestyle="--", color="blue")
+        axes[0, 0].fill_between(time_index, base_load_values, total_load_values, color="purple", alpha=0.6, label="EV Load")
+        axes[0, 0].set_title(f"{h} - Base Load & EV Load")
+        axes[0, 0].legend()
+        axes[0, 0].grid(True)
 
         # **2. Generation**
         if household_config[h]["solar"]:
             gen_values = [Gen[h][t] for t in range(1, T + 1)]
-            axes[1].plot(time_index, gen_values, label="Generation", color="orange")
+            axes[1, 0].plot(time_index, gen_values, label="Generation", color="orange")
         else:
-            axes[1].plot(time_index, [0] * T, label="No Generation", color="gray")
-        axes[1].set_title(f"{h} - Generation")
-        axes[1].legend()
-        axes[1].grid(True)
+            axes[1, 0].plot(time_index, [0] * T, label="No Generation", color="gray")
+        axes[1, 0].set_title(f"{h} - Generation")
+        axes[1, 0].legend()
+        axes[1, 0].grid(True)
 
         # **3. Import, Export, Trading**
         import_values = [import_energy[h_index + 1][t] for t in range(1, T + 1)]
         export_values = [-export_energy[h_index + 1][t] for t in range(1, T + 1)]
-        axes[2].bar(time_index, import_values, label="Import Energy", alpha=0.5, color="red")
-        axes[2].bar(time_index, export_values, label="Export Energy", alpha=0.5, color="green")
+        axes[2, 0].bar(time_index, import_values, label="Import Energy", alpha=0.5, color="red")
+        axes[2, 0].bar(time_index, export_values, label="Export Energy", alpha=0.5, color="green")
 
         if trades:
             for h2 in trades[h_index + 1]:
                 trade_values = [trades[h_index + 1][h2][t] for t in range(1, T + 1)]
-                axes[2].plot(time_index, trade_values, label=f"Trade with {household_index_map[h2]}", linestyle=":")
+                axes[2, 0].plot(time_index, trade_values, label=f"Trade with {household_index_map[h2]}", linestyle=":")
 
-        axes[2].set_title(f"{h} - Import, Export, Trading Energy")
-        axes[2].legend()
-        axes[2].grid(True)
+        axes[2, 0].set_title(f"{h} - Import, Export, Trading Energy")
+        axes[2, 0].legend()
+        axes[2, 0].grid(True)
 
         # **4. Battery SOC & EV SOC**
         ev_soc_values = [ev_soc[h_index + 1][t] for t in range(1, T + 1)]
         battery_soc_values = [battery_soc[h_index + 1][t] for t in range(1, T + 1)]
-        axes[3].plot(time_index, ev_soc_values, label="EV SOC (%)", linestyle="-", color="blue")
-        axes[3].plot(time_index, battery_soc_values, label="Battery SOC (%)", linestyle=":", color="orange")
-        axes[3].set_title(f"{h} - Battery & EV SOC")
-        axes[3].legend()
-        axes[3].grid(True)
+        axes[0, 1].plot(time_index, ev_soc_values, label="EV SOC (%)", linestyle="-", color="blue")
+        axes[0, 1].plot(time_index, battery_soc_values, label="Battery SOC (%)", linestyle=":", color="orange")
+        axes[0, 1].set_title(f"{h} - Battery & EV SOC")
+        axes[0, 1].legend()
+        axes[0, 1].grid(True)
 
-        axes[4].plot(time_index, import_price, label="Electricity Price", color="blue", linewidth=2)
-        axes[4].plot(time_index, peer_buy_price, label="Peer Buy Price", linestyle=":", color="green")
-        axes[4].plot(time_index, peer_sell_price, label="Peer Sell Price", linestyle="-.", color="red")
-        axes[4].set_title(f"{h} - Price (£/kWh)")
-        axes[4].legend()
-        axes[4].grid(True)
+        axes[1, 1].plot(time_index, import_price, label="Electricity Price", color="blue", linewidth=2)
+        axes[1, 1].plot(time_index, peer_buy_price, label="Peer Buy Price", linestyle=":", color="green")
+        axes[1, 1].plot(time_index, peer_sell_price, label="Peer Sell Price", linestyle="-.", color="red")
+        axes[1, 1].set_title(f"{h} - Price (£/kWh)")
+        axes[1, 1].legend()
+        axes[1, 1].grid(True)
 
-        axes[5].plot(time_index, penalty_h, label="Penalty", color="blue", linewidth=2)
-        axes[5].set_title(f"{h} - Penalty (£)")
-        axes[5].legend()
-        axes[5].grid(True)
+        axes[2, 1].plot(time_index, penalty_h, label="Penalty", color="blue", linewidth=2)
+        axes[2, 1].set_title(f"{h} - Penalty (£)")
+        axes[2, 1].legend()
+        axes[2, 1].grid(True)
 
         # 格式化 X 轴
         for ax in axes:
