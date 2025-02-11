@@ -237,8 +237,8 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
         axes[1, 1].legend()
         axes[1, 1].grid(True)
 
-        penalty_values = [penalty[h_index + 1][t] for t in range(1, T + 1)]
-        axes[2, 1].plot(time_index, penalty_values, label="Penalty", color="blue", linewidth=2)
+        penalty_values = [penalty[h_index + 1][t] for t in ev_departure]
+        axes[2, 1].plot(ev_departure, penalty_values, label="Penalty", color="blue", linewidth=2)
         if trades:
             for h2 in trades[h_index + 1]:
                 trade_values = [trades[h_index + 1][h2][t] for t in range(1, T + 1)]
