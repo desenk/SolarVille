@@ -247,7 +247,7 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
         axes[2, 1].grid(True)
 
         # 格式化 X 轴
-        for ax in axes:
+        for ax in axes.ravel():
             ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M"))
             ax.xaxis.set_major_locator(mdates.HourLocator(interval=6))
             ax.tick_params(axis="x", rotation=45)
