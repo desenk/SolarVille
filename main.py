@@ -250,7 +250,7 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
         for ax in axes.ravel():
             ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M"))
             ax.xaxis.set_major_locator(mdates.HourLocator(interval=6))
-            ax.tick_params(axis="x", rotation=15)
+            ax.tick_params(axis="x", rotation=75)
 
         plt.tight_layout()
         plt.show()
@@ -293,7 +293,7 @@ def optimize_and_plot(time_step, start_date, end_date, Base_Load, Gen, battery_c
     m.battery_soc = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=lambda m, h, t: (battery_soc_min[household_index_map[h]], battery_soc_max[household_index_map[h]]))
     m.ev_charge = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=(0, 7))  # EV 每小时充电速率最多 7kWh
     m.ev_load = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals)
-    m.ev_soc = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals)
+    m.ev_soc = pyo.Var(m.H, m.T, domain=pyo.NonNegativeReals, bounds=lambda m, h, t: (0, 100) )
     m.trade = pyo.Var(m.H, m.H, m.T, domain=pyo.NonNegativeReals)
 
     # 约束
