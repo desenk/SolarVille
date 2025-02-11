@@ -263,7 +263,7 @@ def plot_results(T, start_date, end_date, Base_Load, total_load, Gen, import_ene
         plt.show()
 
 # 优化模型和绘图
-def optimize_and_plot(time_step, start_date, end_date, Base_Load, Gen, battery_capacity, 
+def optimize_and_plot(time_step, start_date, end_date, ev_arrival, ev_departure, Base_Load, Gen, battery_capacity, 
                       charge_power_limit, discharge_power_limit, ev_max_capacity, ev_initial_soc, daily_prices):
     """
     优化模型并绘制结果。
@@ -346,6 +346,8 @@ def optimize_and_plot(time_step, start_date, end_date, Base_Load, Gen, battery_c
                 if ev_max_capacity[household_index_map[h]] > 0:
                     if t in ev_arrival:
                         m.constraints.add(m.ev_soc[h, t] == 85)
+                    elif t in ev_departure:
+                        m.constraints.add(m.ev_soc[h, t] == 100)
                     else:
                         m.constraints.add(
                         m.ev_soc[h, t] == m.ev_soc[h, t - 1] + (m.ev_load[h, t] / ev_max_capacity[household_index_map[h]]) * 100
@@ -468,5 +470,5 @@ if __name__ == "__main__":
     print("EV Max capacity:", ev_max_capacity)
 
     # 优化与绘图
-    optimize_and_plot(total_steps, start_date, end_date, Base_Load, Gen, battery_capacity, charge_power_limit, 
+    optimize_and_plot(total_steps, start_date, end_date, ev_arrival, ev_departure, Base_Load, Gen, battery_capacity, charge_power_limit, 
                       discharge_power_limit, ev_max_capacity, ev_initial_soc, daily_prices)
