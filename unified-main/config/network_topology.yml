@@ -1,0 +1,13 @@
+devices:
+  pi1:
+    name: pi1
+    ip_address: 10.126.56.181
+    is_prosumer: true
+    hostname: prosumer-pi-1
+    location: Lab Bench 1
+  pi2:
+    name: pi2
+    ip_address: 10.126.167.128
+    is_prosumer: false
+    hostname: consumer-pi-1
+    location: Lab Bench 2

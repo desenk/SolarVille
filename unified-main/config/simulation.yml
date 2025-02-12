@@ -1,0 +1,11 @@
+simulation:
+  file_path: data/block_0.csv
+  start_date: 2012-10-24
+  timescale: d
+  simulation_speed: 300
+  timeout: 5
+
+hardware:
+  mock_mode: true
+  lcd_enabled: true
+  solar_enabled: true
