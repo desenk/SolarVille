@@ -116,10 +116,11 @@ class HouseholdADMM_CVXPY:
                     constraints.append(ev_soc[t] == 0)
 
         # **家庭间交易平衡**
-        for h2 in households.keys() if h2 != self.h:
-            for t in range(self.T):
-                constraints.append(trade_out[(self.h, h2, t)] <= M * z_trade[self.h, h2, t])
-                constraints.append(trade_in[(self.h, h2, t)] <= M * (1 - z_trade[self.h, h2, t]))
+        for h2 in households.keys(): 
+            if h2 != self.h:
+                for t in range(self.T):
+                    constraints.append(trade_out[(self.h, h2, t)] <= M * z_trade[self.h, h2, t])
+                    constraints.append(trade_in[(self.h, h2, t)] <= M * (1 - z_trade[self.h, h2, t]))
 
         # **不能同时买卖电，充放电**
         for t in range(self.T):
