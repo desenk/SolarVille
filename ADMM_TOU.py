@@ -27,7 +27,7 @@ class HouseholdADMM_CVXPY:
         self.rho = rho  # ADMM 罚因子
 
         self.H = len(self.base_load) #仿真的家庭数量
-        self.lambda_trade = {(self.h, h2, t): 0 for h2 in households.keys()  for t in range(self.T)}
+        self.lambda_trade = {(self.h, h2, t): 0 for h2 in households.keys() if h2 != self.h for t in range(self.T)}
                      
     def solve_local_optimization(self):
         """
@@ -50,13 +50,14 @@ class HouseholdADMM_CVXPY:
            for h2 in households.keys() for t in range(self.T)}    # 是否发生交易（家庭 h1 与 h2 在时间 t 交易）
 
         # 交易变量：家庭 h 在时间 t 向家庭 h2 交易的电量
-        trade_out = {(self.h, h2, t): cvx.Variable(nonneg=True)  for h2 in households.keys() for t in range(self.T)}
-        trade_in = {(self.h, h2, t): cvx.Variable(nonneg=True)  for h2 in households.keys() for t in range(self.T)}
+        trade_out = {(self.h, h2, t): cvx.Variable(nonneg=True)  for h2 in households.keys() if h2 != self.h for t in range(self.T)}
+        trade_in = {(self.h, h2, t): cvx.Variable(nonneg=True)  for h2 in households.keys() if h2 != self.h for t in range(self.T)}
         print("trade_in keys:", list(trade_in.keys())[:10])
         # **目标函数：最小化购电成本**
         objective = cvx.Minimize(
             cvx.sum([import_energy[t] * cvx.Constant(self.daily_prices[t]['import_price']) for t in range(self.T)]) +
-            cvx.sum([trade_in[(self.h, h2, t)] * cvx.Constant(self.lambda_trade[(self.h, h2, t)]) for h2 in households.keys() for t in range(self.T)]) -  # 购买交易电的成本
+            cvx.sum([trade_in[(self.h, h2, t)] * cvx.Constant(self.lambda_trade[(self.h, h2, t)]) 
+                     for h2 in households.keys() if h2 != self.h for t in range(self.T)]) -  # 购买交易电的成本
             cvx.sum([export_energy[t] * cvx.Constant(self.daily_prices[t]['export_price']) for t in range(self.T)]) - 
             cvx.sum([trade_out[(self.h, h2, t)] * cvx.Constant(self.lambda_trade[(self.h, h2, t)]) for h2 in households.keys() for t in range(self.T)]) +  # 卖电的收益
             cvx.sum([self.penalty * self.ev_max_capacity * (1 - ev_soc[t]) for t in range(self.T)])  # 确保常量部分使用 cvx.Constant
@@ -109,10 +110,6 @@ class HouseholdADMM_CVXPY:
                     )
                 else:
                     constraints.append(ev_soc[t] == 0)
-
-        # **禁止家庭与自己交易**
-        for t in range(self.T):
-            constraints.append(trade_out[self.h, self.h, t] == 0)
 
         # **家庭间交易平衡**
         for h2 in households.keys():
