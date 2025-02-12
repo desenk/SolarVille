@@ -28,7 +28,9 @@ class HouseholdADMM_CVXPY:
 
         self.H = len(self.base_load) #仿真的家庭数量
         self.lambda_trade = {(self.h, h2, t): 0 for h2 in households.keys() if h2 != self.h for t in range(self.T)}
-                     
+        self.trade_out = {(self.h, h2, t): cvx.Variable(nonneg=True)  for h2 in households.keys() if h2 != self.h for t in range(self.T)}
+        self.trade_in = {(self.h, h2, t): cvx.Variable(nonneg=True)  for h2 in households.keys() if h2 != self.h for t in range(self.T)}
+          
     def solve_local_optimization(self):
         """
         解决本地 CVXPY 优化问题
@@ -47,11 +49,11 @@ class HouseholdADMM_CVXPY:
         z_grid = cvx.Variable((self.H, self.T), boolean=True)        # 是否购电
         z_battery = cvx.Variable((self.H, self.T), boolean=True)     # 是否充电
         z_trade = {(self.h, h2, t): cvx.Variable(boolean=True)  
-           for h2 in households.keys() for t in range(self.T)}    # 是否发生交易（家庭 h1 与 h2 在时间 t 交易）
+           for h2 in households.keys() if h2 != self.h for t in range(self.T)}    # 是否发生交易（家庭 h1 与 h2 在时间 t 交易）
 
         # 交易变量：家庭 h 在时间 t 向家庭 h2 交易的电量
-        trade_out = {(self.h, h2, t): cvx.Variable(nonneg=True)  for h2 in households.keys() if h2 != self.h for t in range(self.T)}
-        trade_in = {(self.h, h2, t): cvx.Variable(nonneg=True)  for h2 in households.keys() if h2 != self.h for t in range(self.T)}
+        trade_out = self.trade_out
+        trade_in = self.trade_in
         print("trade_in keys:", list(trade_in.keys())[:10])
         # **目标函数：最小化购电成本**
         objective = cvx.Minimize(
@@ -59,7 +61,8 @@ class HouseholdADMM_CVXPY:
             cvx.sum([trade_in[(self.h, h2, t)] * cvx.Constant(self.lambda_trade[(self.h, h2, t)]) 
                      for h2 in households.keys() if h2 != self.h for t in range(self.T)]) -  # 购买交易电的成本
             cvx.sum([export_energy[t] * cvx.Constant(self.daily_prices[t]['export_price']) for t in range(self.T)]) - 
-            cvx.sum([trade_out[(self.h, h2, t)] * cvx.Constant(self.lambda_trade[(self.h, h2, t)]) for h2 in households.keys() for t in range(self.T)]) +  # 卖电的收益
+            cvx.sum([trade_out[(self.h, h2, t)] * cvx.Constant(self.lambda_trade[(self.h, h2, t)]) 
+                     for h2 in households.keys() if h2 != self.h for t in range(self.T)]) +  # 卖电的收益
             cvx.sum([self.penalty * self.ev_max_capacity * (1 - ev_soc[t]) for t in range(self.T)])  # 确保常量部分使用 cvx.Constant
             )
 
@@ -67,8 +70,9 @@ class HouseholdADMM_CVXPY:
         constraints = []
         for t in range(self.T):
             constraints.append(
-                self.base_load[t] + battery_charge[t] + cvx.sum(trade_out[(self.h, h2, t)] for h2 in households.keys()) ==
-                self.gen[t] + battery_discharge[t] + import_energy[t] + cvx.sum(trade_in[(self.h, h2, t)] for h2 in households.keys())
+                self.base_load[t] + battery_charge[t] + cvx.sum(trade_out[(self.h, h2, t)] for h2 in households.keys() if h2 != self.h) ==
+                self.gen[t] + battery_discharge[t] + import_energy[t] + 
+                cvx.sum(trade_in[(self.h, h2, t)] for h2 in households.keys() if h2 != self.h)
             )
 
         # **电池约束**
@@ -112,7 +116,7 @@ class HouseholdADMM_CVXPY:
                     constraints.append(ev_soc[t] == 0)
 
         # **家庭间交易平衡**
-        for h2 in households.keys():
+        for h2 in households.keys() if h2 != self.h:
             for t in range(self.T):
                 constraints.append(trade_out[(self.h, h2, t)] <= M * z_trade[self.h, h2, t])
                 constraints.append(trade_in[(self.h, h2, t)] <= M * (1 - z_trade[self.h, h2, t]))
