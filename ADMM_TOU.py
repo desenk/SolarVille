@@ -27,14 +27,8 @@ class HouseholdADMM_CVXPY:
         self.rho = rho  # ADMM 罚因子
 
         self.H = len(self.base_load) #仿真的家庭数量
-        # ADMM 变量
-        # 卖出的电量 trade_out[h, h2, t]，存储家庭 h 在时间 t 向 h2 交易的电量
-        self.trade_out = {(self.h, h2, t): 0.0 for h2 in households.keys() for t in range(self.T)}
-        # 买入的电量 trade_in[h, h2, t]，存储家庭 h 在时间 t 从 h2 购买的电量
-        self.trade_in = {(self.h, h2, t): 0.0 for h2 in households.keys() for t in range(self.T)}
-        # 交易的拉格朗日乘子 lambda_trade[h, h2, t]，表示交易价格（对偶变量）
-        self.lambda_trade = {(self.h, h2, t): 0.0 for h2 in households.keys() if h2 != self.h for t in range(self.T)}
-
+        self.lambda_trade = {(self.h, h2, t): 0 for h2 in households.keys() if h2 != self.h for t in range(self.T)}
+                     
     def solve_local_optimization(self):
         """
         解决本地 CVXPY 优化问题
@@ -62,9 +56,9 @@ class HouseholdADMM_CVXPY:
         # **目标函数：最小化购电成本**
         objective = cvx.Minimize(
             cvx.sum([import_energy[t] * cvx.Constant(self.daily_prices[t]['import_price']) for t in range(self.T)]) +
-            cvx.sum([trade_in[(self.h, h2, t)] * cvx.Constant(float(self.lambda_trade)) for h2 in households.keys() for t in range(self.T)]) -  # 购买交易电的成本
+            cvx.sum([trade_in[(self.h, h2, t)] * cvx.Constant(self.lambda_trade) for h2 in households.keys() for t in range(self.T)]) -  # 购买交易电的成本
             cvx.sum([export_energy[t] * cvx.Constant(self.daily_prices[t]['export_price']) for t in range(self.T)]) - 
-            cvx.sum([trade_out[(self.h, h2, t)] * cvx.Constant(float(self.lambda_trade)) for h2 in households.keys() for t in range(self.T)]) +  # 卖电的收益
+            cvx.sum([trade_out[(self.h, h2, t)] * cvx.Constant(self.lambda_trade) for h2 in households.keys() for t in range(self.T)]) +  # 卖电的收益
             cvx.sum([self.penalty * self.ev_max_capacity * (1 - ev_soc[t]) for t in range(self.T)])  # 确保常量部分使用 cvx.Constant
             )
 
