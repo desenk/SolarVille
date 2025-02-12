@@ -52,12 +52,13 @@ class HouseholdADMM_CVXPY:
         # 二进制变量（0 或 1）
         z_grid = cvx.Variable((self.H, self.T), boolean=True)        # 是否购电
         z_battery = cvx.Variable((self.H, self.T), boolean=True)     # 是否充电
-        z_trade = cvx.Variable((self.H, self.H, self.T), boolean=True)    # 是否发生交易（家庭 h1 与 h2 在时间 t 交易）
+        z_trade = {(self.h, h2, t): cvx.Variable(boolean=True)  
+           for h2 in households.keys() for t in range(self.T)}    # 是否发生交易（家庭 h1 与 h2 在时间 t 交易）
 
         # 交易变量：家庭 h 在时间 t 向家庭 h2 交易的电量
         trade_out = {(self.h, h2, t): cvx.Variable(nonneg=True)  for h2 in households.keys() for t in range(self.T)}
         trade_in = {(self.h, h2, t): cvx.Variable(nonneg=True)  for h2 in households.keys() for t in range(self.T)}
-
+        print("trade_in keys:", list(trade_in.keys()))
         # **目标函数：最小化购电成本**
         objective = cvx.Minimize(
             cvx.sum([import_energy[t] * cvx.Constant(self.daily_prices[t]['import_price']) for t in range(self.T)]) +
