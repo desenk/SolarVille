@@ -6,11 +6,13 @@ import cvxpy as cvx
 from cvxpy import Minimize, Problem, Variable, norm, square
 from datetime import datetime, timedelta
 from multiprocessing import Pool
+from multiprocessing import Manager
 
 class HouseholdADMM_CVXPY:
-    def __init__(self, total_time_steps, household_id, base_load, gen, battery_capacity, charge_power_limit, discharge_power_limit,
+    def __init__(self, total_time_steps, household_ids, household_id, base_load, gen, battery_capacity, charge_power_limit, discharge_power_limit,
                  ev_max_capacity, ev_initial_soc, daily_prices, rho=0.1):
         self.T = total_time_steps #仿真的时间长度
+        self.household_ids = household_ids #存储了所有家庭id的列表
         self.h = household_id #当前的家庭id
         self.base_load = base_load  # 家庭负载
         self.gen = gen  # 光伏发电
@@ -27,10 +29,26 @@ class HouseholdADMM_CVXPY:
         self.rho = rho  # ADMM 罚因子
 
         self.H = len(self.base_load) #仿真的家庭数量
-        self.lambda_trade = {(self.h, h2, t): 0 for h2 in households.keys() if h2 != self.h for t in range(self.T)}
-        self.trade_out = {(self.h, h2, t): cvx.Variable(nonneg=True)  for h2 in households.keys() if h2 != self.h for t in range(self.T)}
-        self.trade_in = {(self.h, h2, t): cvx.Variable(nonneg=True)  for h2 in households.keys() if h2 != self.h for t in range(self.T)}
-          
+        self.lambda_trade = {(self.h, h2, t): 0 for h2 in self.household_ids if h2 != self.h for t in range(self.T)}
+        self.trade_out = {(self.h, h2, t): cvx.Variable(nonneg=True)  for h2 in self.household_ids if h2 != self.h for t in range(self.T)}
+        self.trade_in = {(self.h, h2, t): cvx.Variable(nonneg=True)  for h2 in self.household_ids if h2 != self.h for t in range(self.T)}
+    
+    def solve_optimization(h):
+        with Manager() as manager:
+            # 使用 manager 创建共享的字典
+            trade_in = manager.dict()
+            trade_out = manager.dict()
+            lambda_trade = manager.dict()    
+            for h2 in self.household_ids:
+                for t in range(self.T):
+                    trade_in[(self.h, h2, t)] = cvx.Variable(nonneg=True)
+                    trade_out[(self.h, h2, t)] = cvx.Variable(nonneg=True)
+                    lambda_trade[(self.h, h2, t)] = 0
+        
+        h.solve_local_optimization()
+        print(f"Household {h.h} results: trade_out={h.trade_out}, trade_in={h.trade_in}")
+        return h.trade_out, h.trade_in, h.import_energy
+    
     def solve_local_optimization(self):
         """
         解决本地 CVXPY 优化问题
@@ -49,7 +67,7 @@ class HouseholdADMM_CVXPY:
         z_grid = cvx.Variable((self.H, self.T), boolean=True)        # 是否购电
         z_battery = cvx.Variable((self.H, self.T), boolean=True)     # 是否充电
         z_trade = {(self.h, h2, t): cvx.Variable(boolean=True)  
-           for h2 in households.keys() if h2 != self.h for t in range(self.T)}    # 是否发生交易（家庭 h1 与 h2 在时间 t 交易）
+           for h2 in self.household_ids if h2 != self.h for t in range(self.T)}    # 是否发生交易（家庭 h1 与 h2 在时间 t 交易）
 
         # 交易变量：家庭 h 在时间 t 向家庭 h2 交易的电量
         trade_out = self.trade_out
@@ -59,10 +77,10 @@ class HouseholdADMM_CVXPY:
         objective = cvx.Minimize(
             cvx.sum([import_energy[t] * cvx.Constant(self.daily_prices[t]['import_price']) for t in range(self.T)]) +
             cvx.sum([trade_in[(self.h, h2, t)] * cvx.Constant(self.lambda_trade[(self.h, h2, t)]) 
-                     for h2 in households.keys() if h2 != self.h for t in range(self.T)]) -  # 购买交易电的成本
+                     for h2 in self.household_ids if h2 != self.h for t in range(self.T)]) -  # 购买交易电的成本
             cvx.sum([export_energy[t] * cvx.Constant(self.daily_prices[t]['export_price']) for t in range(self.T)]) - 
             cvx.sum([trade_out[(self.h, h2, t)] * cvx.Constant(self.lambda_trade[(self.h, h2, t)]) 
-                     for h2 in households.keys() if h2 != self.h for t in range(self.T)]) +  # 卖电的收益
+                     for h2 in self.household_ids if h2 != self.h for t in range(self.T)]) +  # 卖电的收益
             cvx.sum([self.penalty * self.ev_max_capacity * (1 - ev_soc[t]) for t in range(self.T)])  # 确保常量部分使用 cvx.Constant
             )
 
@@ -70,9 +88,9 @@ class HouseholdADMM_CVXPY:
         constraints = []
         for t in range(self.T):
             constraints.append(
-                self.base_load[t] + battery_charge[t] + cvx.sum(trade_out[(self.h, h2, t)] for h2 in households.keys() if h2 != self.h) ==
+                self.base_load[t] + battery_charge[t] + cvx.sum(trade_out[(self.h, h2, t)] for h2 in self.household_ids if h2 != self.h) ==
                 self.gen[t] + battery_discharge[t] + import_energy[t] + 
-                cvx.sum(trade_in[(self.h, h2, t)] for h2 in households.keys() if h2 != self.h)
+                cvx.sum(trade_in[(self.h, h2, t)] for h2 in self.household_ids if h2 != self.h)
             )
 
         # **电池约束**
@@ -116,7 +134,7 @@ class HouseholdADMM_CVXPY:
                     constraints.append(ev_soc[t] == 0)
 
         # **家庭间交易平衡**
-        for h2 in households.keys(): 
+        for h2 in self.household_ids: 
             if h2 != self.h:
                 for t in range(self.T):
                     constraints.append(trade_out[(self.h, h2, t)] <= M * z_trade[self.h, h2, t])
@@ -142,7 +160,7 @@ class HouseholdADMM_CVXPY:
         """
         用 ADMM 进行交易电量调整
         """
-        for h2 in households.keys():  # 遍历所有可能的交易对手 h2
+        for h2 in self.household_ids:  # 遍历所有可能的交易对手 h2
             if h2 == self.h:  
                 continue  # 跳过自己和自己的交易
             
@@ -157,34 +175,31 @@ class HouseholdADMM_CVXPY:
 
                 # **拉格朗日乘子（对偶变量）更新**
                 self.lambda_trade[(self.h, h2, t)] += self.rho * (self.trade_out[(self.h, h2, t)] - neighbor_trade[(h2, self.h, t)])
-def solve_optimization(h):
-    h.solve_local_optimization()
-    print(f"Household {h.h} results: trade_out={h.trade_out}, trade_in={h.trade_in}")
-    return h.trade_out, h.trade_in, h.import_energy
-    
-def run_admm(households, num_iterations=20):
+
+def run_admm(households_data, num_iterations=20):
     with Pool(processes=10) as pool:  # 使用10个进程并行处理
         for i in range(num_iterations):
             # **1. 每个家庭独立优化**
-            pool.map(solve_optimization, households.values())
+            pool.map(solve_optimization, [household for household in households_data.values()])
 
             # **2. 交换交易信息**
-            neighbor_trades = {h: { (h, h2, t): households[h].trade_out[(h, h2, t)] 
-                                    for h2 in households.keys() if (h, h2, t) in households[h].trade_out
-                                    for t in range(households[h].T) }
-                               for h in households}
+            neighbor_trades = {h: { (h, h2, t): households_data[h].trade_out[(h, h2, t)] 
+                                    for h2 in households_data[h].household_ids 
+                                   if (h, h2, t) in households_data[h].trade_out
+                                    for t in range(households_data[h].T) }
+                               for h in households_data[h].household_ids}
 
             # **3. ADMM 更新**
-            def update_wrapper(h):
-                return h.update_admm_variables(neighbor_trades[h])
-            pool.map(update_wrapper, households.values())
+            def update_wrapper(household):
+                return household.update_admm_variables(neighbor_trades[household.h])
+            pool.map(update_wrapper, [household for household in households_data.values()])
 
             # **4. 计算收敛误差**
-            max_gap = max(abs(households[h].trade_out[(h, h2, t)] - households[h2].trade_in[(h, h2, t)]) 
-                          for h in households 
-                          for h2 in households 
-                          for t in range(households[h].T) 
-                          if (h, h2, t) in households[h].trade_out and (h, h2, t) in households[h2].trade_in)
+            max_gap = max(abs(households_data[h].trade_out[(h, h2, t)] - households_data[h2].trade_in[(h, h2, t)]) 
+                          for h in households_data[h].household_ids
+                          for h2 in households_data[h].household_ids 
+                          for t in range(households_data[h].T) 
+                          if (h, h2, t) in households_data[h].trade_out and (h, h2, t) in households_data[h2].trade_in)
             print(f"Iteration {i+1}, Max Gap: {max_gap}")
             if max_gap < 1e-3:
                 print("ADMM 收敛！")
@@ -294,16 +309,16 @@ def calculate_total_time_steps_and_prices(
 
 # 数据映射到模型, T is from calculate_total_time_steps
 def map_data_to_model(household_df, solar_half_hour, config, T):
-    households = config.keys()
-    Base_Load = {h: {} for h in households}
-    Gen = {h: {} for h in households}
+    household_ids = config.keys()
+    Base_Load = {h: {} for h in household_ids}
+    Gen = {h: {} for h in household_ids}
     battery_capacity = {}
     charge_power_limit = {}
     discharge_power_limit = {}
     ev_max_capacity = {}
     ev_initial_soc = {}
 
-    for household in households:
+    for household in household_ids:
         # 获取该家庭的数据
         household_data = household_df[household_df['lclid'] == household].copy()
 
@@ -394,13 +409,13 @@ if __name__ == "__main__":
     )
 
     # 创建所有家庭的 ADMM 实例
-    households = {}
+    households_data = {}
     for h in household_config.keys():
-        households[h] = HouseholdADMM_CVXPY(
-            total_time_steps, h, Base_Load[h], Gen[h], battery_capacity[h], charge_power_limit[h], discharge_power_limit[h], ev_max_capacity, 
+        households_data[h] = HouseholdADMM_CVXPY(
+            total_time_steps, household_ids, h, Base_Load[h], Gen[h], battery_capacity[h], charge_power_limit[h], discharge_power_limit[h], ev_max_capacity, 
             ev_initial_soc, daily_prices
         )
 
-    run_admm(households)
+    run_admm(households_data)
 
 
