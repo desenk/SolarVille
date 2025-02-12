@@ -415,7 +415,7 @@ if __name__ == "__main__":
             total_time_steps, household_ids, h, Base_Load[h], Gen[h], battery_capacity[h], charge_power_limit[h], discharge_power_limit[h], ev_max_capacity, 
             ev_initial_soc, daily_prices
         )
-
-    run_admm(households_data, your_class_instance=HouseholdADMM_CVXPY)
+    household_instance = households_data[list(household_config.keys())[0]]  
+    run_admm(households_data, your_class_instance=household_instance)
 
 
