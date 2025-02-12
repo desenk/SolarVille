@@ -179,7 +179,7 @@ class HouseholdADMM_CVXPY:
 def solve_optimization_wrapper(household):
     household.solve_optimization()
 def run_admm(households_data, num_iterations=20, your_class_instance=None):
-    with Pool(processes=10) as pool:  # 使用10个进程并行处理
+    with Pool(processes=10, daemon=False) as pool:  # 使用10个进程并行处理
         for i in range(num_iterations):
             # **1. 每个家庭独立优化**
             pool.map(solve_optimization_wrapper, [household for household in households_data.values()])
