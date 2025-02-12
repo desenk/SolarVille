@@ -143,3 +143,87 @@ class ConfigManager:
         if local_device:
             logging.info(f"Device Role: {'Prosumer' if local_device.is_prosumer else 'Consumer'}")
             logging.info(f"Device Info: {vars(local_device)}")
+
+    def validate_config(self) -> None:
+        """
+        Validate the loaded configuration.
+        Raises ConfigurationError if validation fails.
+        """
+        try:
+            self._validate_devices()
+            self._validate_simulation()
+            self._validate_network()
+            logging.info("Configuration validation successful")
+        except Exception as e:
+            raise ConfigurationError(f"Configuration validation failed: {e}")
+
+    def _validate_devices(self) -> None:
+        """Validate device configuration"""
+        if not self.devices:
+            raise ConfigurationError("No devices configured")
+        
+        # Check if local device exists
+        local_device = self.get_local_device()
+        if not local_device:
+            raise ConfigurationError("Local device not found in configuration")
+        
+        # Validate IP addresses
+        for name, device in self.devices.items():
+            if not self._is_valid_ip(device.ip_address):
+                raise ConfigurationError(f"Invalid IP address for device {name}: {device.ip_address}")
+            
+            # Check for duplicate IPs
+            ip_count = sum(1 for d in self.devices.values() if d.ip_address == device.ip_address)
+            if ip_count > 1:
+                raise ConfigurationError(f"Duplicate IP address found: {device.ip_address}")
+        
+        # Ensure at least one prosumer and one consumer
+        if not self.get_prosumers():
+            raise ConfigurationError("No prosumer devices configured")
+        if not self.get_consumers():
+            raise ConfigurationError("No consumer devices configured")
+
+    def _validate_simulation(self) -> None:
+        """Validate simulation configuration"""
+        # Check time parameters
+        if self.simulation_config.simulation_speed <= 0:
+            raise ConfigurationError("Simulation speed must be positive")
+        
+        if self.simulation_config.interval_seconds <= 0:
+            raise ConfigurationError("Interval seconds must be positive")
+        
+        # Validate date format
+        try:
+            from datetime import datetime
+            datetime.strptime(self.simulation_config.start_date, "%Y-%m-%d")
+        except ValueError:
+            raise ConfigurationError("Invalid start date format, should be YYYY-MM-DD")
+        
+        # Check timescale
+        if self.simulation_config.timescale not in ['d', 'w', 'm', 'y']:
+            raise ConfigurationError("Invalid timescale, must be one of: d, w, m, y")
+        
+        # Check if data file exists
+        if not os.path.exists(self.simulation_config.file_path):
+            raise ConfigurationError(f"Data file not found: {self.simulation_config.file_path}")
+
+    def _validate_network(self) -> None:
+        """Validate network configuration"""
+        if not (1024 <= self.server_port <= 65535):
+            raise ConfigurationError(f"Invalid server port: {self.server_port}")
+        
+        if not (1 <= self.retry_attempts <= 10):
+            raise ConfigurationError(f"Invalid retry attempts: {self.retry_attempts}")
+        
+        if not (1 <= self.timeout_seconds <= 30):
+            raise ConfigurationError(f"Invalid timeout seconds: {self.timeout_seconds}")
+
+    @staticmethod
+    def _is_valid_ip(ip: str) -> bool:
+        """Check if string is valid IPv4 address"""
+        import socket
+        try:
+            socket.inet_aton(ip)
+            return True
+        except socket.error:
+            return False
