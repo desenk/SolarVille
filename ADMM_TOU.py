@@ -52,7 +52,7 @@ class HouseholdADMM_CVXPY:
         # 交易变量：家庭 h 在时间 t 向家庭 h2 交易的电量
         trade_out = {(self.h, h2, t): cvx.Variable(nonneg=True)  for h2 in households.keys() for t in range(self.T)}
         trade_in = {(self.h, h2, t): cvx.Variable(nonneg=True)  for h2 in households.keys() for t in range(self.T)}
-        print("trade_in keys:", list(trade_in.keys()))
+        print("trade_in keys:", list(trade_in.keys())[:10])
         # **目标函数：最小化购电成本**
         objective = cvx.Minimize(
             cvx.sum([import_energy[t] * cvx.Constant(self.daily_prices[t]['import_price']) for t in range(self.T)]) +
