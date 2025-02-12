@@ -180,7 +180,7 @@ def run_admm(households_data, num_iterations=20, your_class_instance=None):
     with Pool(processes=10) as pool:  # 使用10个进程并行处理
         for i in range(num_iterations):
             # **1. 每个家庭独立优化**
-            pool.map(solve_optimization, [household for household in households_data.values()])
+            pool.map(lambda household: household.solve_optimization(), [household for household in households_data.values()])
 
             # **2. 交换交易信息**
             neighbor_trades = {h: { (h, h2, t): households_data[h].trade_out[(h, h2, t)] 
