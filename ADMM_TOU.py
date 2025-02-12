@@ -176,7 +176,7 @@ class HouseholdADMM_CVXPY:
                 # **拉格朗日乘子（对偶变量）更新**
                 self.lambda_trade[(self.h, h2, t)] += self.rho * (self.trade_out[(self.h, h2, t)] - neighbor_trade[(h2, self.h, t)])
 
-def run_admm(households_data, num_iterations=20):
+def run_admm(households_data, num_iterations=20, your_class_instance=None):
     with Pool(processes=10) as pool:  # 使用10个进程并行处理
         for i in range(num_iterations):
             # **1. 每个家庭独立优化**
@@ -416,6 +416,6 @@ if __name__ == "__main__":
             ev_initial_soc, daily_prices
         )
 
-    run_admm(households_data)
+    run_admm(households_data, your_class_instance=HouseholdADMM_CVXPY)
 
 
