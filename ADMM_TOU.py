@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from multiprocessing import Pool
 from multiprocessing import Manager
 import multiprocessing
-multiprocessing.set_start_method('spawn')
+
 class HouseholdADMM_CVXPY:
     def __init__(self, total_time_steps, household_ids, household_id, base_load, gen, battery_capacity, charge_power_limit, discharge_power_limit,
                  ev_max_capacity, ev_initial_soc, daily_prices, rho=0.1):
@@ -367,6 +367,7 @@ def map_data_to_model(household_df, solar_half_hour, config, T):
 
 
 if __name__ == "__main__":
+    multiprocessing.set_start_method('spawn')
     household_config = {
     "MAC003252": {"solar": True, "battery": True, "ev": False, "demand": True},
     "MAC003305": {"solar": True, "battery": False, "ev": False, "demand": True},
