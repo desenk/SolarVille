@@ -62,9 +62,9 @@ class HouseholdADMM_CVXPY:
         # **目标函数：最小化购电成本**
         objective = cvx.Minimize(
             cvx.sum([import_energy[t] * cvx.Constant(self.daily_prices[t]['import_price']) for t in range(self.T)]) +
-            cvx.sum([trade_in[(self.h, h2)][t] * self.lambda_trade for h2 in households.keys() for t in range(self.T)]) -  # 购买交易电的成本
+            cvx.sum([trade_in[(self.h, h2, t)] * self.lambda_trade for h2 in households.keys() for t in range(self.T)]) -  # 购买交易电的成本
             cvx.sum([export_energy[t] * cvx.Constant(self.daily_prices[t]['export_price']) for t in range(self.T)]) - 
-            cvx.sum([trade_out[(self.h, h2)][t] * self.lambda_trade for h2 in households.keys() for t in range(self.T)]) +  # 卖电的收益
+            cvx.sum([trade_out[(self.h, h2, t)] * self.lambda_trade for h2 in households.keys() for t in range(self.T)]) +  # 卖电的收益
             cvx.sum([self.penalty * self.ev_max_capacity * (1 - ev_soc[t]) for t in range(self.T)])  # 确保常量部分使用 cvx.Constant
             )
 
@@ -72,8 +72,8 @@ class HouseholdADMM_CVXPY:
         constraints = []
         for t in range(self.T):
             constraints.append(
-                self.base_load[t] + battery_charge[t] + cvx.sum(trade_out[self.h][h1][t] for h1 in range(self.H)) ==
-                self.gen[t] + battery_discharge[t] + import_energy[t] + cvx.sum(trade_in[self.h][h1][t] for h1 in range(self.H))
+                self.base_load[t] + battery_charge[t] + cvx.sum(trade_out[(self.h, h2, t)] for h2 in households.keys()) ==
+                self.gen[t] + battery_discharge[t] + import_energy[t] + cvx.sum(trade_in[(self.h, h2, t)] for h2 in households.keys())
             )
 
         # **电池约束**
@@ -118,13 +118,13 @@ class HouseholdADMM_CVXPY:
 
         # **禁止家庭与自己交易**
         for t in range(self.T):
-            constraints.append(trade_out[self.h][self.h][t] == 0)
+            constraints.append(trade_out[self.h, self.h, t] == 0)
 
         # **家庭间交易平衡**
         for h2 in households.keys():
             for t in range(self.T):
-                constraints.append(trade_out[self.h][h2][t] <= M * z_trade[self.h, h2, t])
-                constraints.append(trade_in[self.h][h2][t] <= M * (1 - z_trade[self.h, h2, t]))
+                constraints.append(trade_out[(self.h, h2, t)] <= M * z_trade[self.h, h2, t])
+                constraints.append(trade_in[(self.h, h2, t)] <= M * (1 - z_trade[self.h, h2, t]))
 
         # **不能同时买卖电，充放电**
         for t in range(self.T):
@@ -173,15 +173,23 @@ def run_admm(households, num_iterations=20):
             pool.map(solve_optimization, households.values())
 
             # **2. 交换交易信息**
-            neighbor_trades = {h: households[h].trade_out for h in households}
+            neighbor_trades = {h: { (h, h2, t): households[h].trade_out[(h, h2, t)] 
+                                    for h2 in households.keys() if (h, h2, t) in households[h].trade_out
+                                    for t in range(households[h].T) }
+                               for h in households}
 
             # **3. ADMM 更新**
-            pool.map(lambda h: h.update_admm_variables(neighbor_trades[h]), households.values())
+            def update_wrapper(h):
+                return h.update_admm_variables(neighbor_trades[h])
+            pool.map(update_wrapper, households.values())
 
             # **4. 计算收敛误差**
-            max_gap = max(abs(households[h].trade_out[t] - households[h].trade_in[t]) for h in households for t in households[h].trade_out)
+            max_gap = max(abs(households[h].trade_out[(h, h2, t)] - households[h2].trade_in[(h, h2, t)]) 
+                          for h in households 
+                          for h2 in households 
+                          for t in range(households[h].T) 
+                          if (h, h2, t) in households[h].trade_out and (h, h2, t) in households[h2].trade_in)
             print(f"Iteration {i+1}, Max Gap: {max_gap}")
-
             if max_gap < 1e-3:
                 print("ADMM 收敛！")
                 break
