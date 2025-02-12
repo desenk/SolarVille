@@ -7,6 +7,7 @@ from cvxpy import Minimize, Problem, Variable, norm, square
 from datetime import datetime, timedelta
 from multiprocessing import Pool
 from multiprocessing import Manager
+import multiprocessing
 multiprocessing.set_start_method('spawn')
 class HouseholdADMM_CVXPY:
     def __init__(self, total_time_steps, household_ids, household_id, base_load, gen, battery_capacity, charge_power_limit, discharge_power_limit,
