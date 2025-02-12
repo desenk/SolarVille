@@ -258,7 +258,7 @@ def calculate_total_time_steps_and_prices(
     ev_arrival = [arrival_step + i * steps_per_day for i in range(num_days)]
     ev_departure = [departure_step + i * steps_per_day for i in range(num_days)]
 
-    for t in range(1, total_time_steps + 1):  # 直接用 1 到 T 作为 key
+    for t in range(0, total_time_steps):  # 直接用 0 到 T 作为 key
         # 计算当前时间
         current_time = start + timedelta(minutes=(t - 1) * time_step_minutes)
 
