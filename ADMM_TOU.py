@@ -27,7 +27,7 @@ class HouseholdADMM_CVXPY:
         self.rho = rho  # ADMM 罚因子
 
         self.H = len(self.base_load) #仿真的家庭数量
-        self.lambda_trade = {(self.h, h2, t): 0 for h2 in households.keys() if h2 != self.h for t in range(self.T)}
+        self.lambda_trade = {(self.h, h2, t): 0 for h2 in households.keys()  for t in range(self.T)}
                      
     def solve_local_optimization(self):
         """
