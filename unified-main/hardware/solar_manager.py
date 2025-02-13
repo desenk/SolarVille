@@ -1,3 +1,6 @@
+# Branch: unified-main
+# File: solar_manager.py
+
 import logging
 from typing import Dict
 

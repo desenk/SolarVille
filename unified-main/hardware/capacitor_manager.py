@@ -1,3 +1,6 @@
+# Branch: unified-main
+# File: capacitor_manager.py
+
 import logging
 
 class CapacitorManager:

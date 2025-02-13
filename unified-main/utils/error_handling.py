@@ -1,3 +1,6 @@
+# Branch: unified-main
+# File: error_handling.py
+
 import logging
 from typing import Optional
 

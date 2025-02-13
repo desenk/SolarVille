@@ -1,3 +1,6 @@
+# Branch: unified-main
+# File: trading_integration.py
+
 import requests
 import logging
 from typing import Optional, Dict

@@ -1,3 +1,6 @@
+# Branch: unified-main
+# File: discovery.py
+
 import logging
 from typing import List
 from core.energy_types import PiDevice

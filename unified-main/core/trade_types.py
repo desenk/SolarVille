@@ -1,3 +1,6 @@
+# Branch: unified-main
+# File: trade_types.py
+
 """Trade-related data structures for the SolarVille system."""
 from dataclasses import dataclass
 from datetime import datetime

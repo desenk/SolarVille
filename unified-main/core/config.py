@@ -1,4 +1,6 @@
-# core/config.py
+# Branch: unified-main
+# File: config.py
+
 """Configuration management for SolarVille."""
 import os
 import yaml

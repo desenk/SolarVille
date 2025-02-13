@@ -1,3 +1,6 @@
+# Branch: unified-main
+# File: visualisation_manager.py
+
 from multiprocessing import Process, Queue, Event
 import logging
 

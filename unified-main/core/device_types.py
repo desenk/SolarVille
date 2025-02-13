@@ -1,3 +1,6 @@
+# Branch: unified-main
+# File: device_types.py
+
 """Device-related data structures for the SolarVille system."""
 from dataclasses import dataclass
 from typing import Optional, Dict
@@ -17,7 +20,6 @@ class PiDevice:
             "ip_address": self.ip_address,
             "is_prosumer": self.is_prosumer,
             "hostname": self.hostname,
-            "location": self.location
         }
     
     @classmethod
@@ -27,5 +29,4 @@ class PiDevice:
             ip_address=data["ip_address"],
             is_prosumer=data["is_prosumer"],
             hostname=data["hostname"],
-            location=data.get("location")
         )

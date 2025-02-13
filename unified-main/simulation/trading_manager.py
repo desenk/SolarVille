@@ -1,3 +1,6 @@
+# Branch: unified-main
+# File: trading_manager.py
+
 import logging
 from typing import Optional
 from core.energy_types import EnergyReading

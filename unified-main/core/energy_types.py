@@ -1,3 +1,6 @@
+# Branch: unified-main
+# File: energy_types.py
+
 """Energy-related data structures for the SolarVille system."""
 from dataclasses import dataclass
 from datetime import datetime
