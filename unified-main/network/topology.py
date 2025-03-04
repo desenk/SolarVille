@@ -46,6 +46,8 @@ class NetworkTopology:
         
         self.logger.info("NetworkTopology initialized")
     
+# This is an updated version of the _determine_local_device method for network/topology.py
+
     def _determine_local_device(self) -> Optional[PiDevice]:
         """
         Determine the local device based on hostname.
@@ -53,6 +55,11 @@ class NetworkTopology:
         Returns:
             Local device or None if not found
         """
+        # Safely check if devices attribute exists (needed for tests)
+        if not hasattr(self, 'devices') or not self.devices:
+            self.logger.warning("No devices available to determine local device")
+            return None
+            
         local_hostname = socket.gethostname()
         
         for device_id, device in self.devices.items():

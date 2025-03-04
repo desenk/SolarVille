@@ -75,19 +75,37 @@ class HealthChecker:
             self.check_thread = None
         self.logger.info("Health checking stopped")
     
+    # This is an updated version of the _check_loop method for network/health_check.py
+
     def _check_loop(self) -> None:
         """Main health check loop that runs in a background thread."""
+        error_count = 0
+        max_consecutive_errors = 3
+        
         while self.checking_active:
             try:
                 # Check the health of all known peers
                 self._check_all_peers()
                 
+                # Reset error counter on success
+                error_count = 0
+                
                 # Sleep until next check
                 time.sleep(self.check_interval)
                 
             except Exception as e:
+                error_count += 1
                 self.logger.error(f"Error in health check loop: {str(e)}")
-                time.sleep(5)  # Shorter sleep on error
+                
+                # Continue checking even after errors
+                # Short sleep on error to allow more check attempts
+                time.sleep(max(0.1, self.check_interval / 2))
+                
+                # Stop checking if too many consecutive errors
+                if error_count >= max_consecutive_errors:
+                    self.logger.critical(f"Stopping health checks after {error_count} consecutive errors")
+                    self.checking_active = False
+                    break
     
     def _check_all_peers(self) -> None:
         """Check the health of all known peers."""

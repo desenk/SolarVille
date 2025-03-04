@@ -1,0 +1,246 @@
+❯ python -m tests.test_main
+test_check_all_peers (test_health_checker.TestHealthChecker.test_check_all_peers)
+Test checking health of all peers. ... ok
+test_check_loop (test_health_checker.TestHealthChecker.test_check_loop)
+Test the main health check loop functionality. ... ok
+test_check_loop_error_handling (test_health_checker.TestHealthChecker.test_check_loop_error_handling)
+Test error handling in the health check loop. ... Error in health check loop: Test error
+FAIL
+test_check_peer (test_health_checker.TestHealthChecker.test_check_peer)
+Test checking health of a specific peer. ... ok
+test_check_peer_error (test_health_checker.TestHealthChecker.test_check_peer_error)
+Test handling exceptions when checking peer health. ... ok
+test_check_peer_now (test_health_checker.TestHealthChecker.test_check_peer_now)
+Test immediately checking a peer's health. ... ok
+test_check_peer_unhealthy (test_health_checker.TestHealthChecker.test_check_peer_unhealthy)
+Test checking health of an unhealthy peer. ... ok
+test_get_healthy_peers (test_health_checker.TestHealthChecker.test_get_healthy_peers)
+Test getting list of healthy peers. ... ok
+test_get_unhealthy_peers (test_health_checker.TestHealthChecker.test_get_unhealthy_peers)
+Test getting list of unhealthy peers. ... ok
+test_initialization (test_health_checker.TestHealthChecker.test_initialization)
+Test that HealthChecker initializes correctly. ... ok
+test_is_peer_healthy (test_health_checker.TestHealthChecker.test_is_peer_healthy)
+Test checking if a peer is healthy. ... ok
+test_start_checking (test_health_checker.TestHealthChecker.test_start_checking)
+Test starting health checking process. ... ok
+test_status_change_notification (test_health_checker.TestHealthChecker.test_status_change_notification)
+Test notification of status changes. ... Peer device2 (192.168.1.2) is now unhealthy
+ok
+test_stop_checking (test_health_checker.TestHealthChecker.test_stop_checking)
+Test stopping health checking process. ... ok
+test_broadcast (test_network_manager.TestNetworkManager.test_broadcast)
+Test broadcasting messages to multiple peers. ... ok
+test_get_offline_peers (test_network_manager.TestNetworkManager.test_get_offline_peers)
+Test getting list of offline peers. ... ok
+test_get_online_peers (test_network_manager.TestNetworkManager.test_get_online_peers)
+Test getting list of online peers. ... ok
+test_get_peer_data (test_network_manager.TestNetworkManager.test_get_peer_data)
+Test getting data from a specific peer. ... ok
+test_initialization (test_network_manager.TestNetworkManager.test_initialization)
+Test that NetworkManager initializes correctly. ... ok
+test_run_health_checks (test_network_manager.TestNetworkManager.test_run_health_checks)
+Test running health checks on all peers. ... FAIL
+test_send_request_connection_error (test_network_manager.TestNetworkManager.test_send_request_connection_error)
+Test handling of connection errors. ... Connection to device2 (http://192.168.1.2:5000/test) failed: Connection failed
+Connection to device2 (http://192.168.1.2:5000/test) failed: Connection failed
+ok
+test_send_request_post (test_network_manager.TestNetworkManager.test_send_request_post)
+Test POST request sending. ... ok
+test_send_request_success (test_network_manager.TestNetworkManager.test_send_request_success)
+Test successful request sending. ... ok
+test_send_request_timeout (test_network_manager.TestNetworkManager.test_send_request_timeout)
+Test handling of timeout errors. ... Request to device2 (http://192.168.1.2:5000/test) timed out: Request timed out
+Request to device2 (http://192.168.1.2:5000/test) timed out: Request timed out
+ok
+test_sync_timestamp (test_network_manager.TestNetworkManager.test_sync_timestamp)
+Test timestamp synchronization with peers. ... FAIL
+test_add_device (test_network_topology.TestNetworkTopology.test_add_device)
+Test adding a new device to the topology. ... ok
+test_can_communicate (test_network_topology.TestNetworkTopology.test_can_communicate)
+Test checking if two devices can communicate. ... ok
+test_determine_local_device_by_hostname (test_network_topology.TestNetworkTopology.test_determine_local_device_by_hostname)
+Test determining local device by hostname. ... ERROR
+test_determine_local_device_by_ip (test_network_topology.TestNetworkTopology.test_determine_local_device_by_ip)
+Test determining local device by IP address. ... ERROR
+test_determine_local_device_not_found (test_network_topology.TestNetworkTopology.test_determine_local_device_not_found)
+Test handling when local device cannot be determined. ... ERROR
+test_get_consumers (test_network_topology.TestNetworkTopology.test_get_consumers)
+Test getting all consumer devices. ... ok
+test_get_device_by_ip (test_network_topology.TestNetworkTopology.test_get_device_by_ip)
+Test getting a device by IP address. ... ok
+test_get_device_by_name (test_network_topology.TestNetworkTopology.test_get_device_by_name)
+Test getting a device by name. ... ok
+test_get_local_device (test_network_topology.TestNetworkTopology.test_get_local_device)
+Test getting the local device. ... ok
+test_get_peers (test_network_topology.TestNetworkTopology.test_get_peers)
+Test getting all peers (excluding local device). ... ok
+test_get_prosumers (test_network_topology.TestNetworkTopology.test_get_prosumers)
+Test getting all prosumer devices. ... ok
+test_get_shortest_path (test_network_topology.TestNetworkTopology.test_get_shortest_path)
+Test finding the shortest path between devices. ... ok
+test_initialization (test_network_topology.TestNetworkTopology.test_initialization)
+Test that NetworkTopology initializes correctly. ... ok
+test_initialize_communication_paths (test_network_topology.TestNetworkTopology.test_initialize_communication_paths)
+Test initialization of communication paths. ... ok
+test_remove_device (test_network_topology.TestNetworkTopology.test_remove_device)
+Test removing a device from the topology. ... ok
+test_visualize (test_network_topology.TestNetworkTopology.test_visualize)
+Test generating a visualization of the network topology. ... ok
+test_check_known_peers (test_peer_discovery.TestPeerDiscovery.test_check_known_peers)
+Test checking known peers. ... ok
+test_check_known_peers_unhealthy (test_peer_discovery.TestPeerDiscovery.test_check_known_peers_unhealthy)
+Test checking known peers that are unhealthy. ... ok
+test_check_potential_peer (test_peer_discovery.TestPeerDiscovery.test_check_potential_peer)
+Test checking a potential peer. ... ok
+test_check_potential_peer_error (test_peer_discovery.TestPeerDiscovery.test_check_potential_peer_error)
+Test handling errors when checking a potential peer. ... ok
+test_check_potential_peer_minimal_info (test_peer_discovery.TestPeerDiscovery.test_check_potential_peer_minimal_info)
+Test checking a potential peer with minimal info. ... ok
+test_discovery_loop_error_handling (test_peer_discovery.TestPeerDiscovery.test_discovery_loop_error_handling)
+Test error handling in the discovery loop. ... Error in discovery loop: Test error
+FAIL
+test_discovery_loop_integration (test_peer_discovery.TestPeerDiscovery.test_discovery_loop_integration)
+Test the integration of discovery loop steps. ... ok
+test_get_available_consumers (test_peer_discovery.TestPeerDiscovery.test_get_available_consumers)
+Test getting available consumer peers. ... ok
+test_get_available_peers (test_peer_discovery.TestPeerDiscovery.test_get_available_peers)
+Test getting available peers. ... ok
+test_get_available_prosumers (test_peer_discovery.TestPeerDiscovery.test_get_available_prosumers)
+Test getting available prosumer peers. ... ok
+test_initialization (test_peer_discovery.TestPeerDiscovery.test_initialization)
+Test that PeerDiscovery initializes correctly. ... ok
+test_is_peer_available (test_peer_discovery.TestPeerDiscovery.test_is_peer_available)
+Test checking if a specific peer is available. ... ok
+test_start_discovery (test_peer_discovery.TestPeerDiscovery.test_start_discovery)
+Test starting peer discovery process. ... ok
+test_stop_discovery (test_peer_discovery.TestPeerDiscovery.test_stop_discovery)
+Test stopping peer discovery process. ... ok
+test_verify_all_peers (test_peer_discovery.TestPeerDiscovery.test_verify_all_peers)
+Test verifying all discovered peers. ... ok
+test_verify_all_peers_mixed_results (test_peer_discovery.TestPeerDiscovery.test_verify_all_peers_mixed_results)
+Test verifying peers with mixed health results. ... ok
+test_energy_data_get_endpoint (test_server.TestServer.test_energy_data_get_endpoint)
+Test getting energy data. ... ok
+test_energy_data_post_endpoint (test_server.TestServer.test_energy_data_post_endpoint)
+Test posting energy data. ... ok
+test_energy_data_post_validation (test_server.TestServer.test_energy_data_post_validation)
+Test validation of posted energy data. ... ok
+test_get_status (test_server.TestServer.test_get_status)
+Test getting server status. ... ok
+test_health_check_endpoint (test_server.TestServer.test_health_check_endpoint)
+Test the health check endpoint. ... ok
+test_initialization (test_server.TestServer.test_initialization)
+Test that Server initializes correctly. ... ok
+test_peer_info_endpoint (test_server.TestServer.test_peer_info_endpoint)
+Test the peer info endpoint. ... ok
+test_simulation_get_endpoint (test_server.TestServer.test_simulation_get_endpoint)
+Test getting simulation status. ... ok
+test_simulation_post_endpoint (test_server.TestServer.test_simulation_post_endpoint)
+Test updating simulation status. ... ok
+test_start_server (test_server.TestServer.test_start_server)
+Test starting the server. ... ok
+test_stop_server (test_server.TestServer.test_stop_server)
+Test stopping the server. ... Server thread did not terminate cleanly
+ok
+test_sync_end_signal (test_server.TestServer.test_sync_end_signal)
+Test handling of END synchronization signal. ... ok
+test_sync_endpoint (test_server.TestServer.test_sync_endpoint)
+Test timestamp synchronization endpoint. ... ok
+test_sync_start_signal (test_server.TestServer.test_sync_start_signal)
+Test handling of START synchronization signal. ... ok
+test_trade_get_endpoint (test_server.TestServer.test_trade_get_endpoint)
+Test getting trade data. ... ok
+test_trade_post_endpoint (test_server.TestServer.test_trade_post_endpoint)
+Test posting trade data. ... ok
+test_trade_post_validation (test_server.TestServer.test_trade_post_validation)
+Test validation of posted trade data. ... ok
+
+======================================================================
+ERROR: test_determine_local_device_by_hostname (test_network_topology.TestNetworkTopology.test_determine_local_device_by_hostname)
+Test determining local device by hostname.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/unittest/mock.py", line 1375, in patched
+    return func(*newargs, **newkeywargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/tests/test_network_topology.py", line 58, in test_determine_local_device_by_hostname
+    device = NetworkTopology._determine_local_device(self)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/network/topology.py", line 58, in _determine_local_device
+    for device_id, device in self.devices.items():
+                             ^^^^^^^^^^^^
+AttributeError: 'TestNetworkTopology' object has no attribute 'devices'
+
+======================================================================
+ERROR: test_determine_local_device_by_ip (test_network_topology.TestNetworkTopology.test_determine_local_device_by_ip)
+Test determining local device by IP address.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/unittest/mock.py", line 1375, in patched
+    return func(*newargs, **newkeywargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/tests/test_network_topology.py", line 72, in test_determine_local_device_by_ip
+    device = NetworkTopology._determine_local_device(self)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/network/topology.py", line 58, in _determine_local_device
+    for device_id, device in self.devices.items():
+                             ^^^^^^^^^^^^
+AttributeError: 'TestNetworkTopology' object has no attribute 'devices'
+
+======================================================================
+ERROR: test_determine_local_device_not_found (test_network_topology.TestNetworkTopology.test_determine_local_device_not_found)
+Test handling when local device cannot be determined.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/unittest/mock.py", line 1375, in patched
+    return func(*newargs, **newkeywargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/tests/test_network_topology.py", line 86, in test_determine_local_device_not_found
+    device = NetworkTopology._determine_local_device(self)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/network/topology.py", line 58, in _determine_local_device
+    for device_id, device in self.devices.items():
+                             ^^^^^^^^^^^^
+AttributeError: 'TestNetworkTopology' object has no attribute 'devices'
+
+======================================================================
+FAIL: test_check_loop_error_handling (test_health_checker.TestHealthChecker.test_check_loop_error_handling)
+Test error handling in the health check loop.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/tests/test_health_checker.py", line 252, in test_check_loop_error_handling
+    self.assertGreaterEqual(self.health_checker._check_all_peers.call_count, 2)
+AssertionError: 1 not greater than or equal to 2
+
+======================================================================
+FAIL: test_run_health_checks (test_network_manager.TestNetworkManager.test_run_health_checks)
+Test running health checks on all peers.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/tests/test_network_manager.py", line 243, in test_run_health_checks
+    self.assertEqual(len(results), 2)
+AssertionError: 1 != 2
+
+======================================================================
+FAIL: test_sync_timestamp (test_network_manager.TestNetworkManager.test_sync_timestamp)
+Test timestamp synchronization with peers.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/tests/test_network_manager.py", line 228, in test_sync_timestamp
+    self.assertEqual(len(results), 2)
+AssertionError: 1 != 2
+
+======================================================================
+FAIL: test_discovery_loop_error_handling (test_peer_discovery.TestPeerDiscovery.test_discovery_loop_error_handling)
+Test error handling in the discovery loop.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/tests/test_peer_discovery.py", line 260, in test_discovery_loop_error_handling
+    self.assertGreaterEqual(self.peer_discovery._check_known_peers.call_count, 2)
+AssertionError: 1 not greater than or equal to 2
+
+----------------------------------------------------------------------
+Ran 74 tests in 11.691s
+
+FAILED (failures=4, errors=3)

@@ -79,6 +79,9 @@ class PeerDiscovery:
     
     def _discovery_loop(self) -> None:
         """Main discovery loop that runs in a background thread."""
+        error_count = 0
+        max_consecutive_errors = 3
+        
         while self.discovery_active:
             try:
                 # 1. Check known peers from config
@@ -93,12 +96,25 @@ class PeerDiscovery:
                 # 4. Update peer status based on verification
                 self._update_peer_availability()
                 
+                # Reset error counter on success
+                error_count = 0
+                
                 # Sleep before next discovery cycle
                 time.sleep(self.discovery_interval)
                 
             except Exception as e:
+                error_count += 1
                 self.logger.error(f"Error in discovery loop: {str(e)}")
-                time.sleep(5)  # Shorter sleep on error
+                
+                # Continue discovery even after errors
+                # Short sleep on error to allow more discovery attempts
+                time.sleep(max(0.1, self.discovery_interval / 2))
+                
+                # Stop discovery if too many consecutive errors
+                if error_count >= max_consecutive_errors:
+                    self.logger.critical(f"Stopping discovery after {error_count} consecutive errors")
+                    self.discovery_active = False
+                    break
     
     def _check_known_peers(self) -> None:
         """Check status of all known peers from configuration."""
