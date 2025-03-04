@@ -48,13 +48,20 @@ class TestNetworkTopology(unittest.TestCase):
         with patch.object(NetworkTopology, '_determine_local_device', return_value=self.device1):
             self.topology = NetworkTopology(self.mock_config)
     
+    # Modified test methods for NetworkTopology
     @patch('socket.gethostname')
     def test_determine_local_device_by_hostname(self, mock_gethostname):
         """Test determining local device by hostname."""
-        # Arrange
+        # Create a temporary topology with necessary attributes
+        self.devices = {
+            "device1": self.device1,
+            "device2": self.device2,
+            "device3": self.device3
+        }
+        self.logger = Mock()
         mock_gethostname.return_value = "prosumer-1"
         
-        # Act
+        # Now call the method on self since we've added the needed attributes
         device = NetworkTopology._determine_local_device(self)
         
         # Assert
@@ -64,11 +71,18 @@ class TestNetworkTopology(unittest.TestCase):
     @patch('socket.gethostbyname')
     def test_determine_local_device_by_ip(self, mock_gethostbyname, mock_gethostname):
         """Test determining local device by IP address."""
-        # Arrange
+        # Add the needed attributes
+        self.devices = {
+            "device1": self.device1, 
+            "device2": self.device2,
+            "device3": self.device3
+        }
+        self.logger = Mock()  # Add a mock logger
+        
+        # Now call the method with correct mock setup
         mock_gethostname.return_value = "unknown-host"
         mock_gethostbyname.return_value = "192.168.1.1"
         
-        # Act
         device = NetworkTopology._determine_local_device(self)
         
         # Assert
@@ -78,6 +92,7 @@ class TestNetworkTopology(unittest.TestCase):
     @patch('socket.gethostbyname')
     def test_determine_local_device_not_found(self, mock_gethostbyname, mock_gethostname):
         """Test handling when local device cannot be determined."""
+        self.logger = Mock()
         # Arrange
         mock_gethostname.return_value = "unknown-host"
         mock_gethostbyname.return_value = "192.168.1.100"  # Unknown IP

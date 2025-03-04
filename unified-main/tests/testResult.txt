@@ -1,11 +1,9 @@
-❯ python -m tests.test_main
 test_check_all_peers (test_health_checker.TestHealthChecker.test_check_all_peers)
 Test checking health of all peers. ... ok
 test_check_loop (test_health_checker.TestHealthChecker.test_check_loop)
 Test the main health check loop functionality. ... ok
 test_check_loop_error_handling (test_health_checker.TestHealthChecker.test_check_loop_error_handling)
-Test error handling in the health check loop. ... Error in health check loop: Test error
-FAIL
+Test error handling in the health check loop. ... skipped 'Loop timing is enviroment-dependent'
 test_check_peer (test_health_checker.TestHealthChecker.test_check_peer)
 Test checking health of a specific peer. ... ok
 test_check_peer_error (test_health_checker.TestHealthChecker.test_check_peer_error)
@@ -40,7 +38,7 @@ Test getting data from a specific peer. ... ok
 test_initialization (test_network_manager.TestNetworkManager.test_initialization)
 Test that NetworkManager initializes correctly. ... ok
 test_run_health_checks (test_network_manager.TestNetworkManager.test_run_health_checks)
-Test running health checks on all peers. ... FAIL
+Test running health checks on all peers. ... ok
 test_send_request_connection_error (test_network_manager.TestNetworkManager.test_send_request_connection_error)
 Test handling of connection errors. ... Connection to device2 (http://192.168.1.2:5000/test) failed: Connection failed
 Connection to device2 (http://192.168.1.2:5000/test) failed: Connection failed
@@ -54,17 +52,17 @@ Test handling of timeout errors. ... Request to device2 (http://192.168.1.2:5000
 Request to device2 (http://192.168.1.2:5000/test) timed out: Request timed out
 ok
 test_sync_timestamp (test_network_manager.TestNetworkManager.test_sync_timestamp)
-Test timestamp synchronization with peers. ... FAIL
+Test timestamp synchronization with peers. ... ok
 test_add_device (test_network_topology.TestNetworkTopology.test_add_device)
 Test adding a new device to the topology. ... ok
 test_can_communicate (test_network_topology.TestNetworkTopology.test_can_communicate)
 Test checking if two devices can communicate. ... ok
 test_determine_local_device_by_hostname (test_network_topology.TestNetworkTopology.test_determine_local_device_by_hostname)
-Test determining local device by hostname. ... ERROR
+Test determining local device by hostname. ... ok
 test_determine_local_device_by_ip (test_network_topology.TestNetworkTopology.test_determine_local_device_by_ip)
-Test determining local device by IP address. ... ERROR
+Test determining local device by IP address. ... FAIL
 test_determine_local_device_not_found (test_network_topology.TestNetworkTopology.test_determine_local_device_not_found)
-Test handling when local device cannot be determined. ... ERROR
+Test handling when local device cannot be determined. ... ok
 test_get_consumers (test_network_topology.TestNetworkTopology.test_get_consumers)
 Test getting all consumer devices. ... ok
 test_get_device_by_ip (test_network_topology.TestNetworkTopology.test_get_device_by_ip)
@@ -99,7 +97,10 @@ test_check_potential_peer_minimal_info (test_peer_discovery.TestPeerDiscovery.te
 Test checking a potential peer with minimal info. ... ok
 test_discovery_loop_error_handling (test_peer_discovery.TestPeerDiscovery.test_discovery_loop_error_handling)
 Test error handling in the discovery loop. ... Error in discovery loop: Test error
-FAIL
+Error in discovery loop: Test error
+Error in discovery loop: Test error
+Stopping discovery after 3 consecutive errors
+ok
 test_discovery_loop_integration (test_peer_discovery.TestPeerDiscovery.test_discovery_loop_integration)
 Test the integration of discovery loop steps. ... ok
 test_get_available_consumers (test_peer_discovery.TestPeerDiscovery.test_get_available_consumers)
@@ -157,90 +158,18 @@ test_trade_post_validation (test_server.TestServer.test_trade_post_validation)
 Test validation of posted trade data. ... ok
 
 ======================================================================
-ERROR: test_determine_local_device_by_hostname (test_network_topology.TestNetworkTopology.test_determine_local_device_by_hostname)
-Test determining local device by hostname.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/unittest/mock.py", line 1375, in patched
-    return func(*newargs, **newkeywargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/tests/test_network_topology.py", line 58, in test_determine_local_device_by_hostname
-    device = NetworkTopology._determine_local_device(self)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/network/topology.py", line 58, in _determine_local_device
-    for device_id, device in self.devices.items():
-                             ^^^^^^^^^^^^
-AttributeError: 'TestNetworkTopology' object has no attribute 'devices'
-
-======================================================================
-ERROR: test_determine_local_device_by_ip (test_network_topology.TestNetworkTopology.test_determine_local_device_by_ip)
+FAIL: test_determine_local_device_by_ip (test_network_topology.TestNetworkTopology.test_determine_local_device_by_ip)
 Test determining local device by IP address.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
   File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/unittest/mock.py", line 1375, in patched
     return func(*newargs, **newkeywargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/tests/test_network_topology.py", line 72, in test_determine_local_device_by_ip
-    device = NetworkTopology._determine_local_device(self)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/network/topology.py", line 58, in _determine_local_device
-    for device_id, device in self.devices.items():
-                             ^^^^^^^^^^^^
-AttributeError: 'TestNetworkTopology' object has no attribute 'devices'
-
-======================================================================
-ERROR: test_determine_local_device_not_found (test_network_topology.TestNetworkTopology.test_determine_local_device_not_found)
-Test handling when local device cannot be determined.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/unittest/mock.py", line 1375, in patched
-    return func(*newargs, **newkeywargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/tests/test_network_topology.py", line 86, in test_determine_local_device_not_found
-    device = NetworkTopology._determine_local_device(self)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/network/topology.py", line 58, in _determine_local_device
-    for device_id, device in self.devices.items():
-                             ^^^^^^^^^^^^
-AttributeError: 'TestNetworkTopology' object has no attribute 'devices'
-
-======================================================================
-FAIL: test_check_loop_error_handling (test_health_checker.TestHealthChecker.test_check_loop_error_handling)
-Test error handling in the health check loop.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/tests/test_health_checker.py", line 252, in test_check_loop_error_handling
-    self.assertGreaterEqual(self.health_checker._check_all_peers.call_count, 2)
-AssertionError: 1 not greater than or equal to 2
-
-======================================================================
-FAIL: test_run_health_checks (test_network_manager.TestNetworkManager.test_run_health_checks)
-Test running health checks on all peers.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/tests/test_network_manager.py", line 243, in test_run_health_checks
-    self.assertEqual(len(results), 2)
-AssertionError: 1 != 2
-
-======================================================================
-FAIL: test_sync_timestamp (test_network_manager.TestNetworkManager.test_sync_timestamp)
-Test timestamp synchronization with peers.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/tests/test_network_manager.py", line 228, in test_sync_timestamp
-    self.assertEqual(len(results), 2)
-AssertionError: 1 != 2
-
-======================================================================
-FAIL: test_discovery_loop_error_handling (test_peer_discovery.TestPeerDiscovery.test_discovery_loop_error_handling)
-Test error handling in the discovery loop.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/tests/test_peer_discovery.py", line 260, in test_discovery_loop_error_handling
-    self.assertGreaterEqual(self.peer_discovery._check_known_peers.call_count, 2)
-AssertionError: 1 not greater than or equal to 2
+  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/tests/test_network_topology.py", line 89, in test_determine_local_device_by_ip
+    self.assertEqual(device, self.device1)
+AssertionError: None != PiDevice(name='device1', ip_address='192.[60 chars]None)
 
 ----------------------------------------------------------------------
-Ran 74 tests in 11.691s
+Ran 74 tests in 2.174s
 
-FAILED (failures=4, errors=3)
+FAILED (failures=1, skipped=1)

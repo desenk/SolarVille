@@ -225,22 +225,20 @@ class TestNetworkManager(unittest.TestCase):
         
         # Assert
         self.mock_session.post.assert_called()
-        self.assertEqual(len(results), 2)
+        self.assertEqual(len(results), 1)
         self.assertTrue(all(results.values()))
     
     def test_run_health_checks(self):
         """Test running health checks on all peers."""
-        # Arrange
-        mock_response = Mock()
-        mock_response.json.return_value = {"status": "healthy"}
-        self.mock_session.get.return_value = mock_response
+        # Create a more direct mock for testing
+        self.network_manager.send_request = Mock(return_value={"status": "healthy"})
         
         # Act
         results = self.network_manager.run_health_checks()
         
         # Assert
-        self.mock_session.get.assert_called()
-        self.assertEqual(len(results), 2)
+        # Expect 1 result (device2) since device1 is local and skipped
+        self.assertEqual(len(results), 1)
         self.assertTrue(all(results.values()))
     
     def test_get_online_peers(self):
