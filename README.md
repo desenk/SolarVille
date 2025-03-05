@@ -10,12 +10,8 @@ SolarVille isn't just any demo; it's a power-packed simulation designed to mimic
 - You monitor the juice 📊 (state of charge) in our lithium-ion batteries.
 - You rule the grid, directing power where it's needed or trading it with your neighbours!
 
-### ⛈️ Plus, Weather Modes! 🌞
-Experience how weather messes with energy. Normal day? Heat wave? Stormy skies? Each scenario uniquely affects power generation and demand. Buckle up, as SolarVille brings you the climate challenge!
-
 ## 🎯 Goals
 - **Enlighten**: Learn the grit of grid management.
-- **Demonstrate**: See real weather impacts on solar power.
 - **Simulate**: Watch and manage as the sun rises and sets and storms roll in.
 
 ## Prerequisites
@@ -73,7 +69,7 @@ python main.py --file_path data/block_0.csv --household MAC000002 --start_date 2
 For Raspberry Pi, ensure the correct hardware connections, making sure to adjust the GPIO pins in the code to your requirements. Install additional libraries specified in requirements-pi.txt.
 
 ## 🔄 Usage
-Get your hands on the controls with our super user-friendly guide. Adjust the weather, watch energy flow, tweak setups – all in real-time!
+Get your hands on the controls with our super user-friendly guide. Watch energy flow, tweak setups – all in real-time!
 
 ## 💡 Contribute
 Got ideas? Enhancements? We’re all ears! 💬 Here’s how you can contribute:
