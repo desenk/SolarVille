@@ -9,6 +9,7 @@ Supports multi-peer architecture with routes for energy data, trading, and netwo
 import logging
 import threading
 import time
+import asyncio
 from datetime import datetime
 from flask import Flask, request, jsonify, Response
 from typing import Dict, Any, Optional, List
@@ -16,7 +17,7 @@ from typing import Dict, Any, Optional, List
 from core.config import ConfigManager
 from core.device_types import PiDevice
 from core.energy_types import EnergyReading, ProsumerReading
-from core.trade_types import TradeData
+from core.trade_types import TradeOffer, TradeRequest, TradeMatch
 
 class ServerError(Exception):
     """Base exception for server-related errors"""
@@ -28,14 +29,16 @@ class Server:
     Handles API endpoints for energy data, trading, and network management.
     """
     
-    def __init__(self, config_manager: ConfigManager):
+    def __init__(self, config_manager: ConfigManager, trading_manager=None):
         """
         Initialize the server.
         
         Args:
             config_manager: Configuration manager
+            trading_manager: Trading Manager instance (optional)
         """
         self.config = config_manager
+        self.trading_manager = trading_manager
         self.logger = logging.getLogger(__name__)
         self.app = Flask(__name__)
         
@@ -57,6 +60,16 @@ class Server:
         self._setup_routes()
         
         self.logger.info("Server initialized")
+    
+    def register_trading_manager(self, trading_manager):
+        """
+        Register a trading manager with the server.
+        
+        Args:
+            trading_manager: Trading Manager instance
+        """
+        self.trading_manager = trading_manager
+        self.logger.info("Trading Manager registered with server")
     
     def _setup_routes(self) -> None:
         """Setup Flask routes for the server."""
@@ -267,6 +280,173 @@ class Server:
                 
             except Exception as e:
                 self.logger.error(f"Error syncing timestamp: {str(e)}")
+                return jsonify({
+                    "status": "error",
+                    "message": str(e)
+                }), 500
+                
+        # ============= New Trading System Endpoints =============
+        
+        # Trade offer endpoint
+        @self.app.route('/trade/offer', methods=['POST'])
+        def trade_offer() -> Response:
+            """Handle a new trade offer from a peer."""
+            try:
+                if not self.trading_manager:
+                    return jsonify({
+                        "status": "error",
+                        "message": "Trading Manager not registered"
+                    }), 500
+                    
+                data = request.json
+                peer_ip = request.remote_addr
+                
+                # Validate required fields
+                if 'id' not in data or 'offer' not in data:
+                    return jsonify({
+                        "status": "error",
+                        "message": "Missing required fields"
+                    }), 400
+                
+                # Get offer data
+                offer_id = data['id']
+                offer_data = data['offer']
+                
+                # Create offer object
+                try:
+                    offer = TradeOffer.from_dict(offer_data)
+                except Exception as e:
+                    return jsonify({
+                        "status": "error",
+                        "message": f"Invalid offer data: {str(e)}"
+                    }), 400
+                
+                # Add to trading manager
+                # Note: We're using create_task instead of awaiting directly
+                # since Flask doesn't support async views without additional libraries
+                asyncio.run(self.trading_manager.handle_peer_offer(offer_id, offer))
+                
+                return jsonify({"status": "success"})
+                
+            except Exception as e:
+                self.logger.error(f"Error processing trade offer: {str(e)}")
+                return jsonify({
+                    "status": "error",
+                    "message": str(e)
+                }), 500
+
+        # Trade request endpoint
+        @self.app.route('/trade/request', methods=['POST'])
+        def trade_request() -> Response:
+            """Handle a new trade request from a peer."""
+            try:
+                if not self.trading_manager:
+                    return jsonify({
+                        "status": "error",
+                        "message": "Trading Manager not registered"
+                    }), 500
+                    
+                data = request.json
+                peer_ip = request.remote_addr
+                
+                # Validate required fields
+                if 'id' not in data or 'request' not in data:
+                    return jsonify({
+                        "status": "error",
+                        "message": "Missing required fields"
+                    }), 400
+                
+                # Get request data
+                request_id = data['id']
+                request_data = data['request']
+                
+                # Create request object
+                try:
+                    trade_request = TradeRequest.from_dict(request_data)
+                except Exception as e:
+                    return jsonify({
+                        "status": "error",
+                        "message": f"Invalid request data: {str(e)}"
+                    }), 400
+                
+                # Add to trading manager
+                asyncio.run(self.trading_manager.handle_peer_request(request_id, trade_request))
+                
+                return jsonify({"status": "success"})
+                
+            except Exception as e:
+                self.logger.error(f"Error processing trade request: {str(e)}")
+                return jsonify({
+                    "status": "error",
+                    "message": str(e)
+                }), 500
+
+        # Trade completion endpoint
+        @self.app.route('/trade/completion', methods=['POST'])
+        def trade_completion() -> Response:
+            """Handle a trade completion notification."""
+            try:
+                if not self.trading_manager:
+                    return jsonify({
+                        "status": "error",
+                        "message": "Trading Manager not registered"
+                    }), 500
+                    
+                data = request.json
+                peer_ip = request.remote_addr
+                
+                # Validate required fields
+                if 'id' not in data or 'trade' not in data:
+                    return jsonify({
+                        "status": "error",
+                        "message": "Missing required fields"
+                    }), 400
+                
+                # Get trade data
+                match_id = data['id']
+                trade_data = data['trade']
+                
+                # Create trade match object
+                try:
+                    trade_match = TradeMatch.from_dict(trade_data)
+                except Exception as e:
+                    return jsonify({
+                        "status": "error",
+                        "message": f"Invalid trade data: {str(e)}"
+                    }), 400
+                
+                # Update trade status in trading manager
+                # For now just log it - in a full implementation we would update the status
+                self.logger.info(f"Received trade completion notification for {match_id}")
+                
+                return jsonify({"status": "success"})
+                
+            except Exception as e:
+                self.logger.error(f"Error processing trade completion: {str(e)}")
+                return jsonify({
+                    "status": "error",
+                    "message": str(e)
+                }), 500
+
+        # Trade status endpoint
+        @self.app.route('/trade/status', methods=['GET'])
+        def trade_status() -> Response:
+            """Get current trading status."""
+            try:
+                if not self.trading_manager:
+                    return jsonify({
+                        "status": "error",
+                        "message": "Trading Manager not registered"
+                    }), 500
+                    
+                status = self.trading_manager.get_trade_status()
+                return jsonify({
+                    "status": "success",
+                    "trading_status": status
+                })
+                
+            except Exception as e:
+                self.logger.error(f"Error retrieving trade status: {str(e)}")
                 return jsonify({
                     "status": "error",
                     "message": str(e)
