@@ -1,3 +1,4 @@
+❯ python -m tests.test_main
 test_check_all_peers (test_health_checker.TestHealthChecker.test_check_all_peers)
 Test checking health of all peers. ... ok
 test_check_loop (test_health_checker.TestHealthChecker.test_check_loop)
@@ -60,7 +61,7 @@ Test checking if two devices can communicate. ... ok
 test_determine_local_device_by_hostname (test_network_topology.TestNetworkTopology.test_determine_local_device_by_hostname)
 Test determining local device by hostname. ... ok
 test_determine_local_device_by_ip (test_network_topology.TestNetworkTopology.test_determine_local_device_by_ip)
-Test determining local device by IP address. ... FAIL
+Test determining local device by IP address. ... ok
 test_determine_local_device_not_found (test_network_topology.TestNetworkTopology.test_determine_local_device_not_found)
 Test handling when local device cannot be determined. ... ok
 test_get_consumers (test_network_topology.TestNetworkTopology.test_get_consumers)
@@ -156,20 +157,69 @@ test_trade_post_endpoint (test_server.TestServer.test_trade_post_endpoint)
 Test posting trade data. ... ok
 test_trade_post_validation (test_server.TestServer.test_trade_post_validation)
 Test validation of posted trade data. ... ok
+test_verify_trade_expired_offer (test_trade_verification.TestTradeVerificationSystem.test_verify_trade_expired_offer)
+Test verifying a trade with an expired offer. ... Offer offer_id has expired for trade match_id
+ok
+test_verify_trade_insufficient_amount (test_trade_verification.TestTradeVerificationSystem.test_verify_trade_insufficient_amount)
+Test verifying a trade with insufficient offer amount. ... Offer offer_id has insufficient energy for trade match_id
+ok
+test_verify_trade_missing_offer (test_trade_verification.TestTradeVerificationSystem.test_verify_trade_missing_offer)
+Test verifying a trade with a missing offer. ... Offer or request not found for trade match_id
+ok
+test_verify_trade_missing_request (test_trade_verification.TestTradeVerificationSystem.test_verify_trade_missing_request)
+Test verifying a trade with a missing request. ... Offer or request not found for trade match_id
+ok
+test_verify_trade_price_mismatch (test_trade_verification.TestTradeVerificationSystem.test_verify_trade_price_mismatch)
+Test verifying a trade with mismatched price. ... Price 0.15 is not acceptable for trade match_id
+ok
+test_verify_trade_seller_buyer_mismatch (test_trade_verification.TestTradeVerificationSystem.test_verify_trade_seller_buyer_mismatch)
+Test verifying a trade with mismatched seller/buyer. ... Buyer or seller mismatch for trade match_id
+ok
+test_verify_trade_valid (test_trade_verification.TestTradeVerificationSystem.test_verify_trade_valid)
+Test verifying a valid trade. ... ok
+test_notify_trade_completion (test_trading_integration.TestTradingIntegration.test_notify_trade_completion)
+Test notifying a peer about a completed trade. ... ok
+test_notify_trade_completion_peer_not_found (test_trading_integration.TestTradingIntegration.test_notify_trade_completion_peer_not_found)
+Test notifying an unknown peer about a completed trade. ... Peer unknown_device not found
+ok
+test_publish_offer (test_trading_integration.TestTradingIntegration.test_publish_offer)
+Test publishing an offer to peers. ... ok
+test_publish_offer_network_error (test_trading_integration.TestTradingIntegration.test_publish_offer_network_error)
+Test publishing an offer with network error. ... Error publishing offer: Network error
+ok
+test_publish_request (test_trading_integration.TestTradingIntegration.test_publish_request)
+Test publishing a request to peers. ... ok
+test_create_offer (test_trading_manager.TestTradingManager.test_create_offer)
+Test creating a trade offer. ... ok
+test_create_request (test_trading_manager.TestTradingManager.test_create_request)
+Test creating a trade request. ... ok
+test_execute_trade (test_trading_manager.TestTradingManager.test_execute_trade)
+Test executing a matched trade. ... ok
+test_get_trade_status (test_trading_manager.TestTradingManager.test_get_trade_status)
+Test getting the current trading status. ... ok
+test_handle_peer_offer (test_trading_manager.TestTradingManager.test_handle_peer_offer)
+Test handling an offer from a peer. ... ok
+test_handle_peer_request (test_trading_manager.TestTradingManager.test_handle_peer_request)
+Test handling a request from a peer. ... ok
+test_initialization (test_trading_manager.TestTradingManager.test_initialization)
+Test that TradingManager initializes correctly. ... ok
+test_match_trades (test_trading_manager.TestTradingManager.test_match_trades)
+Test matching offers with requests. ... ok
+test_process_matched_trades (test_trading_manager.TestTradingManager.test_process_matched_trades)
+Test processing matched trades in the queue. ... ok
+test_process_offers (test_trading_manager.TestTradingManager.test_process_offers)
+Test processing offers in the queue. ... ok
+test_process_requests (test_trading_manager.TestTradingManager.test_process_requests)
+Test processing requests in the queue. ... ok
+test_start_processing (test_trading_manager.TestTradingManager.test_start_processing)
+Test starting the trade processing. ... ok
+test_stop_processing (test_trading_manager.TestTradingManager.test_stop_processing)
+Test stopping the trade processing. ... /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/unittest/mock.py:2130: RuntimeWarning: coroutine 'TradingManager._process_trades' was never awaited
+  setattr(_type, entry, MagicProxy(entry, self))
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+ok
 
-======================================================================
-FAIL: test_determine_local_device_by_ip (test_network_topology.TestNetworkTopology.test_determine_local_device_by_ip)
-Test determining local device by IP address.
 ----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/unittest/mock.py", line 1375, in patched
-    return func(*newargs, **newkeywargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jackscott/Documents/GitHub/SolarVille/unified-main/tests/test_network_topology.py", line 89, in test_determine_local_device_by_ip
-    self.assertEqual(device, self.device1)
-AssertionError: None != PiDevice(name='device1', ip_address='192.[60 chars]None)
+Ran 99 tests in 2.216s
 
-----------------------------------------------------------------------
-Ran 74 tests in 2.174s
-
-FAILED (failures=1, skipped=1)
+OK (skipped=1)
