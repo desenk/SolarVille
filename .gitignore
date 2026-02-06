@@ -3,4 +3,6 @@ venv-mac/
 __pycache__/
 *.py[cod]
 .DS_Store
+.claude
+CLAUDE.md
 requirements-mac.txt

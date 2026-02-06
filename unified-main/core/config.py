@@ -21,12 +21,14 @@ class ConfigurationError(Exception):
 @dataclass
 class SimulationConfig:
     """Simulation settings"""
-    file_path: str = "data/block_0.csv"
+    file_path: str = "dataset/block_0.csv"
+    household: str = "MAC000002"
     start_date: str = "2012-10-24"
     timescale: str = "d"
     simulation_speed: int = 300
-    interval_seconds: int = 6
+    interval_seconds: int = 1800  # 30 minutes in seconds
     log_level: str = "INFO"
+    mock_mode: bool = True
 
 @dataclass
 class HardwareConfig:
@@ -52,9 +54,10 @@ class ConfigManager:
     def __init__(self, config_dir: str = "config"):
         self.config_dir = config_dir
         self.simulation_config = SimulationConfig()
+        self.sim_config = self.simulation_config  # Alias for convenience
         self.hardware_config = HardwareConfig()
         self.devices: Dict[str, PiDevice] = {}
-        
+
         # Use constants for these values
         self.server_port = DEFAULT_PORT
         self.retry_attempts = RETRY_ATTEMPTS
@@ -67,14 +70,21 @@ class ConfigManager:
         try:
             self._load_simulation_config()
             self._load_network_topology()
-            
+
             # Configure hardware based on local device role
             local_device = self.get_local_device()
             if local_device:
                 self.hardware_config.configure_for_role(local_device.is_prosumer)
+                logging.info(f"Detected local device: {local_device.name}")
             else:
-                raise ConfigurationError("Could not determine local device")
-                
+                # In mock mode, use first device as default for development
+                if self.hardware_config.mock_mode and self.devices:
+                    local_device = list(self.devices.values())[0]
+                    self.hardware_config.configure_for_role(local_device.is_prosumer)
+                    logging.warning(f"Hostname not in config - using {local_device.name} for mock mode")
+                else:
+                    raise ConfigurationError("Could not determine local device and not in mock mode")
+
             logging.info("Configuration loaded successfully")
             self._log_configuration()
         except Exception as e:
@@ -86,15 +96,16 @@ class ConfigManager:
         try:
             with open(sim_path, 'r') as f:
                 data = yaml.safe_load(f)
-                
+
             # Update simulation config
             sim_data = data.get('simulation', {})
             self.simulation_config = SimulationConfig(**sim_data)
-            
+            self.sim_config = self.simulation_config  # Update alias
+
             # Update mock mode if specified
             if 'hardware' in data and 'mock_mode' in data['hardware']:
                 self.hardware_config.mock_mode = data['hardware']['mock_mode']
-                
+
         except FileNotFoundError:
             logging.warning(f"Simulation config not found at {sim_path}, using defaults")
         except Exception as e:
@@ -120,12 +131,23 @@ class ConfigManager:
             raise ConfigurationError(f"Error loading network topology: {e}")
     
     def get_local_device(self) -> Optional[PiDevice]:
-        """Get the local device based on hostname"""
+        """
+        Get the local device based on hostname.
+        In mock mode, returns first device if hostname doesn't match.
+        """
         import socket
         hostname = socket.gethostname()
+
+        # Try exact match first
         for device in self.devices.values():
             if device.hostname == hostname:
                 return device
+
+        # In mock mode, return first device as fallback for development
+        if self.hardware_config.mock_mode and self.devices:
+            logging.debug(f"Hostname '{hostname}' not in config, using first device for mock mode")
+            return list(self.devices.values())[0]
+
         return None
     
     def get_prosumers(self) -> List[PiDevice]:

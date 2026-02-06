@@ -1,0 +1,28 @@
+# Core dependencies for SolarVille unified-main
+# Python 3.11+
+
+# Configuration
+PyYAML>=6.0
+
+# Web framework
+Flask>=3.0.0
+Werkzeug>=3.0.0
+
+# HTTP requests
+requests>=2.31.0
+
+# Data processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Async support (built-in but explicit for clarity)
+# asyncio is part of standard library in Python 3.11+
+
+# Visualization (optional, for development)
+matplotlib>=3.7.0
+
+# Date/time handling (built-in)
+python-dateutil>=2.8.0
+
+# Logging is built-in
+# Testing uses unittest (built-in)

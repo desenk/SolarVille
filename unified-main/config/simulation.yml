@@ -3,12 +3,13 @@
 
 # simulation.yml
 simulation:
-  file_path: data/block_0.csv
+  file_path: dataset/block_0.csv
+  household: MAC000002
   start_date: 2012-10-24
-  timescale: d
-  simulation_speed: 300
-  interval_seconds: 6
+  timescale: d  # d=day, w=week, m=month, y=year
+  simulation_speed: 300  # 300x speedup (5 min real time = 1 day simulated)
+  interval_seconds: 1800  # Data interval: 1800s = 30 minutes
   log_level: INFO
 
 hardware:
-  mock_mode: true  # Only mock_mode is configurable in YAML
+  mock_mode: true  # Run in mock mode without real hardware
